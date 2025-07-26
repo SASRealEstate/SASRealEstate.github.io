@@ -3,7 +3,8 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>قائمة العقارات</title>
+    <title>قائمة الأراضي للبيع</title>
+    <link rel="icon" href="Logo.png" type="image/png">
     <style>
         body {
                 background: linear-gradient(to bottom, #dbd692 , #ffffff);
@@ -33,43 +34,11 @@
             color: white;
         }
     </style>
+    
 </head>
 <body>
 
-<html dir="rtl" lang="ar">
-<head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>قائمة الشقق للإيجار</title>
-<link href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" rel="stylesheet"/>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css" rel="stylesheet"/>
-<style>
-        body {
-            font-family: Tahoma, sans-serif;
-            padding: 20px;
-            direction: rtl;
-        }
-        table {
-            width: 100%;
-            font-size: 14px;
-            border-collapse: collapse;
-        }
-        th, td {
-            text-align: center;
-            vertical-align: middle;
-            border: 1px solid #ccc;
-        }
-        th {
-            background-color: #f0f0f0;
-        }
-        tr:hover {
-            background-color: #f9f9f9;
-        }
-        a {
-            text-decoration: none;
-            color: white;
-        }
-    </style>
+
 </head>
 <body>
 <div style="text-align: center; margin-bottom: 20px;">
@@ -81,9 +50,11 @@
 <a href="https://maps.app.goo.gl/2NUqCqLExX86fFG87" style="margin:5px;padding:10px 15px;background-color:#25D366;border-radius:5px;">📍 موقع المكتب ، تقييمك يهمنا!</a>
 <a href="index.html" style="margin:5px;padding:10px 15px;background-color:#25D366;border-radius:5px;">العودة للصفحة الرئيسية</a>
 <a href="Rent.html" style="margin:5px;padding:10px 15px;background-color:#25D366;border-radius:5px;">شقق للإيجار</a>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+
 </div>
 
-    <h2 style="text-align: center;">قائمة العقارات</h2>
+    <h2 style="text-align: center;">قائمة الأراضي للبيع</h2>
     <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -103,7 +74,6 @@
       <th>سعر المتر</th>
       <th>مرفقات</th>
       <th>الملاحظات</th>
-      <th>None</th>
     </tr>
   </thead>
   <tbody>
@@ -736,5 +706,122 @@
     </tr>
   </tbody>
 </table>
+
+<h2 style="text-align:center;">خريطة المواقع</h2>
+<div id="LandsMap" style="height: 500px; width: 100%; margin-bottom: 30px; border-radius: 10px;"></div>
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+
+<script>
+  var LandsMap = L.map('LandsMap').setView([18.275406366370408, 42.59176906998552], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19
+  }).addTo(LandsMap);
+
+  L.marker([18.275406366370408, 42.59176906998552]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/2NUqCqLExX86fFG87" target="_blank">📍 موقع المكتب </a>');
+
+
+  L.marker([18.317031616137314, 42.62076053673479]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/xogyHiSc9o9qovxo6" target="_blank">تجارية 1 </a>');
+
+  L.marker([18.261505279227162, 42.60617606013096]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/simWRYBXVdzuB2aU6" target="_blank">تجارية 2 </a>');
+
+  L.marker([18.24866459674192, 42.60696186914708]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/fLdnn21r8AVRDsau9" target="_blank">تجارية 3 </a>');
+
+  L.marker([18.213293730550564, 42.580779306746706]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/zMd3hgBsR5XMLZ2S6" target="_blank">تجارية 4 </a>');
+
+  L.marker([18.275409501419073, 42.59043436441777]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/ofzpX9GshkWddEGA7" target="_blank">تجارية 5 </a>');
+
+  L.marker([18.298888160828678, 42.59379148605021]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/47qvc782gy94nFd88" target="_blank">تجارية 6 </a>');
+
+  L.marker([18.284840738193815, 42.59330869140457]).addTo(LandsMap)
+    .bindPopup('<a href="https://goo.gl/maps/4ucUTXPk1FtX34nr8" target="_blank">زراعية 7 </a>');
+
+  L.marker([18.29729784667323, 42.61926800430974]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/nFg5CLwizEad13c19" target="_blank">زراعية 8 </a>');
+
+  L.marker([18.29164541791735, 42.64201954487548]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/A8GYfgv2oSCuPYjQA" target="_blank">زراعية 9 </a>');
+
+  L.marker([18.283740342025173, 42.65627573956742]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/QXanVr7wMSwzgZfD8" target="_blank">سكنية 10 </a>');
+
+  L.marker([18.289342419091707, 42.587680906746705]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/7VdrnMibhxDF1Mnt7" target="_blank">سكنية 11 </a>');
+
+  L.marker([18.365978470592353, 42.55933841469391]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/iwJGNwKXgFJPUAGo9" target="_blank">سكنية 12 </a>');
+
+  L.marker([18.272595162416668, 42.618333158316304]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/6cDp71CdaQjb7uha9" target="_blank">سكنية 13 </a>');
+
+  L.marker([18.35749673129308, 42.55508778650631]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/kKwvQ2cg4YVmajct7" target="_blank">سكنية 14 </a>');
+
+  L.marker([18.32209094226089, 42.56094297168378]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/zPSqFyY2g94fQaoB9" target="_blank">سكنية 15 </a>');
+
+  L.marker([18.345168210566516, 42.758319988624386]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/CJV1o16EUGDLtRkH7" target="_blank">سكنية 16 </a>');
+
+  L.marker([18.244193477328892, 42.516582493172315]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/SrcbBcWQZexUfT5w6" target="_blank">سكنية 17 </a>');
+
+  L.marker([18.277362778594426, 42.59804977116591]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/j7kbMnjfsfLnN6Fj6" target="_blank">سكنية 18 </a>');
+
+  L.marker([18.277362778594426, 42.59804977116591]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/ranJyPNEznPUB5kY8" target="_blank">سكنية 19 </a>');
+
+  L.marker([18.283242873335613, 42.5993668219876]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/2tJPF4uX63L9Ajfj6" target="_blank">سكنية 20 </a>');
+
+  L.marker([18.26054249460357, 42.612103301520264]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/6KbAHvDfyB1vopoWA" target="_blank">سكنية 21 </a>');
+
+  L.marker([18.307321615260477, 42.63861831738496]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/fqad44C4ZYYN2yT36" target="_blank">سكنية 22 </a>');
+
+  L.marker([18.306319430046415, 42.64091370261797]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/p54oAjFx9nA2LmWcA" target="_blank">سكنية 23 </a>');
+
+  L.marker([18.303165212723606, 42.649733511964364]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/TFjfJyzw25QJE7y69" target="_blank">سكنية 24 </a>');
+
+  L.marker([17.89980524240371, 42.26565932836844]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/zARubnVPXwoMVkDk6" target="_blank">سكنية 25 </a>');
+
+  L.marker([18.320854980275893, 42.608893142386144]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/wjkzBjGr8HXRqPeD9" target="_blank">سكنية 26 </a>');
+
+  L.marker([18.415298213994877, 42.56624988274037]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/XCqHpjuBfRLUrmCTA" target="_blank">سكنية 27 </a>');
+
+  L.marker([18.262273224132112, 42.60456456103844]).addTo(LandsMap)
+    .bindPopup('<a href="https://goo.gl/maps/6naYpf6oxi2Drakn9" target="_blank">سكنية 28 </a>');
+
+  L.marker([18.275281699728694, 42.590025052871354]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/P3a58ZaBhuEuHThx5" target="_blank">سكنية 29 </a>');
+
+  L.marker([18.27570745308567, 42.589005317791134]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/VhhfwcsmV4KHXjCK9" target="_blank">سكنية 30 </a>');
+
+  L.marker([18.31585799059864, 42.62928318418233]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/5BArbC2983EfJeFM8" target="_blank">سكنية 31 </a>');
+
+  L.marker([18.220501382497126, 42.60253812536326]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/BWjY881yuFHZqeBC7" target="_blank">سكنية 32 </a>');
+
+  L.marker([18.312310378086572, 42.64994469970459]).addTo(LandsMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/QxbGTqL5MPe3Lwk47" target="_blank">سكنية 33 </a>');
+
+    
+</script>
 </body>
 </html>

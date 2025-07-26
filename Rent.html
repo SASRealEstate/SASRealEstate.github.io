@@ -6,6 +6,8 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <title>قائمة الشقق للإيجار</title>
+<link rel="icon" href="Logo.png" type="image/png">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
 <link href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" rel="stylesheet"/>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css" rel="stylesheet"/>
 <style>
@@ -70,6 +72,8 @@
 <label for="maxPriceInput" style="font-weight: bold;">إلى:</label>
 <input id="maxPriceInput" placeholder="الحد الأعلى" style="margin: 5px; padding: 5px; width: 120px;" type="number"/>
 </div>
+
+
 <table class="dataframe display" id="productTable">
 
 <thead>
@@ -186,6 +190,7 @@
     </tr>
   
 </table>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.js"></script>
@@ -284,6 +289,35 @@ window.addEventListener('load', function() {
         });
     });
 </script>
+
+<h2 style="text-align:center;">خريطة المواقع</h2>
+<div id="RentMap" style="height: 500px; width: 100%; margin-bottom: 30px; border-radius: 10px;"></div>
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+
+<script>
+  var RentMap = L.map('RentMap').setView([18.275406366370408, 42.59176906998552], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19
+  }).addTo(RentMap);
+
+  L.marker([18.275406366370408, 42.59176906998552]).addTo(RentMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/2NUqCqLExX86fFG87" target="_blank">📍 موقع المكتب </a>');
+
+  L.marker([18.300364593176624, 42.593944199093286]).addTo(RentMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/Uw88fZud3RmqRmT97" target="_blank">شقة 12 </a>');
+  L.marker([18.274658523599495, 42.58890933070823]).addTo(RentMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/nEQgs8VmzaDxHUf7A" target="_blank">شقة 15 </a>');
+  L.marker([18.223555599999997, 42.59924463558224]).addTo(RentMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/BzjH7LpjhVvkrmK58" target="_blank">شقة 40 </a>');
+  L.marker([18.300003979754557, 42.59276555092437]).addTo(RentMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/Qr1A3qJRGgY7bvEU9" target="_blank">شقة 43 </a>');
+  L.marker([18.275409501419073, 42.59043436441777]).addTo(RentMap)
+    .bindPopup('<a href="https://maps.app.goo.gl/MMnR4y961L8EYv1D6" target="_blank">شقة 44 </a>');
+
+    
+</script>
+
 </body>
 
 </html>
