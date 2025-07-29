@@ -62,6 +62,12 @@
     </style>
 </head>
 <body>
+<!-- Login/Logout Buttons -->
+<div style="text-align: center; margin-top: 10px;">
+  <a href="login.html" id="login-btn" style="display: none; background-color: #25D366; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none;">🔐 تسجيل الدخول</a>
+  <button onclick="logOut()" id="logout-btn" style="display: none; background-color: red; color: white; padding: 10px 20px; border-radius: 8px;">🚪 تسجيل الخروج</button>
+</div>
+
 <div style="text-align: center; margin-bottom: 20px;">
     <a href="index.html">
 <img alt="شعار المكتب" img src="Logo.png" style="height: 400px;"/><br/><br/></a>
@@ -86,6 +92,7 @@
     </div>
 <br>
 <img src="Background.png" alt="Background" style="max-width:100%; margin-top: 20px;">
+<script src="script.js" defer></script>
 
 </body>
 </html>

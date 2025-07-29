@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>تسجيل الدخول | تطوير ساس العقارية</title>
+    <link rel="icon" href="Logo.png" type="image/png">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="script.js" defer></script>
+    <style>
+        body {
+            background: linear-gradient(to bottom, #dbd692 , #ffffff);
+            font-family: Tahoma, sans-serif;
+            padding: 30px;
+            text-align: center;
+            direction: rtl;
+        }
+        .logo {
+            max-width: 300px;
+            margin-bottom: 20px;
+        }
+        .contact-buttons a, .nav-buttons a {
+            display: inline-block;
+            margin: 10px;
+            padding: 12px 20px;
+            font-size: 16px;
+            text-decoration: none;
+            border-radius: 8px;
+            color: white;
+        }
+        .nav-buttons a {
+            background-color: #25D366;
+        }
+        .login-form input {
+            padding: 10px;
+            width: 250px;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        .login-form button {
+            background-color: #25D366;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        #recaptcha-container {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        #verify-section {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div style="text-align: center;">
+    <a href="index.html">
+        <img src="Logo.png" alt="شعار المكتب" class="logo"><br><br>
+    </a>
+    <div class="nav-buttons">
+        <a href="AllLands.html">📋 أراضي للبيع</a>
+        <a href="Rent.html">🏠 شقق للإيجار</a>
+    </div>
+</div>
+
+<h2>تسجيل الدخول برقم الجوال</h2>
+
+<div class="login-form">
+    <input type="text" id="phone" placeholder="مثال: 0555555555 أو 555555555"><br>
+    <div id="recaptcha-container"></div>
+    <button onclick="sendCode()">إرسال رمز التحقق</button><br>
+
+    <div id="verify-section" style="display:none;">
+        <input type="text" id="code" placeholder="رمز التحقق"><br>
+        <button onclick="verifyCode()">تأكيد</button>
+    </div>
+
+    <p id="msg"></p>
+</div>
+
+<script>
+function normalizePhone(input) {
+    // Remove non-digit characters
+    input = input.replace(/\D/g, '');
+    // Remove leading 0 if present
+    if (input.startsWith('0')) input = input.slice(1);
+    return '+966' + input;
+}
+</script>
+
+</body>
+</html>

@@ -7,6 +7,7 @@
     <link rel="icon" href="Logo.png" type="image/png">
     <style>
         body {
+
                 background: linear-gradient(to bottom, #dbd692 , #ffffff);
                 font-family: Tahoma, sans-serif;
                 padding: 30px;
@@ -41,6 +42,13 @@
 
 </head>
 <body>
+<!-- Login/Logout Buttons -->
+<div style="text-align: center; margin-top: 10px;">
+  <a href="login.html" id="login-btn" style="display: none; background-color: #25D366; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none;">🔐 تسجيل الدخول</a>
+  <button onclick="logOut()" id="logout-btn" style="display: none; background-color: red; color: white; padding: 10px 20px; border-radius: 8px;">🚪 تسجيل الخروج</button>
+</div>
+
+
 <div style="text-align: center; margin-bottom: 20px;">
   <a href="index.html">
 <img alt="شعار المكتب" img src="Logo.png" style="height: 300px;"/><br/><br/>
@@ -828,6 +836,19 @@
     .bindPopup('<a href="https://maps.app.goo.gl/QxbGTqL5MPe3Lwk47" target="_blank">سكنية 33 </a>');
 
     
+</script>
+<script src="script.js" defer></script>
+<!-- Firebase Auth check -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="script.js"></script>
+<script>
+  // Auth redirect logic
+  firebase.auth().onAuthStateChanged(function(user) {
+    if (!user) {
+      window.location.href = "login.html";
+    }
+  });
 </script>
 </body>
 </html>
