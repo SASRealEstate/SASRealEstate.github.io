@@ -37,16 +37,12 @@
     </style>
     
 </head>
-<body>
+
 
 
 </head>
 <body>
-<!-- Login/Logout Buttons -->
-<div style="text-align: center; margin-top: 10px;">
-  <a href="login.html" id="login-btn" style="display: none; background-color: #25D366; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none;">🔐 تسجيل الدخول</a>
-  <button onclick="logOut()" id="logout-btn" style="display: none; background-color: red; color: white; padding: 10px 20px; border-radius: 8px;">🚪 تسجيل الخروج</button>
-</div>
+
 
 
 <div style="text-align: center; margin-bottom: 20px;">
@@ -66,12 +62,171 @@
 <a href="Rent.html" style="margin:5px;padding:10px 15px;background-color:#25D366;border-radius:5px;">شقق للإيجار</a>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
 
+
+
+<!-- jQuery + DataTables (إن لم تكن مضافة مسبقاً) -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+
+<!-- Filters UI -->
+<div id="filters" style="margin:15px 0; display:flex; gap:40px; align-items:center; justify-content:center; flex-wrap:wrap;">
+  <div id="price-filter" style="display:flex; gap:8px; align-items:center;">
+    <strong>السعر:</strong>
+    <label>من
+      <input type="number" id="minPriceInput" placeholder="0" style="width:120px">
+    </label>
+    <label>إلى
+      <input type="number" id="maxPriceInput" placeholder="10000000" style="width:140px">
+    </label>
+  </div>
+
+  <div id="area-filter" style="display:flex; gap:8px; align-items:center;">
+    <strong>المساحة:</strong>
+    <label>من
+      <input type="number" id="minAreaInput" placeholder="0" style="width:120px">
+    </label>
+    <label>إلى
+      <input type="number" id="maxAreaInput" placeholder="2000" style="width:120px">
+    </label>
+  </div>
+
+  <button id="clearAll" type="button">مسح</button>
+</div>
+
+
+
+
+<script>
+$(function () {
+  const $table = $('table.dataframe');
+  if (!$table.length) return;
+
+  // Ensure the table has an ID
+  if (!$table.attr('id')) $table.attr('id','landsTable');
+  const tableId = $table.attr('id');
+
+  // Destroy any existing DataTables instance before changing columns
+  if ($.fn.dataTable.isDataTable('#' + tableId)) {
+    $('#' + tableId).DataTable().destroy();
+  }
+
+  // Add "نسخ" header if missing
+  const $theadTr = $('#' + tableId + ' thead tr');
+  const hasCopyHeader = $theadTr.find('th').filter(function(){
+    return $(this).text().trim() === 'نسخ';
+  }).length > 0;
+  if (!hasCopyHeader) {
+    $theadTr.append('<th>نسخ</th>');
+  }
+
+  // Get index of the "نسخ" column
+  const copyIdx = $('#' + tableId + ' thead th').filter(function(){
+    return $(this).text().trim() === 'نسخ';
+  }).index();
+
+  // Make sure each <tr> has the same number of <td> as headers (after adding "نسخ")
+  const headerCount = $('#' + tableId + ' thead th').length;
+  $('#' + tableId + ' tbody tr').each(function(){
+    const diff = headerCount - $(this).children('td').length;
+    for (let i = 0; i < diff; i++) { $(this).append('<td></td>'); }
+  });
+
+  // Init DataTables and always inject a copy button into the "نسخ" column
+  const dt = $('#' + tableId).DataTable({
+    language: { url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/ar.json' },
+    pageLength: 100,
+    order: [],
+    columnDefs: [{
+      targets: copyIdx,                // target "نسخ" column by name
+      orderable: false,
+      searchable: false,
+      createdCell: function(td){       // inject the button into every cell
+        td.innerHTML = '<button type="button" class="copyRowBtn" style="padding:6px 10px;border:1px solid #ccc;border-radius:8px;background:#f7f7f7;cursor:pointer;">📋 نسخ</button>';
+      }
+    }]
+  });
+
+  // ===== Helpers (English comments) =====
+  function stripTags(html){ return String(html).replace(/<[^>]*>?/gm,'').trim(); }
+
+  // Extract all hrefs from a cell's HTML (first link, or multiple if present)
+  function extractHrefs(html){
+    const div = document.createElement('div');
+    div.innerHTML = String(html || '');
+    const anchors = Array.from(div.querySelectorAll('a[href]'));
+    return anchors.map(a => a.getAttribute('href')).filter(Boolean);
+  }
+
+  function copyToClipboard(text){
+    if (navigator.clipboard?.writeText) return navigator.clipboard.writeText(text);
+    return new Promise((res,rej)=>{
+      const ta=document.createElement('textarea');
+      ta.value=text; document.body.appendChild(ta);
+      ta.select(); ta.setSelectionRange(0,text.length);
+      try{ document.execCommand('copy'); res(); } catch(e){ rej(e); }
+      finally{ document.body.removeChild(ta); }
+    });
+  }
+
+  function showToast(msg='تم نسخ الصف'){
+    const el=document.createElement('div');
+    el.textContent=msg;
+    el.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 14px;border-radius:8px;opacity:.95;z-index:9999;font-size:14px';
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),1300);
+  }
+
+  // Copy handler: include URLs from "الموقع" and "مرفقات"
+  $('#' + tableId + ' tbody').on('click', 'button.copyRowBtn', async function(){
+    const rowData = dt.row($(this).closest('tr')).data();      // HTML per cell
+    const headers = dt.columns().header().toArray().map(h => $(h).text().trim());
+
+    const lines = [];
+    for (let i = 0; i < headers.length; i++){
+      if (i === copyIdx) continue; // skip the "نسخ" column
+
+      const title = headers[i] || '';
+      let value;
+
+      // For these columns, extract the link(s) instead of plain text
+      if (title === 'الموقع' || title === 'مرفقات') {
+        const hrefs = extractHrefs(rowData[i]);
+        value = hrefs.length ? hrefs.join(' , ') : stripTags(rowData[i] ?? '');
+      } else {
+        // For all other columns, copy plain text without HTML
+        value = stripTags(rowData[i] ?? '');
+      }
+
+      if (title) lines.push(`${title}: ${value}`);
+    }
+
+    try { await copyToClipboard(lines.join('\n')); showToast(); }
+    catch { showToast('تعذّر النسخ'); }
+  });
+
+  // Keep price/area filters wired to the current DataTables instance
+  $('#minPriceInput, #maxPriceInput, #minAreaInput, #maxAreaInput')
+    .off('input').on('input', function(){ dt.draw(); });
+  $('#clearAll').off('click').on('click', function(){
+    $('#minPriceInput, #maxPriceInput, #minAreaInput, #maxAreaInput').val('');
+    dt.draw();
+  });
+});
+</script>
+
+
+
+
+
+
 </div>
 
     <h2 style="text-align: center;">قائمة الأراضي للبيع</h2>
     <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
+      <th>رقم اللوحة</th>
       <th>رقم</th>
       <th>نوع العقار</th>
       <th>النوع</th>
@@ -79,19 +234,22 @@
       <th>طول</th>
       <th>عرض</th>
       <th>المساحة</th>
-      <th>شارع 1</th>
-      <th>شارع 2</th>
-      <th>شارع 3</th>
       <th>مواصفات العقار</th>
       <th>الواجهات</th>
       <th>السعر</th>
       <th>سعر المتر</th>
       <th>مرفقات</th>
       <th>الملاحظات</th>
+      <th>نسخ</th>
     </tr>
   </thead>
+
+
+
+  
   <tbody>
     <tr>
+      <td></td>
       <td>1</td>
       <td>أرض تجارية</td>
       <td>بيع</td>
@@ -100,17 +258,16 @@
       <td>20</td>
       <td>800</td>
       <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
       <td>جنوب</td>
       <td>2,000,000</td>
       <td>2,500</td>
       <td><a href="https://drive.google.com/drive/folders/1HQEatlm07Svdy37DVT3UezgerW5VxcnM?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
       
     </tr>
     <tr>
+      <td></td>
       <td>2</td>
       <td>أرض تجارية</td>
       <td>بيع</td>
@@ -118,18 +275,16 @@
       <td>30</td>
       <td>30</td>
       <td>900</td>
-      <td></td>
-      <td></td>
-      <td></td>
       <td>على ثلاث شوارع</td>
       <td>شرق وجنوب وغرب</td>
       <td>1,800,000</td>
       <td>2,000</td>
       <td><a href="https://drive.google.com/drive/folders/1hZAfwf-3TC-iPI9NJgwDzgo6jRmyqmpG?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
-      
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>3</td>
       <td>أرض تجارية</td>
       <td>بيع</td>
@@ -137,18 +292,16 @@
       <td>37</td>
       <td>24</td>
       <td>867</td>
-      <td>26</td>
-      <td></td>
-      <td></td>
       <td>-</td>
-      <td>شرق</td>
+      <td>شرق26</td>
       <td>1,800,000</td>
       <td>2,0767</td>
       <td><a href="https://drive.google.com/drive/folders/19M0CFXtgY2DnvjJHDZSHZTB9z-G1lgbB?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
-      
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>4</td>
       <td>أرض تجارية</td>
       <td>بيع</td>
@@ -156,18 +309,16 @@
       <td>31</td>
       <td>30</td>
       <td>875</td>
-      <td>40</td>
-      <td></td>
-      <td></td>
       <td>على شارعين</td>
-      <td>شرق</td>
+      <td>شرق40</td>
       <td>1,700,000</td>
       <td>1,943</td>
       <td><a href="https://drive.google.com/drive/folders/1S16w7VpKp57Q-E2WtBsnPxhr0ho9LOoE?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
-      
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>5</td>
       <td>أرض تجارية</td>
       <td>إيجار</td>
@@ -175,18 +326,16 @@
       <td>29</td>
       <td>28</td>
       <td>826</td>
-      <td>20</td>
-      <td></td>
-      <td></td>
       <td>على شارعين</td>
-      <td>شمال وشرق</td>
+      <td>شمال20 وشرق</td>
       <td>200,000</td>
       <td>242</td>
       <td><a href="https://drive.google.com/drive/folders/13g1A1JB8CBLRgiIWwWwJewQzBc5JJ6-l?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
-      
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>6</td>
       <td>أرض تجارية</td>
       <td>بيع</td>
@@ -194,17 +343,15 @@
       <td></td>
       <td></td>
       <td>1,200</td>
-      <td></td>
-      <td></td>
-      <td></td>
       <td>على شارعين</td>
       <td>شرق وغرب</td>
       <td>4,000,000</td>
       <td>3,333</td>
       <td><a href="https://drive.google.com/drive/folders/1YMUqPry-ELvERjefHHojIvIKGuY-aGq9?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
-      
+      <td></td>
     <tr>
+      <td></td>
       <td>7</td>
       <td>أرض زراعية</td>
       <td>بيع</td>
@@ -214,16 +361,14 @@
       <td>13,115</td>
       <td></td>
       <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
       <td>5,900,000</td>
       <td>450</td>
       <td><a href="https://drive.google.com/drive/folders/1mBG6TlTx5iV21-WNPSgIuHXpbtJwuBEE?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
-      
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>8</td>
       <td>أرض زراعية</td>
       <td>بيع</td>
@@ -233,16 +378,14 @@
       <td>40,753</td>
       <td></td>
       <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
       <td>12,225,000</td>
       <td>300</td>
       <td><a href="https://drive.google.com/drive/folders/1bZlF3VBYafpvDsFaj5d3mhgeEEwFHc_C?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
-    
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>9</td>
       <td>أرض زراعية</td>
       <td>بيع</td>
@@ -252,15 +395,14 @@
       <td>48,000</td>
       <td></td>
       <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
       <td>19,200,000</td>
       <td>400</td>
       <td><a href="https://drive.google.com/drive/folders/1w3ZyX3dJIhNhDeA1lGwQW0JQSR74D_BJ?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>10</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -268,17 +410,16 @@
       <td></td>
       <td></td>
       <td>2,040</td>
-      <td></td>
-      <td></td>
-      <td></td>
       <td>ثلاث اراضي سكنية متجاورة</td>
       <td>جنوب</td>
       <td>سيمت 1,000,000</td>
       <td>490</td>
       <td><a href="https://drive.google.com/drive/folders/1GrltRr6LnuCETrrMbXVB03yKB4_0hO2w?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>11</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -286,17 +427,16 @@
       <td>35</td>
       <td>20</td>
       <td>700</td>
-      <td>20</td>
       <td></td>
-      <td></td>
-      <td></td>
-      <td>شرق</td>
+      <td>شرق20</td>
       <td>650,000</td>
       <td>929</td>
       <td><a href="https://drive.google.com/drive/folders/1TjgwxNzbuLt5GV_BFIwxeF47qZ7Lucw-?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>12</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -304,17 +444,16 @@
       <td></td>
       <td></td>
       <td>700</td>
-      <td></td>
-      <td></td>
-      <td></td>
       <td>على شارعين</td>
       <td>شمال وغرب</td>
       <td>450,000</td>
       <td>643</td>
       <td><a href="https://drive.google.com/drive/folders/1V5rmHiGIDKnNLTmA4lHlabJPdVznWAQR?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>13</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -322,17 +461,16 @@
       <td>29</td>
       <td>15</td>
       <td>435</td>
-      <td>12</td>
       <td></td>
-      <td></td>
-      <td></td>
-      <td>جنوب</td>
+      <td>جنوب12</td>
       <td>400,000</td>
       <td>920</td>
       <td><a href="https://drive.google.com/drive/folders/1M3mZwlb6r2mCRKutmZ5Uy_sgZtD2kelk?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>14</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -340,17 +478,16 @@
       <td>25</td>
       <td>25</td>
       <td>633</td>
-      <td>20</td>
-      <td></td>
-      <td></td>
       <td>ثلاث واجهات</td>
-      <td>شمال وجنوب وغرب</td>
+      <td>شمال20 وجنوب وغرب</td>
       <td>550,000</td>
       <td>869</td>
       <td><a href="https://drive.google.com/drive/folders/1MVQd-mvbxXJXz5CblxtiEM3xNWWlg-sZ?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>15</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -358,17 +495,16 @@
       <td>22</td>
       <td>28</td>
       <td>745</td>
-      <td>20</td>
-      <td>12</td>
-      <td></td>
       <td>على شارعين</td>
-      <td>شمال وشرق</td>
+      <td>شمال20 وشرق12</td>
       <td>650,000</td>
       <td>872</td>
       <td><a href="https://drive.google.com/drive/folders/1Ch6SFOH1x9GsGj_HbegaME3yyxBjq5m1?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>16</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -377,16 +513,15 @@
       <td></td>
       <td>795</td>
       <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
       <td>شرق</td>
       <td>900,000</td>
       <td>1,132</td>
       <td><a href="https://drive.google.com/drive/folders/1z34HhGD39NEAQdxf6APXdcOeFmKK-X1v?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>17</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -395,16 +530,15 @@
       <td></td>
       <td>689</td>
       <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
       <td>شرق</td>
       <td>-</td>
       <td></td>
       <td><a href="https://drive.google.com/drive/folders/1i46pqonXRdgaazQ-ROmwMjiRWqfzMXqY?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>18</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -412,17 +546,16 @@
       <td>30</td>
       <td>40</td>
       <td>1196</td>
-      <td></td>
-      <td></td>
-      <td></td>
       <td>على شارعين</td>
       <td>جنوب وغرب</td>
       <td>2,200,000</td>
       <td>1,839</td>
       <td><a href="https://drive.google.com/drive/folders/1FzQ6nt96_HZ-hHaqnizUa0IoJr9jNWKi?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>19</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -430,17 +563,16 @@
       <td>30</td>
       <td>40</td>
       <td>1196</td>
-      <td></td>
-      <td></td>
-      <td></td>
       <td>على شارعين</td>
       <td>شرق وجنوب</td>
       <td>2,200,000</td>
       <td>1,839</td>
       <td><a href="https://drive.google.com/drive/folders/12TYBAH8Qf188bBph7r_2_IzLmBQmaY3N?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>20</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -449,34 +581,32 @@
       <td>20</td>
       <td>800</td>
       <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
       <td>شرق</td>
       <td>950,000</td>
       <td>1,187</td>
       <td><a href="https://drive.google.com/drive/folders/10wbUZr9mnIKaxreElLfl9-UqWd2PINOF?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td>مرهونة للبنك 556 الف</td>
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>21</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
       <td><a href="https://maps.app.goo.gl/6KbAHvDfyB1vopoWA" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📍 الموقع</a></td>
       <td>30</td>
       <td>15</td>
-      <td>450</td> 
-      <td>8</td>
+      <td>450</td>
       <td></td>
-      <td></td>
-      <td></td>
-      <td>شمال</td>
+      <td>شمال8</td>
       <td>400,000</td>
       <td>889</td>
       <td><a href="https://drive.google.com/drive/folders/185aYMiHAEzDBe7DKBcDr5clO8Nr-k0Hn?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>22</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -484,17 +614,16 @@
       <td>30</td>
       <td>30</td>
       <td>900</td>
-      <td>20</td>
-      <td></td>
-      <td></td>
       <td>على شارعين</td>
-      <td>جنوب وغرب</td>
+      <td>جنوب20 وغرب20</td>
       <td>1,200,000</td>
       <td>1,333</td>
       <td><a href="https://drive.google.com/drive/folders/1dc3aEreFGc59YpSjmNjJe1h1zoD5rHY7?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>23</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -502,17 +631,16 @@
       <td>30</td>
       <td>25</td>
       <td>750</td>
-      <td>20</td>
       <td></td>
-      <td></td>
-      <td></td>
-      <td>جنوب</td>
+      <td>جنوب20</td>
       <td>1,050,000</td>
       <td>1,400</td>
       <td><a href="https://drive.google.com/drive/folders/19dwuW1MML5HhZOV3lsqpQY6nlCBOSWch?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>24</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -520,17 +648,16 @@
       <td></td>
       <td></td>
       <td>650</td>
-      <td></td>
-      <td></td>
-      <td></td>
       <td>على شارعين</td>
       <td>شرق وغرب</td>
       <td>320,000</td>
       <td>492</td>
       <td><a href="https://drive.google.com/drive/folders/1fYJm-hFhF7GjXPj5U6hhF0Eq2NVvDe1U?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td>مرفوعة على احكام</td>
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>25</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -538,17 +665,16 @@
       <td></td>
       <td></td>
       <td>630</td>
-      <td></td>
-      <td></td>
-      <td></td>
       <td>على شارعين</td>
       <td>شمال وجنوب</td>
       <td>125,000</td>
       <td>198</td>
       <td><a href="https://drive.google.com/drive/folders/11NbIdSRmK1Lwh2jyHB9tXiiI4Wgr915w?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>26</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -557,16 +683,15 @@
       <td></td>
       <td>1,073</td>
       <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
       <td>غرب</td>
       <td>السوم 1,000,000</td>
       <td>932</td>
       <td><a href="https://drive.google.com/drive/folders/180PZrQL1V5VllnKVW3qdALHSDEadOQ1j?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>27</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -575,16 +700,15 @@
       <td></td>
       <td>400</td>
       <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
       <td>جنوب</td>
       <td>200,000</td>
       <td>500</td>
       <td><a href="https://drive.google.com/drive/folders/1T7mN7IacsEhJHRua09txXDCyxEfHHeJY?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>28</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -592,17 +716,16 @@
       <td></td>
       <td></td>
       <td>437</td>
-      <td>15</td>
-      <td></td>
-      <td></td>
       <td>على شارعين</td>
-      <td>شمال وشرق</td>
+      <td>شمال12 وشرق12</td>
       <td>600,000</td>
       <td>1,373</td>
       <td><a href="https://drive.google.com/drive/folders/1mz5Ncxxspc_vNr1-NS3yo3dx9RalKX7Q?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>29</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -610,17 +733,16 @@
       <td></td>
       <td></td>
       <td>780</td>
-      <td>12</td>
-      <td>13</td>
-      <td></td>
       <td>على شارعين</td>
-      <td>شمال وشرق</td>
+      <td>شمال12 وشرق13</td>
       <td>السوم 1,050,000</td>
       <td>1,346</td>
       <td><a href="https://drive.google.com/drive/folders/1HphsnNzO_Lx06DrHdJxvr5MLPMqMN2JS?usp=sharing" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
     <tr>
+      <td>213</td>
       <td>30</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -628,17 +750,16 @@
       <td></td>
       <td></td>
       <td>759</td>
-      <td>13</td>
-      <td>17</td>
-      <td></td>
       <td>على شارعين</td>
-      <td>جنوب وغرب</td>
-      <td>1,100,000</td>
+      <td>جنوب13 وغرب17</td>
+      <td>1,000,000</td>
       <td>1,449</td>
       <td><a href="https://drive.google.com/drive/folders/1jrSIzY6jpfa4qRPcHyeT_kTVLwHGDY8M?usp=sharing" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>31</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -646,17 +767,16 @@
       <td></td>
       <td></td>
       <td>750</td>
-      <td>15</td>
       <td></td>
-      <td></td>
-      <td></td>
-      <td>شمال</td>
+      <td>شمال15</td>
       <td>600,000</td>
       <td>800</td>
       <td><a href="https://drive.google.com/drive/folders/1Fi4NkFqVWRwfZ1gXYgIx4Vc6iQhhwlr0?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
     <tr>
+      <td>206</td>
       <td>32</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -664,17 +784,16 @@
       <td></td>
       <td></td>
       <td>710</td>
-      <td>15</td>
-      <td>9</td>
-      <td></td>
       <td>على شارعين</td>
-      <td>جنوب وشرق</td>
-      <td>1,1000,00</td>
+      <td>جنوب15 وشرق9</td>
+      <td>1,000,000</td>
       <td>1,549</td>
       <td><a href="https://drive.google.com/drive/folders/14p1hlGx8n8u6ayHF7wAS07DEi8AHuoqX?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td>تم بناء القواعد</td>
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>33</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -682,35 +801,33 @@
       <td></td>
       <td></td>
       <td>750</td>
-      <td>20</td>
       <td></td>
-      <td></td>
-      <td></td>
-      <td>غرب</td>
+      <td>غرب20</td>
       <td>على السوم</td>
       <td>0</td>
       <td><a href="https://drive.google.com/drive/folders/1Tf4igL4wu4Jx-yWqENtSvtlgZ1qIxzZ_?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>34</td>
-<td>أرض سكنية</td>
+      <td>أرض سكنية</td>
       <td>بيع</td>
       <td><a href="https://maps.app.goo.gl/RQtUvhi7191ytF3MA" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📍 الموقع</a></td>
       <td></td>
       <td></td>
       <td>764</td>
-      <td>10</td>
       <td></td>
-      <td></td>
-      <td></td>
-      <td>شمال</td>
+      <td>شمال10</td>
       <td>350,000 </td>
       <td>458</td>
       <td><a href="https://drive.google.com/drive/folders/1qV_xaZiOeA0ELao-U7iT4y3ybI-NUmco?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td>مرفوعة في احكام</td>
+      <td></td>
     </tr>
     <tr>
+      <td>71</td>
       <td>35</td>
       <td>أرض صناعية</td>
       <td>بيع</td>
@@ -718,17 +835,16 @@
       <td></td>
       <td></td>
       <td>626</td>
-      <td>40</td>
       <td></td>
-      <td></td>
-      <td></td>
-      <td>شمال</td>
+      <td>شمال40</td>
       <td>السوم 1,700,000</td>
       <td>2,715</td>
       <td><a href="https://drive.google.com/drive/folders/182U_6ML0KKmL_5wbO2hG0Omj7WY2zvNN?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>36</td>
       <td>أرض تجارية</td>
       <td>بيع</td>
@@ -736,17 +852,16 @@
       <td></td>
       <td></td>
       <td>1006</td>
-      <td>20</td>
-      <td></td>
-      <td></td>
       <td>على شارعين</td>
-      <td>جنوب وغرب</td>
+      <td>جنوب40 وغرب10</td>
       <td>700,000</td>
       <td>698</td>
       <td><a href="https://drive.google.com/drive/folders/10sLp-dCTSRO4hPBJdJQHH8nbkO9LUPpP?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>37</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -754,17 +869,16 @@
       <td></td>
       <td></td>
       <td>1007</td>
-      <td>20</td>
-      <td></td>
-      <td></td>
       <td>على 3 شوارع	</td>
-      <td>شمال غرب جنوب</td>
+      <td>شمال15 غرب15 جنوب15</td>
       <td>600,000</td>
       <td>596</td>
       <td><a href="https://drive.google.com/drive/folders/1Imbkqe_4XpvqmJHqbF_4ghh94fmYpdIq?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
     <tr>
+      <td>211</td>
       <td>38</td>
       <td>أرض زراعية</td>
       <td>بيع</td>
@@ -772,17 +886,16 @@
       <td></td>
       <td></td>
       <td>3166</td>
-      <td>20</td>
-      <td></td>
-      <td></td>
       <td>على 3 شوارع	</td>
-      <td>شرق وشمال وغرب</td>
+      <td>شرق15 وشمال15 وغرب10</td>
       <td>3,166,000</td>
       <td>1,000</td>
       <td><a href="https://drive.google.com/drive/folders/1N0VCpX2EQRPRA8H2z3gF0XC7qYj5EcOH?usp=sharing" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
     <tr>
+      <td></td>
       <td>39</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -790,18 +903,17 @@
       <td></td>
       <td></td>
       <td>1200</td>
-      <td>20</td>
-      <td></td>
-      <td></td>
       <td>على شارعين</td>
-      <td>شرق وشمال</td>
+      <td>شرق15 وشمال15</td>
       <td>2,000,000</td>
       <td>1,667</td>
       <td><a href="https://drive.google.com/drive/folders/1pqteUcdwrG5GohgkL7suKyReR7Kiboc_?usp=sharing" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
 
     <tr>
+      <td></td>
       <td>40</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -809,18 +921,17 @@
       <td>35</td>
       <td>20</td>
       <td>750</td>
-      <td>12</td>
       <td></td>
-      <td></td>
-      <td></td>
-      <td>غرب</td>
+      <td>غرب12</td>
       <td>600,000</td>
       <td>800</td>
       <td><a href="https://drive.google.com/drive/folders/1FhtTJtCV5KYZPJKvTMab2n5pSEkLit87?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
 
-        <tr>
+    <tr>
+      <td></td>
       <td>41</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -828,19 +939,18 @@
       <td>15</td>
       <td>30</td>
       <td>450</td>
-      <td>18</td>
-      <td>12</td>
-      <td></td>
       <td>على شارعين</td>
-      <td>شرق وغرب</td>
+      <td>12شرق18 وغرب</td>
       <td>السوم 600,000</td>
       <td>1,333</td>
       <td><a href="https://drive.google.com/drive/folders/1DfQrrly5t8gA46MlFdM5GGmgespCixdu?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
 
     
-        <tr>
+    <tr>
+      <td></td>    
       <td>42</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -848,18 +958,17 @@
       <td>26.6</td>
       <td>30</td>
       <td>799</td>
-      <td>25</td>
       <td></td>
-      <td></td>
-      <td></td>
-      <td>شمال</td>
+      <td>شمال25</td>
       <td>على السوم</td>
       <td></td>
       <td><a href="https://drive.google.com/drive/folders/1xoOSor9_8CGmrP_p3nw0oNjMlDuyEq_i?usp=sharing" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
 
         <tr>
+      <td></td>   
       <td>43</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -867,19 +976,18 @@
       <td>25</td>
       <td>30</td>
       <td>750</td>
-      <td>30</td>
-      <td></td>
-      <td></td>
       <td></td>
       <td></td>
       <td>على السوم</td>
       <td></td>
       <td><a href="https://drive.google.com/drive/folders/15nNWDZRkBiiMiyOJEaNn4cquIl9ZJhMX?usp=sharing" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
       <td></td>
+      <td></td>
     </tr>
 
 
     <tr>
+      <td></td>
       <td>44</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -887,18 +995,17 @@
       <td></td>
       <td></td>
       <td>630</td>
-      <td>15</td>
-      <td>15</td>
-      <td></td>
       <td>على شارعين</td>
-      <td>شرق وشمال</td>
+      <td>شرق15 وشمال15</td>
       <td>125,000</td>
-      <td></td>
+      <td>198</td>
       <td><a href="https://drive.google.com/drive/folders/1huLyQnCuDQf-wBQ7MGG8ycdAv3yFvaGG?usp=sharing" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
+      <td></td>
       <td></td>
     </tr>
 
     <tr>
+      <td></td>
       <td>45</td>
       <td>أرض سكنية</td>
       <td>بيع</td>
@@ -906,19 +1013,23 @@
       <td></td>
       <td></td>
       <td>791</td>
-      <td>15</td>
-      <td>15</td>
-      <td></td>
       <td>على شارعين</td>
-      <td>شمال وغرب</td>
+      <td>شمال15 وغرب15</td>
       <td></td>
       <td></td>
       <td><a href="https://drive.google.com/drive/folders/1KeIPlZWBJDqQrQHnsX6LxKYFRkzLOkSU?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
+      <td></td>
       <td></td>
     </tr>
 
   </tbody>
 </table>
+
+
+
+
+
+
 
 <h2 style="text-align:center;">خريطة المواقع</h2>
 <div id="LandsMap" style="height: 500px; width: 200%; margin-bottom: 30px; border-radius: 10px;"></div>
@@ -1083,5 +1194,7 @@
     }
   });
 </script> -->
+
+
 </body>
 </html>
