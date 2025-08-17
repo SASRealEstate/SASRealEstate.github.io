@@ -214,6 +214,70 @@ $(function () {
   });
 });
 </script>
+<!-- UI: Property Type Filter -->
+<div id="type-filter" style="margin:10px 0; display:flex; align-items:center; gap:12px; justify-content:center; flex-wrap:wrap;">
+  <strong>نوع العقار:</strong>
+  <label><input type="checkbox" class="typeCheckbox" value="أرض تجارية"> أرض تجارية</label>
+  <label><input type="checkbox" class="typeCheckbox" value="أرض سكنية"> أرض سكنية</label>
+  <label><input type="checkbox" class="typeCheckbox" value="أرض زراعية"> أرض زراعية</label>
+  <label><input type="checkbox" class="typeCheckbox" value="أرض صناعية"> أرض صناعية</label>
+</div>
+
+<script>
+$(function(){
+  // Ensure we target the same table used elsewhere
+  const $t = $('table.dataframe').last();
+  if (!$t.length) return;
+  if (!$t.attr('id')) $t.attr('id','landsTable');
+  const tableId = $t.attr('id');
+
+  // Helper: get column index by exact header text
+  function getColIndexByHeaderText(txt) {
+    return $('#' + tableId + ' thead th').filter(function(){
+      return $(this).text().trim() === txt;
+    }).index();
+  }
+
+  // Locate "نوع العقار" column
+  const typeIdx = getColIndexByHeaderText('نوع العقار');
+
+  // Push a dedicated filter for "نوع العقار" (only for this table)
+  if (typeIdx >= 0) {
+    $.fn.dataTable.ext.search.push(function(settings, data){
+      // Apply only to our table instance
+      if (settings.nTable !== $('#' + tableId)[0]) return true;
+
+      // Read selected types from checkboxes
+      const selected = $('.typeCheckbox:checked').map(function(){ return $(this).val(); }).get();
+      if (!selected.length) return true; // no selection => don't filter
+
+      // Plain text of the cell (strip HTML if any)
+      const cell = String(data[typeIdx] || '').replace(/<[^>]*>?/gm,'').trim();
+
+      // Keep row only if cell matches one of selected values
+      return selected.includes(cell);
+    });
+  } else {
+    // If the header isn't found, do nothing (avoid errors)
+    console.warn('Column "نوع العقار" not found.');
+  }
+
+  // Redraw on checkbox change
+  $(document).on('change', '.typeCheckbox', function(){
+    const dt = $('#' + tableId).DataTable();
+    dt.draw();
+  });
+
+  // Integrate with an existing "Clear All" button if present
+  if ($('#clearAll').length) {
+    $('#clearAll').off('click.type').on('click.type', function(){
+      $('.typeCheckbox').prop('checked', false);
+      const dt = $('#' + tableId).DataTable();
+      dt.draw();
+    });
+  }
+});
+</script>
 
 
 
