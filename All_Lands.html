@@ -282,6 +282,313 @@ $(function(){
 
 
 
+<!-- ➕ Add Row button -->
+<div style="margin:15px 0; text-align:center;">
+  <button id="openAddForm" style="padding:10px 20px; background:#198754; color:#fff; border:none; border-radius:8px; cursor:pointer;">
+    ➕ إضافة صف جديد
+  </button>
+</div>
+
+<!-- Modal form (all fields visible together) -->
+<style>
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;
+  }
+  .modal-card{
+    background:#fff; border-radius:12px; padding:18px; width:min(900px,96vw); max-height:90vh; overflow:auto; direction:rtl; text-align:right;
+    box-shadow:0 10px 30px rgba(0,0,0,.2); font-family:Tahoma, sans-serif;
+  }
+  .form-grid{
+    display:grid; grid-template-columns: repeat(2, minmax(220px, 1fr)); gap:12px;
+  }
+  .form-grid label{ font-weight:600; font-size:14px; }
+  .form-grid input, .form-grid select, .form-grid textarea{
+    width:100%; padding:8px; border:1px solid #ccc; border-radius:8px; font-size:14px;
+  }
+  .modal-actions{ display:flex; gap:10px; justify-content:flex-start; margin-top:14px; }
+  .btn{
+    padding:10px 16px; border:none; border-radius:8px; cursor:pointer; font-size:14px;
+  }
+  .btn-primary{ background:#0d6efd; color:#fff; }
+  .btn-secondary{ background:#6c757d; color:#fff; }
+  .hint{ font-size:12px; color:#666; }
+</style>
+
+<div id="addRowModal" class="modal-overlay" aria-hidden="true">
+  <div class="modal-card">
+    <h3 style="margin-top:0;">إضافة صف جديد</h3>
+    <p class="hint">املأ ما تحتاجه فقط. يمكن ترك أي خانة فارغة. الحقول <strong>الموقع</strong> و<strong>مرفقات</strong> تقبل روابط.</p>
+
+    <form id="addRowForm">
+      <div class="form-grid">
+
+        <div>
+          <label>رقم اللوحة</label>
+          <input name="رقم اللوحة" type="text" />
+        </div>
+
+        <div>
+          <label>رقم</label>
+          <input name="رقم" type="number" step="1" min="0" placeholder="يُمكن تركه فارغًا وسيُملأ تلقائيًا" />
+        </div>
+
+        <div>
+          <label>نوع العقار</label>
+          <select name="نوع العقار">
+            <option value=""></option>
+            <option>أرض تجارية</option>
+            <option>أرض سكنية</option>
+            <option>أرض زراعية</option>
+            <option>أرض صناعية</option>
+          </select>
+        </div>
+
+        <div>
+          <label>نوع العرض</label>
+          <select name="نوع العرض">
+            <option value=""></option>
+            <option>بيع</option>
+            <option>إيجار</option>
+          </select>
+        </div>
+
+        <div>
+          <label>الموقع <span class="hint">(رابط خرائط)</span></label>
+          <input name="الموقع" type="url" placeholder="https://maps.app..." />
+        </div>
+
+        <div>
+          <label>رقم المخطط</label>
+          <input name="رقم المخطط" type="text" />
+        </div>
+
+        <div>
+          <label>اسم المخطط</label>
+          <input name="اسم المخطط" type="text" />
+        </div>
+
+        <div>
+          <label>طول</label>
+          <input name="طول" type="number" step="0.1" />
+        </div>
+
+        <div>
+          <label>عرض</label>
+          <input name="عرض" type="number" step="0.1" />
+        </div>
+
+        <div>
+          <label>المساحة</label>
+          <input name="المساحة" type="number" step="0.1" />
+        </div>
+
+        <div>
+          <label>مواصفات العقار</label>
+          <input name="مواصفات العقار" type="text" />
+        </div>
+
+        <div>
+          <label>الواجهات</label>
+          <input name="الواجهات" type="text" />
+        </div>
+
+        <div>
+          <label>السوم</label>
+          <input name="السوم" type="text" />
+        </div>
+
+        <div>
+          <label>السعر</label>
+          <input name="السعر" type="text" />
+        </div>
+
+        <div>
+          <label>سعر المتر</label>
+          <input name="سعر المتر" type="text" />
+        </div>
+
+        <div>
+          <label>مرفقات <span class="hint">(رابط صور/Drive)</span></label>
+          <input name="مرفقات" type="url" placeholder="https://drive.google.com/..." />
+        </div>
+
+        <div style="grid-column: 1 / -1;">
+          <label>الملاحظات</label>
+          <textarea name="الملاحظات" rows="2"></textarea>
+        </div>
+
+      </div>
+
+      <div class="modal-actions">
+        <button type="submit" class="btn btn-primary">حفظ</button>
+        <button type="button" id="cancelAdd" class="btn btn-secondary">إلغاء</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+$(function(){
+  // Ensure table has an id DataTables already uses
+  const $t = $('table.dataframe');
+  if (!$t.length) return;
+  if (!$t.attr('id')) $t.attr('id','landsTable');
+  const tableId = $t.attr('id');
+
+  const dt = $('#' + tableId).DataTable();
+
+  // build header map (so we place values in the right columns)
+  const headers = $('#' + tableId + ' thead th').map(function(){return $(this).text().trim();}).get();
+
+  // small helper to convert URL inputs for الموقع/مرفقات into the same styled buttons you already use
+  function linkButton(colTitle, url){
+    if (!url || !String(url).trim()) return '';
+    const common = 'target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;"';
+    if (colTitle === 'الموقع')  return `<a href="${url}" ${common}>📍 الموقع</a>`;
+    if (colTitle === 'مرفقات')  return `<a href="${url}" ${common}>📷 صور</a>`;
+    return url;
+  }
+
+  // Modal controls
+  const $modal = $('#addRowModal');
+  $('#openAddForm').on('click', function(){
+    // clear form each time
+    $('#addRowForm')[0].reset();
+
+    // if "رقم" left blank, we’ll auto-suggest next number visually (placeholder)
+    const nextNum = (function(){
+      // find index of "رقم"
+      const numIdx = headers.indexOf('رقم');
+      if (numIdx === -1) return '';
+      // scan current numbers to find the max
+      let max = 0;
+      dt.column(numIdx).data().each(function(v){
+        const n = parseInt(String(v).replace(/[^\d]/g,''), 10);
+        if (!isNaN(n)) max = Math.max(max, n);
+      });
+      return max + 1;
+    })();
+    $('input[name="رقم"]').attr('placeholder', nextNum ? `مثال: ${nextNum}` : '');
+
+    $modal.css('display','flex').attr('aria-hidden','false');
+  });
+
+  $('#cancelAdd').on('click', function(){
+    $modal.hide().attr('aria-hidden','true');
+  });
+
+  // Submit the form: build row in the exact header order (including "نسخ")
+  $('#addRowForm').on('submit', function(e){
+    e.preventDefault();
+
+    // gather values from form by name (names exactly match headers except "نسخ")
+    const formData = {};
+    $(this).serializeArray().forEach(({name, value}) => { formData[name] = value; });
+
+    // auto-fill "رقم" if empty with next max+1
+    if (!formData['رقم']) {
+      const numIdx = headers.indexOf('رقم');
+      if (numIdx > -1) {
+        let max = 0;
+        dt.column(numIdx).data().each(function(v){
+          const n = parseInt(String(v).replace(/[^\d]/g,''), 10);
+          if (!isNaN(n)) max = Math.max(max, n);
+        });
+        formData['رقم'] = max ? String(max + 1) : '1';
+      }
+    }
+
+    // convert links
+    if (formData['الموقع'])   formData['الموقع']   = linkButton('الموقع', formData['الموقع'].trim());
+    if (formData['مرفقات'])  formData['مرفقات']  = linkButton('مرفقات', formData['مرفقات'].trim());
+
+    // create new row array aligned with headers
+    const newRow = headers.map(h => {
+      if (h === 'نسخ') return ''; // DataTables will fill the copy button
+      return (formData[h] ?? '').toString();
+    });
+
+    dt.row.add(newRow).draw(false);
+
+    // close modal
+    $modal.hide().attr('aria-hidden','true');
+
+    // small toast
+    const el=document.createElement('div');
+    el.textContent='تمت إضافة الصف';
+    el.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 14px;border-radius:8px;opacity:.95;z-index:99999;font-size:14px';
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),1300);
+  });
+});
+</script>
+
+<script>
+$(function(){
+  const $t = $('table.dataframe');
+  if (!$t.length) return;
+  if (!$t.attr('id')) $t.attr('id','landsTable');
+  const tableId = $t.attr('id');
+  const dt = $('#' + tableId).DataTable();
+
+  // helper: get index of a header by its exact Arabic text
+  function colIdx(title){
+    return $('#' + tableId + ' thead th').filter(function(){
+      return $(this).text().trim() === title;
+    }).index();
+  }
+
+  const priceIdx = colIdx('السعر');      // filter targets this column
+  const areaIdx  = colIdx('المساحة');    // area filter targets this column
+
+  // parse numbers like "1,800,000" → 1800000 (ignore non-digits)
+  function toNumber(x){
+    if (x == null) return NaN;
+    const n = String(x).replace(/[^\d.]/g,'');  // keep digits & dot
+    return n ? Number(n) : NaN;
+  }
+
+  // Register one global DataTables filter just for THIS table
+  $.fn.dataTable.ext.search.push(function(settings, data){
+    if (settings.nTable !== $('#' + tableId)[0]) return true;
+
+    // read inputs
+    const minP = toNumber($('#minPriceInput').val());
+    const maxP = toNumber($('#maxPriceInput').val());
+    const minA = toNumber($('#minAreaInput').val());
+    const maxA = toNumber($('#maxAreaInput').val());
+
+    // current row values
+    const priceVal = priceIdx >= 0 ? toNumber(data[priceIdx]) : NaN;
+    const areaVal  = areaIdx  >= 0 ? toNumber(data[areaIdx])  : NaN;
+
+    // price passes if not constrained OR within bounds
+    const pricePass =
+      (isNaN(minP) || (!isNaN(priceVal) && priceVal >= minP)) &&
+      (isNaN(maxP) || (!isNaN(priceVal) && priceVal <= maxP));
+
+    // area passes if not constrained OR within bounds
+    const areaPass =
+      (isNaN(minA) || (!isNaN(areaVal) && areaVal >= minA)) &&
+      (isNaN(maxA) || (!isNaN(areaVal) && areaVal <= maxA));
+
+    return pricePass && areaPass;
+  });
+
+  // (you already have these, but keep them to redraw)
+  $('#minPriceInput, #maxPriceInput, #minAreaInput, #maxAreaInput').off('input').on('input', function(){
+    dt.draw();
+  });
+  $('#clearAll').off('click.filter').on('click.filter', function(){
+    $('#minPriceInput, #maxPriceInput, #minAreaInput, #maxAreaInput').val('');
+    dt.draw();
+  });
+});
+</script>
+
+
+
+
 
 
 </div>
