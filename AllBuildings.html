@@ -206,24 +206,17 @@
 </div>
 
 <script>
-$(function(){
-  
-  // استخدم نفس الجدول الحالي (ملف المباني)
-  const $t = $('table.dataframe');
-  if (!$t.length) return;
+// Use the same table (buildings)
+const $t = $('table.dataframe');
+if (!$t.length) return;
 
-  // عرّف ID واضح وثابت للمباني
-  if (!$t.attr('id')) $t.attr('id','buildingsTable');
-  const tableId = $t.attr('id');
+// Set ID if missing
+if (!$t.attr('id')) $t.attr('id','buildingsTable');
+const tableId = $t.attr('id');
 
-  // خذ نسخة من DataTable الحالي (تم تهيئته لاحقًا في صفحتك)
-// لا تنشئ DataTable هنا، فقط استخدم الموجود
+// ✅ Just define dt as a global variable here
 let dt;
-$(document).ready(function() {
-  if ($.fn.dataTable.isDataTable('#' + tableId)) {
-    dt = $('#' + tableId).DataTable();
-  }
-});
+
   // خريطة الرؤوس حسب الجدول الحالي
   const headers = $('#' + tableId + ' thead th').map(function(){return $(this).text().trim();}).get();
 
@@ -301,38 +294,10 @@ $(document).ready(function() {
     document.body.appendChild(el);
     setTimeout(()=>el.remove(),1300);
   });
-});
 </script>
 
 
 
-<script>
-$(function(){
-  const tableId = $('table.dataframe').attr('id') || 'landsTable';
-
-  // ✅ فلترة حسب مساحة البناء
-  $.fn.dataTable.ext.search.push(function(settings, data){
-    const min = parseFloat($('#minSpace').val()) || 0;
-    const max = parseFloat($('#maxSpace').val()) || Infinity;
-
-    // ابحث عن عمود "مساحة البناء"
-    const colIndex = $('#' + tableId + ' thead th').map(function(i){ 
-      return $(this).text().trim(); 
-    }).get().indexOf('مساحة البناء');
-
-    if (colIndex === -1) return true; // لو ما فيه عمود بهذا الاسم
-
-    const val = parseFloat(String(data[colIndex]).replace(/[^\d.]/g,'')) || 0;
-
-    return (val >= min && val <= max);
-  });
-
-  // ✅ حدث الفلتر عند إدخال القيم
-  $('#minSpace, #maxSpace').on('keyup change', function(){
-    dt.draw();
-  });
-});
-</script>
 
 
 
@@ -366,39 +331,39 @@ $(function () {
   });
 
   const headers = $('#' + tableId + ' thead th').map(function(){return $(this).text().trim();}).get();
-  const idx = {
-    type: headers.indexOf('نوع العقار'),
-    price: headers.indexOf('السعر'),
-    area: headers.indexOf('مساحة الأرض'),
-    details: headers.indexOf('تفاصيل اضافية'),   // 👈 هنا تضيفه
-    copy: headers.indexOf('نسخ'),
-    lokasi: headers.indexOf('الموقع'),
+const idx = {
+  type: headers.indexOf('نوع العقار'),
+  price: headers.indexOf('السعر'),
+  area: headers.indexOf('مساحة الأرض'),
+  buildArea: headers.indexOf('مسطح البناء'),
+  details: headers.indexOf('تفاصيل اضافية'),
+  copy: headers.indexOf('نسخ'),
+  lokasi: headers.indexOf('الموقع'),
+  photos: headers.indexOf('صور')
+};
 
-    photos: headers.indexOf('صور')
-  };
 
-  // فعّل DataTables + زر النسخ داخل العمود الأخير
-  const dt = $('#' + tableId).DataTable({
-    language: { url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/ar.json' },
-    pageLength: 100,
-    order: [],
-    columnDefs: [
-  {
-    targets: idx.copy,
-    orderable: false,
-    searchable: false,
-    createdCell: function(td){
-      td.innerHTML = '<button type="button" class="copyRowBtn" ...>📋 نسخ</button>';
+dt = $('#' + tableId).DataTable({
+  language: { url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/ar.json' },
+  pageLength: 100,
+  order: [],
+  columnDefs: [
+    {
+      targets: idx.copy,
+      orderable: false,
+      searchable: false,
+      createdCell: function(td){
+        td.innerHTML = '<button type="button" class="copyRowBtn" style="padding:6px 10px;border:1px solid #ccc;border-radius:8px;background:#f7f7f7;cursor:pointer;">📋 نسخ</button>';
+      }
+    },
+    {
+      targets: idx.details,
+      visible: false,
+      searchable: false
     }
-  },
-  {
-    targets: idx.details,
-    visible: false,
-    searchable: false
-  }
-]
+  ]
+});
 
-  });
 
   // ====== نفس منطق الفلاتر في ملف الأراضي ======
   // تحويل نص مثل "680-600,000" أو "900,000" إلى [min,max]
@@ -437,40 +402,45 @@ function buildTypeBoxes(){
 
 
 
-// ✅ build boxes after draw
+dt.on('init', buildTypeBoxes);
 dt.on('draw', buildTypeBoxes);
-// and also once on init
-buildTypeBoxes();
 
 
 
-  // سجّل مُرشّح DataTables (سعر + مساحة + نوع) — خاص بهذا الجدول فقط
-  $.fn.dataTable.ext.search.push(function(settings, data){
-    if (settings.nTable !== $('#' + tableId)[0]) return true;
 
-    // نوع
-    const selected = $('.typeCheckbox:checked').map(function(){ return $(this).val(); }).get();
-    if (selected.length){
-      const cellType = stripTags(data[idx.type] || '');
-      if (!selected.includes(cellType)) return false;
-    }
+$.fn.dataTable.ext.search.push(function(settings, data){
+  if (settings.nTable !== $('#' + tableId)[0]) return true;
 
-    // سعر
-    const [pMinRow, pMaxRow] = parseRange(data[idx.price] || '');
-    const minP = numOrNaN($('#minPriceInput').val());
-    const maxP = numOrNaN($('#maxPriceInput').val());
-    if (!isNaN(minP) && (isNaN(pMaxRow) || pMaxRow < minP)) return false;
-    if (!isNaN(maxP) && (isNaN(pMinRow) || pMinRow > maxP)) return false;
+  // نوع العقار
+  const selected = $('.typeCheckbox:checked').map(function(){ return $(this).val(); }).get();
+  if (selected.length){
+    const cellType = stripTags(data[idx.type] || '');
+    if (!selected.includes(cellType)) return false;
+  }
 
-    // مساحة الأرض
-    const [aMinRow, aMaxRow] = parseRange(data[idx.area] || '');
-    const minA = numOrNaN($('#minAreaInput').val());
-    const maxA = numOrNaN($('#maxAreaInput').val());
-    if (!isNaN(minA) && (isNaN(aMaxRow) || aMaxRow < minA)) return false;
-    if (!isNaN(maxA) && (isNaN(aMinRow) || aMinRow > maxA)) return false;
+  // السعر
+  const [pMinRow, pMaxRow] = parseRange(data[idx.price] || '');
+  const minP = numOrNaN($('#minPriceInput').val());
+  const maxP = numOrNaN($('#maxPriceInput').val());
+  if (!isNaN(minP) && (isNaN(pMaxRow) || pMaxRow < minP)) return false;
+  if (!isNaN(maxP) && (isNaN(pMinRow) || pMinRow > maxP)) return false;
 
-    return true;
-  });
+  // مساحة الأرض
+  const [aMinRow, aMaxRow] = parseRange(data[idx.area] || '');
+  const minA = numOrNaN($('#minAreaInput').val());
+  const maxA = numOrNaN($('#maxAreaInput').val());
+  if (!isNaN(minA) && (isNaN(aMaxRow) || aMaxRow < minA)) return false;
+  if (!isNaN(maxA) && (isNaN(aMinRow) || aMinRow > maxA)) return false;
+
+  // مساحة البناء ✅ new filter
+  const minB = parseFloat($('#minBuildAreaInput').val()) || 0;
+  const maxB = parseFloat($('#maxBuildAreaInput').val()) || Infinity;
+  const buildArea = parseFloat((data[idx.buildArea] || '').replace(/[^\d.]/g, '')) || 0;
+  if (buildArea < minB || buildArea > maxB) return false;
+
+  return true;
+});
+
 
   // اربط المدخلات لإعادة الرسم
   $('#minPriceInput, #maxPriceInput, #minAreaInput, #maxAreaInput').on('input', function(){ dt.draw(); });
