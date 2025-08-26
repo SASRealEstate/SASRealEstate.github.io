@@ -218,7 +218,6 @@ $(function(){
   const tableId = $t.attr('id');
 
   // خذ نسخة من DataTable الحالي (تم تهيئته لاحقًا في صفحتك)
-  const dt = $('#' + tableId).DataTable();
 
   // خريطة الرؤوس حسب الجدول الحالي
   const headers = $('#' + tableId + ' thead th').map(function(){return $(this).text().trim();}).get();
