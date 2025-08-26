@@ -413,22 +413,29 @@ const dt = $('#' + tableId).DataTable({
   }
 
   // فلتر "نوع العقار": ابنِ مربعات الاختيار من القيم الموجودة في الجدول
-  (function buildTypeBoxes(){
-    const set = new Set();
-    $('#' + tableId + ' tbody tr').each(function(){
-      const txt = stripTags($(this).children('td').eq(idx.type).html()||'');
-      if (txt) set.add(txt);
-    });
-    const $wrap = $('#typeBoxes').empty();
-    Array.from(set).sort().forEach(val=>{
-      const id = 'type_'+ val.replace(/\s+/g,'_');
-      $wrap.append(
-        `<label for="${id}" style="margin-inline:6px">
-           <input id="${id}" type="checkbox" class="typeCheckbox" value="${val}"> ${val}
-         </label>`
-      );
-    });
-  })();
+function buildTypeBoxes(){
+  const set = new Set();
+  $('#' + tableId + ' tbody tr').each(function(){
+    const txt = stripTags($(this).children('td').eq(idx.type).html()||'');
+    if (txt) set.add(txt);
+  });
+  const $wrap = $('#typeBoxes').empty();
+  Array.from(set).sort().forEach(val=>{
+    const id = 'type_'+ val.replace(/\s+/g,'_');
+    $wrap.append(
+      `<label for="${id}" style="margin-inline:6px">
+         <input id="${id}" type="checkbox" class="typeCheckbox" value="${val}"> ${val}
+       </label>`
+    );
+  });
+}
+
+// ✅ build boxes after draw
+dt.on('draw', buildTypeBoxes);
+// and also once on init
+buildTypeBoxes();
+
+
 
   // سجّل مُرشّح DataTables (سعر + مساحة + نوع) — خاص بهذا الجدول فقط
   $.fn.dataTable.ext.search.push(function(settings, data){
