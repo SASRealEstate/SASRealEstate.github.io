@@ -126,7 +126,7 @@
 <div id="addRowModal" class="modal-overlay" aria-hidden="true">
   <div class="modal-card">
     <h3 style="margin-top:0;">إضافة صف جديد</h3>
-    <p class="hint">املأ ما تحتاجه فقط. يمكن ترك أي خانة فارغة. الحقول <strong>الموقع</strong> و<strong>صور وتفاصيل اضافية</strong> تقبل روابط.</p>
+    <p class="hint">املأ ما تحتاجه فقط. يمكن ترك أي خانة فارغة. الحقول <strong>الموقع</strong> و<strong>صور</strong> تقبل روابط.</p>
 
     <form id="addRowForm">
       <div class="form-grid">
@@ -188,13 +188,13 @@
         </div>
 
         <div>
-          <label>صور وتفاصيل اضافية <span class="hint">(رابط صور/Drive)</span></label>
-          <input name="صور وتفاصيل اضافية" type="url" placeholder="https://drive.google.com/..." />
+          <label>صور <span class="hint">(رابط صور/Drive)</span></label>
+          <input name="صور" type="url" placeholder="https://drive.google.com/..." />
         </div>
 
         <div style="grid-column: 1 / -1;">
-          <label>ملاحظات</label>
-          <textarea name="ملاحظات" rows="2"></textarea>
+          <label>تفاصيل اضافية</label>
+          <textarea name="تفاصيل اضافية" rows="2"></textarea>
         </div>
       </div>
 
@@ -228,7 +228,7 @@ $(function(){
     if (!url || !String(url).trim()) return '';
     const common = 'target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;"';
     if (colTitle === 'الموقع')               return `<a href="${url}" ${common}>📍 الموقع</a>`;
-    if (colTitle === 'صور وتفاصيل اضافية')  return `<a href="${url}" ${common}>📷 صور</a>`;
+    if (colTitle === 'صور')  return `<a href="${url}" ${common}>📷 صور</a>`;
     return url;
   }
 
@@ -278,7 +278,7 @@ $(function(){
 
     // تحويل الروابط لزر مثل الجدول
     if (formData['الموقع'])                 formData['الموقع'] = linkButton('الموقع', formData['الموقع'].trim());
-    if (formData['صور وتفاصيل اضافية'])    formData['صور وتفاصيل اضافية'] = linkButton('صور وتفاصيل اضافية', formData['صور وتفاصيل اضافية'].trim());
+    if (formData['صور'])    formData['صور'] = linkButton('صور', formData['صور'].trim());
 
     // ابنِ المصفوفة بنفس ترتيب رؤوس الجدول
     const newRow = headers.map(h => {
@@ -367,9 +367,10 @@ $(function () {
     type: headers.indexOf('نوع العقار'),
     price: headers.indexOf('السعر'),
     area: headers.indexOf('مساحة الأرض'),
+    details: headers.indexOf('تفاصيل'),   // 👈 هنا تضيفه
     copy: headers.indexOf('نسخ'),
     lokasi: headers.indexOf('الموقع'),
-    photos: headers.indexOf('صور وتفاصيل اضافية')
+    photos: headers.indexOf('صور')
   };
 
   // فعّل DataTables + زر النسخ داخل العمود الأخير
@@ -377,14 +378,22 @@ $(function () {
     language: { url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/ar.json' },
     pageLength: 100,
     order: [],
-    columnDefs: [{
-      targets: idx.copy,
-      orderable: false,
-      searchable: false,
-      createdCell: function(td){
-        td.innerHTML = '<button type="button" class="copyRowBtn" style="padding:6px 10px;border:1px solid #ccc;border-radius:8px;background:#f7f7f7;cursor:pointer;">📋 نسخ</button>';
-      }
-    }]
+    columnDefs: [
+  {
+    targets: idx.copy,
+    orderable: false,
+    searchable: false,
+    createdCell: function(td){
+      td.innerHTML = '<button type="button" class="copyRowBtn" ...>📋 نسخ</button>';
+    }
+  },
+  {
+    targets: idx.details,
+    visible: false,
+    searchable: false
+  }
+]
+
   });
 
   // ====== نفس منطق الفلاتر في ملف الأراضي ======
@@ -554,8 +563,8 @@ document.addEventListener("click", function(e){
       <th>الواجهات</th>
       <th>السوم</th>
       <th>السعر</th>
-      <th>صور وتفاصيل اضافية</th>
-      <th>ملاحظات</th>
+      <th>صور</th>
+      <th>تفاصيل اضافية</th>
       <th>نسخ</th>  
     </tr>
   </thead>
