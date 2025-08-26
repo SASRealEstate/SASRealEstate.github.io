@@ -126,7 +126,7 @@
 <div id="addRowModal" class="modal-overlay" aria-hidden="true">
   <div class="modal-card">
     <h3 style="margin-top:0;">إضافة صف جديد</h3>
-    <p class="hint">املأ ما تحتاجه فقط. يمكن ترك أي خانة فارغة. الحقول <strong>الموقع</strong> و<strong>صور وتفاصيل اضافية</strong> تقبل روابط.</p>
+    <p class="hint">املأ ما تحتاجه فقط. يمكن ترك أي خانة فارغة. الحقول <strong>الموقع</strong> و<strong>صور </strong> تقبل روابط.</p>
 
     <form id="addRowForm">
       <div class="form-grid">
@@ -188,13 +188,13 @@
         </div>
 
         <div>
-          <label>صور وتفاصيل اضافية <span class="hint">(رابط صور/Drive)</span></label>
-          <input name="صور وتفاصيل اضافية" type="url" placeholder="https://drive.google.com/..." />
+          <label>صور <span class="hint">(رابط صور/Drive)</span></label>
+          <input name="صور" type="url" placeholder="https://drive.google.com/..." />
         </div>
 
         <div style="grid-column: 1 / -1;">
-          <label>ملاحظات</label>
-          <textarea name="ملاحظات" rows="2"></textarea>
+          <label>تفاصيل</label>
+          <textarea name="تفاصيل" rows="2"></textarea>
         </div>
       </div>
 
@@ -228,7 +228,7 @@ $(function(){
     if (!url || !String(url).trim()) return '';
     const common = 'target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;"';
     if (colTitle === 'الموقع')               return `<a href="${url}" ${common}>📍 الموقع</a>`;
-    if (colTitle === 'صور وتفاصيل اضافية')  return `<a href="${url}" ${common}>📷 صور</a>`;
+    if (colTitle === 'صور')  return `<a href="${url}" ${common}>📷 صور</a>`;
     return url;
   }
 
@@ -278,7 +278,7 @@ $(function(){
 
     // تحويل الروابط لزر مثل الجدول
     if (formData['الموقع'])                 formData['الموقع'] = linkButton('الموقع', formData['الموقع'].trim());
-    if (formData['صور وتفاصيل اضافية'])    formData['صور وتفاصيل اضافية'] = linkButton('صور وتفاصيل اضافية', formData['صور وتفاصيل اضافية'].trim());
+    if (formData['صور'])    formData['صور'] = linkButton('صور', formData['صور'].trim());
 
     // ابنِ المصفوفة بنفس ترتيب رؤوس الجدول
     const newRow = headers.map(h => {
@@ -369,8 +369,31 @@ $(function () {
     area: headers.indexOf('مساحة الأرض'),
     copy: headers.indexOf('نسخ'),
     lokasi: headers.indexOf('الموقع'),
-    photos: headers.indexOf('صور وتفاصيل اضافية')
+    photos: headers.indexOf('صور'),
+    details: headers.indexOf('تفاصيل')   
   };
+
+
+const dt = $('#' + tableId).DataTable({
+  language: { url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/ar.json' },
+  pageLength: 100,
+  order: [],
+  columnDefs: [
+    {
+      targets: idx.copy,
+      orderable: false,
+      searchable: false,
+      createdCell: function(td){
+        td.innerHTML = '<button type="button" class="copyRowBtn" style="padding:6px 10px;border:1px solid #ccc;border-radius:8px;background:#f7f7f7;cursor:pointer;">📋 نسخ</button>';
+      }
+    },
+    {
+      targets: idx.details,  // 👈 إخفاء عمود تفاصيل
+      visible: false,
+      searchable: false
+    }
+  ]
+});
 
   // فعّل DataTables + زر النسخ داخل العمود الأخير
   const dt = $('#' + tableId).DataTable({
@@ -461,35 +484,40 @@ $(function () {
 
   // ====== زر نسخ محتوى الصف (بنفس أسلوب الأراضي) ======
   $('#' + tableId + ' tbody').on('click', 'button.copyRowBtn', async function(){
-    const rowData = dt.row($(this).closest('tr')).data();    // HTML لكل خلية
-    const hdrs = dt.columns().header().toArray().map(h => $(h).text().trim());
-    const lines = [];
-    for (let i=0;i<hdrs.length;i++){
-      if (i===idx.copy) continue; // تجاهل عمود "نسخ"
-      const title = hdrs[i] || '';
-      let value;
-      if (i===idx.lokasi || i===idx.photos) { // خذ الروابط بدل نص الزر
-        const hrefs = extractHrefs(rowData[i]);
-        value = hrefs.length ? hrefs.join(' , ') : stripTags(rowData[i]||'');
-      } else {
-        value = stripTags(rowData[i]||'');
-      }
-      if (title) lines.push(title + ': ' + value);
+  const rowData = dt.row($(this).closest('tr')).data();
+  const hdrs = dt.columns().header().toArray().map(h => $(h).text().trim());
+  const lines = [];
+
+  for (let i=0;i<hdrs.length;i++){
+    if (i===idx.copy) continue; // تجاهل عمود النسخ
+    const title = hdrs[i] || '';
+    let value;
+
+    if (i===idx.lokasi || i===idx.photos) {
+      const hrefs = extractHrefs(rowData[i]);
+      value = hrefs.length ? hrefs.join(' , ') : stripTags(rowData[i]||'');
+    } else {
+      value = stripTags(rowData[i]||'');
     }
-    try{
-      if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(lines.join('\n'));
-      else {
-        const ta=document.createElement('textarea'); ta.value=lines.join('\n'); document.body.appendChild(ta);
-        ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-      }
-      // توست بسيط
-      const el=document.createElement('div');
-      el.textContent='تم نسخ الصف';
-      el.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 14px;border-radius:8px;opacity:.95;z-index:9999;font-size:14px';
-      document.body.appendChild(el); setTimeout(()=>el.remove(),1200);
-    }catch(e){}
-  });
+
+    if (title) lines.push(title + ': ' + value);
+  }
+
+  try {
+    if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(lines.join('\n'));
+    else {
+      const ta=document.createElement('textarea'); ta.value=lines.join('\n');
+      document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    const el=document.createElement('div');
+    el.textContent='تم نسخ الصف';
+    el.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 14px;border-radius:8px;opacity:.95;z-index:9999;font-size:14px';
+    document.body.appendChild(el); setTimeout(()=>el.remove(),1200);
+  } catch(e){}
 });
+
 
 
 // فلتر السعر والمساحة
@@ -554,8 +582,8 @@ document.addEventListener("click", function(e){
       <th>الواجهات</th>
       <th>السوم</th>
       <th>السعر</th>
-      <th>صور وتفاصيل اضافية</th>
-      <th>ملاحظات</th>
+      <th>صور</th>
+      <th>تفاصيل</th>
       <th>نسخ</th>  
     </tr>
   </thead>
