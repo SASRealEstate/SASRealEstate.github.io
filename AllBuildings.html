@@ -218,7 +218,9 @@ $(function(){
   const tableId = $t.attr('id');
 
   // خذ نسخة من DataTable الحالي (تم تهيئته لاحقًا في صفحتك)
-
+const dt = $.fn.dataTable.isDataTable('#' + tableId)
+  ? $('#' + tableId).DataTable()
+  : null;
   // خريطة الرؤوس حسب الجدول الحالي
   const headers = $('#' + tableId + ' thead th').map(function(){return $(this).text().trim();}).get();
 
@@ -304,7 +306,6 @@ $(function(){
 <script>
 $(function(){
   const tableId = $('table.dataframe').attr('id') || 'landsTable';
-  const dt = $('#' + tableId).DataTable();
 
   // ✅ فلترة حسب مساحة البناء
   $.fn.dataTable.ext.search.push(function(settings, data){
