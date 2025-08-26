@@ -395,20 +395,6 @@ const dt = $('#' + tableId).DataTable({
   ]
 });
 
-  // فعّل DataTables + زر النسخ داخل العمود الأخير
-  const dt = $('#' + tableId).DataTable({
-    language: { url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/ar.json' },
-    pageLength: 100,
-    order: [],
-    columnDefs: [{
-      targets: idx.copy,
-      orderable: false,
-      searchable: false,
-      createdCell: function(td){
-        td.innerHTML = '<button type="button" class="copyRowBtn" style="padding:6px 10px;border:1px solid #ccc;border-radius:8px;background:#f7f7f7;cursor:pointer;">📋 نسخ</button>';
-      }
-    }]
-  });
 
   // ====== نفس منطق الفلاتر في ملف الأراضي ======
   // تحويل نص مثل "680-600,000" أو "900,000" إلى [min,max]
@@ -518,47 +504,6 @@ const dt = $('#' + tableId).DataTable({
   } catch(e){}
 });
 
-
-
-// فلتر السعر والمساحة
-function applyFilters() {
-  var minPrice = parseInt(document.getElementById("minPrice").value) || 0;
-  var maxPrice = parseInt(document.getElementById("maxPrice").value) || Infinity;
-  var minArea  = parseInt(document.getElementById("minArea").value) || 0;
-  var maxArea  = parseInt(document.getElementById("maxArea").value) || Infinity;
-  var type     = document.getElementById("typeFilter").value;
-
-  $('#landsTable').DataTable().rows().every(function(){
-    var data = this.data();
-    var price = parseInt((data[8] || "0").replace(/[^0-9]/g, "")); // عمود السعر
-    var area  = parseInt((data[4] || "0").replace(/[^0-9]/g, "")); // عمود المساحة
-    var match = true;
-
-    if (price < minPrice || price > maxPrice) match = false;
-    if (area < minArea || area > maxArea) match = false;
-    if (type && data[1] !== type) match = false;
-
-    if (match) $(this.node()).show();
-    else $(this.node()).hide();
-  });
-}
-
-document.querySelectorAll("#minPrice,#maxPrice,#minArea,#maxArea,#typeFilter")
-  .forEach(el => el.addEventListener("input", applyFilters));
-document.getElementById("clearFilters").addEventListener("click", () => {
-  document.querySelectorAll("#minPrice,#maxPrice,#minArea,#maxArea,#typeFilter").forEach(el => el.value = "");
-  applyFilters();
-});
-
-// زر النسخ
-document.addEventListener("click", function(e){
-  if(e.target.classList.contains("copy-btn")){
-    var rowText = Array.from(e.target.closest("tr").children)
-                       .map(td => td.innerText).join("\t");
-    navigator.clipboard.writeText(rowText);
-    alert("تم نسخ بيانات الصف ✅");
-  }
-});
 
 
 </script>
