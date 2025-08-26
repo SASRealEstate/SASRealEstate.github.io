@@ -218,9 +218,13 @@ $(function(){
   const tableId = $t.attr('id');
 
   // خذ نسخة من DataTable الحالي (تم تهيئته لاحقًا في صفحتك)
-const dt = $.fn.dataTable.isDataTable('#' + tableId)
-  ? $('#' + tableId).DataTable()
-  : null;
+// لا تنشئ DataTable هنا، فقط استخدم الموجود
+let dt;
+$(document).ready(function() {
+  if ($.fn.dataTable.isDataTable('#' + tableId)) {
+    dt = $('#' + tableId).DataTable();
+  }
+});
   // خريطة الرؤوس حسب الجدول الحالي
   const headers = $('#' + tableId + ' thead th').map(function(){return $(this).text().trim();}).get();
 
