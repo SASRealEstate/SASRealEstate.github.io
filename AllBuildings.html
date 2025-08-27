@@ -363,29 +363,34 @@ $(function () {
   });
 
   const headers = $('#' + tableId + ' thead th').map(function(){return $(this).text().trim();}).get();
-  const idx = {
-    type: headers.indexOf('نوع العقار'),
-    price: headers.indexOf('السعر'),
-    area: headers.indexOf('مساحة الأرض'),
-    copy: headers.indexOf('نسخ'),
-    lokasi: headers.indexOf('الموقع'),
-    photos: headers.indexOf('صور')
-  };
+const idx = {
+  type: headers.indexOf('نوع العقار'),
+  price: headers.indexOf('السعر'),
+  area: headers.indexOf('مساحة الأرض'),
+  copy: headers.indexOf('نسخ'),
+  lokasi: headers.indexOf('الموقع'),
+  photos: headers.indexOf('صور'),
+  details: headers.indexOf('تفاصيل اضافية')
+   };
 
   // فعّل DataTables + زر النسخ داخل العمود الأخير
-  const dt = $('#' + tableId).DataTable({
-    language: { url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/ar.json' },
-    pageLength: 100,
-    order: [],
-    columnDefs: [{
+const dt = $('#' + tableId).DataTable({
+  language: { url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/ar.json' },
+  pageLength: 100,
+  order: [],
+  columnDefs: [
+    {
       targets: idx.copy,
       orderable: false,
       searchable: false,
       createdCell: function(td){
         td.innerHTML = '<button type="button" class="copyRowBtn" style="padding:6px 10px;border:1px solid #ccc;border-radius:8px;background:#f7f7f7;cursor:pointer;">📋 نسخ</button>';
       }
-    }]
-  });
+    },
+    { targets: idx.details, visible: false }   // ← hide “تفاصيل اضافية” on screen
+  ]
+});
+
 
   // ====== نفس منطق الفلاتر في ملف الأراضي ======
   // تحويل نص مثل "680-600,000" أو "900,000" إلى [min,max]
@@ -1868,7 +1873,6 @@ TORO 25 ايطاليه الصنع
     }
   }); -->
 <!-- </script> -->
-
 
 
 
