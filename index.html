@@ -4,41 +4,41 @@
     <meta charset="UTF-8">
     <title>تطوير ساس العقارية</title>
     <link rel="icon" href="Logo.png" type="image/png">
-    <style>
-       body {
+<style>
+ <style>
+
+  .sticky-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #dbd692;
+  display: flex;
+  align-items: center;
+  justify-content: center;   /* center all contents */
+  padding: 8px 20px;
+  z-index: 1000;
+  border-bottom: 1px solid #000000;
+}
+
+.sticky-header img {
+  height: 60px;
+  margin-right: 20px;        /* spacing between logo and buttons */
+}
+
+.header-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+        body {
                 background: linear-gradient(to bottom, #dbd692 , #ffffff);
                 font-family: Tahoma, sans-serif;
                 padding: 30px;
                 text-align: center;
                 direction: rtl;
             }
-
-        .logo {
-            max-width: 200px;
-            margin-bottom: 20px;
-        }
-        .contact-buttons a, .nav-buttons a {
-            display: inline-block;
-            margin: 10px;
-            padding: 12px 20px;
-            font-size: 16px;
-            text-decoration: none;
-            border-radius: 8px;
-            color: white;
-        }
-        .call    { background-color: #28a745; }
-        .whatsapp{ background-color: #25d366; }
-        .maps    { background-color: #25D366; }
-        .nav-buttons a {
-            background-color: #25D366;
-        }
-    </style>
-<style>
-        body {
-            font-family: Tahoma, sans-serif;
-            padding: 20px;
-            direction: rtl;
-        }
+            
         table {
             width: 100%;
             font-size: 14px;
@@ -59,39 +59,92 @@
             text-decoration: none;
             color: white;
         }
+html, body {
+  margin: 0;              /* remove default browser margins */
+  padding: 0;
+}
+
+.sticky-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #dbd692;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 30px;   /* more breathing space top & bottom */
+  z-index: 1000;
+  border-bottom: 2px solid #ccc;
+  box-sizing: border-box;
+}
+
+.sticky-header img {
+  height: 90px;          /* slightly bigger, scales well */
+  object-fit: contain;
+}
+
+body {
+  padding-top: 150px;    /* must be >= total header height */
+}
+
+
     </style>
 </head>
-<body>
-<!-- Login/Logout Buttons -->
-<div style="text-align: center; margin-top: 10px;">
-  <a href="login.html" id="login-btn" style="display: none; background-color: #25D366; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none;">🔐 تسجيل الدخول</a>
-  <button onclick="logOut()" id="logout-btn" style="display: none; background-color: red; color: white; padding: 10px 20px; border-radius: 8px;">🚪 تسجيل الخروج</button>
-</div>
-
-<div style="text-align: center; margin-bottom: 20px;">
-    <a href="index.html">
-<img alt="شعار المكتب" img src="Logo.png" style="height: 400px;"/><br/><br/></a>
+<!-- Sticky Header -->
+<div class="sticky-header">
+  <a href="index.html">
+<img alt="شعار المكتب" img src="Logo.png" style="height: 300px;"/><br/><br/>
+  </a>
+  <div class="header-buttons">
 <a href="tel:0534108666" style="margin:5px;padding:10px 15px;background-color:#25D366;border-radius:5px;">📞 اتصل الآن</a>
 <a href="https://wa.me/966534108666" style="margin:5px;padding:10px 15px;background-color:#25D366;border-radius:5px;">💬 واتساب</a>
-<br>
-<br>
-<br>
+<a href="index.html" style="margin:5px;padding:10px 15px;background-color:#25D366;border-radius:5px;">العودة للصفحة الرئيسية</a>
+<a href="Rent.html" style="margin:5px;padding:10px 15px;background-color:#25D366;border-radius:5px;">شقق للإيجار</a>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
 <a href="https://maps.app.goo.gl/2NUqCqLExX86fFG87" style="margin:5px;padding:10px 15px;background-color:#25D366;border-radius:5px;">📍 موقع المكتب ، تقييمك يهمنا!</a>
 <br>
 
 </div>
 
     </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
 
     <h2>مرحبًا بكم في صفحة تطوير ساس العقارية</h2>
 
-
     <div class="nav-buttons">
-        <a href="Rent.html">🏠 شقق للإيجار</a>
     </div>
 <br>
 <img src="Background.png" alt="Background" style="max-width:100%; margin-top: 20px;">
 <script src="script.js" defer></script>
+
+
+    <!-- Your other JS scripts here -->
+
+    <script>
+      window.addEventListener("load", () => {
+        const header = document.querySelector(".sticky-header");
+        if (header) {
+          document.body.style.paddingTop = header.offsetHeight + "px";
+        }
+      });
+
+      window.addEventListener("resize", () => {
+        const header = document.querySelector(".sticky-header");
+        if (header) {
+          document.body.style.paddingTop = header.offsetHeight + "px";
+        }
+      });
+    </script>
+</body>
+</html>
+
+
 
 </body>
 </html>

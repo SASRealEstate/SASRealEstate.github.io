@@ -11,6 +11,38 @@
 <link href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" rel="stylesheet"/>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css" rel="stylesheet"/>
 <style>
+
+
+
+
+
+
+
+
+  .sticky-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #dbd692;
+  display: flex;
+  align-items: center;
+  justify-content: center;   /* center all contents */
+  padding: 8px 20px;
+  z-index: 1000;
+  border-bottom: 1px solid #000000;
+}
+
+.sticky-header img {
+  height: 60px;
+  margin-right: 20px;        /* spacing between logo and buttons */
+}
+
+.header-buttons {
+  display: flex;
+  gap: 10px;
+}
+
         body {
                 background: linear-gradient(to bottom, #dbd692 , #ffffff);
                 font-family: Tahoma, sans-serif;
@@ -18,6 +50,7 @@
                 text-align: center;
                 direction: rtl;
             }
+            
         table {
             width: 100%;
             font-size: 14px;
@@ -38,30 +71,57 @@
             text-decoration: none;
             color: white;
         }
+html, body {
+  margin: 0;              /* remove default browser margins */
+  padding: 0;
+}
+
+.sticky-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #dbd692;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 30px;   /* more breathing space top & bottom */
+  z-index: 1000;
+  border-bottom: 2px solid #ccc;
+  box-sizing: border-box;
+}
+
+.sticky-header img {
+  height: 90px;          /* slightly bigger, scales well */
+  object-fit: contain;
+}
+
+body {
+  padding-top: 150px;    /* must be >= total header height */
+}
+
+
+
+
+
+
+        
     </style>
 </head>
 <body>
-   <!-- Login/Logout Buttons -->
-<div style="text-align: center; margin-top: 10px;">
-  <a href="login.html" id="login-btn" style="display: none; background-color: #25D366; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none;">🔐 تسجيل الدخول</a>
-  <button onclick="logOut()" id="logout-btn" style="display: none; background-color: red; color: white; padding: 10px 20px; border-radius: 8px;">🚪 تسجيل الخروج</button>
-</div>
-
-<div style="text-align: center; margin-bottom: 20px;">
-    <a href="index.html">
+<!-- Sticky Header -->
+<div class="sticky-header">
+  <a href="index.html">
 <img alt="شعار المكتب" img src="Logo.png" style="height: 300px;"/><br/><br/>
-</a>
+  </a>
+  <div class="header-buttons">
 <a href="tel:0534108666" style="margin:5px;padding:10px 15px;background-color:#25D366;border-radius:5px;">📞 اتصل الآن</a>
 <a href="https://wa.me/966534108666" style="margin:5px;padding:10px 15px;background-color:#25D366;border-radius:5px;">💬 واتساب</a>
-<br>
-<br>
-<br>
 <a href="https://maps.app.goo.gl/2NUqCqLExX86fFG87" style="margin:5px;padding:10px 15px;background-color:#25D366;border-radius:5px;">📍 موقع المكتب ، تقييمك يهمنا!</a>
-<br>
-<br>
-<br>
 <a href="index.html" style="margin:5px;padding:10px 15px;background-color:#25D366;border-radius:5px;">العودة للصفحة الرئيسية</a>
+  </div>
 </div>
+
 <h2 style="text-align:center;">قائمة الشقق للإيجار</h2>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css" rel="stylesheet"/>
 <div style="margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;">
@@ -630,11 +690,12 @@
       <td>25000</td>
       <td><a href="https://drive.google.com/drive/folders/15tzB1hDpQSbvmTejMayOB6yQTZ9eOvD9?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
   </tr>
-
-    <!-- <tr>
+<!-- 
+    <tr>
+>>>>>>> 5cbeb943cb2943e38ead8895917e4ea83157357f
       <td>53</td>
       <td>شقة</td>
-      <td><a href="https://maps.app.goo.gl/TFpN7JjBbcSvayZ7A" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📍 الموقع</a></td>
+      <td><a href="https://maps.app.goo.gl/YhSgSSWSknARWgAD9" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📍 الموقع</a></td>
       <td>2</td>
       <td>4</td>
       <td>2</td>
@@ -873,8 +934,8 @@ window.addEventListener('load', function() {
   // L.marker([18.300364593176624, 42.593944199093286]).addTo(RentMap)
   //   .bindPopup('<a href="https://maps.app.goo.gl/Uw88fZud3RmqRmT97" target="_blank">شقة 35 </a>');
 
-    L.marker([18.25910730956596, 42.596062594845385]).addTo(RentMap)
-      .bindPopup('<a href="https://maps.app.goo.gl/Uu8ugDPoY4f1AYzRA" target="_blank">شقة 36 </a>');
+    // L.marker([18.25910730956596, 42.596062594845385]).addTo(RentMap)
+    //   .bindPopup('<a href="https://maps.app.goo.gl/Uu8ugDPoY4f1AYzRA" target="_blank">شقة 36 </a>');
 
   // L.marker([18.274658523599495, 42.58890933070823]).addTo(RentMap)
   //   .bindPopup('<a href="https://maps.app.goo.gl/nEQgs8VmzaDxHUf7A" target="_blank">شقة 37 </a>');
@@ -918,12 +979,33 @@ window.addEventListener('load', function() {
   L.marker([18.28398809764962, 42.596285878678835]).addTo(RentMap)
     .bindPopup('<a href="https://maps.app.goo.gl/RuPiVjF83uTV26h89" target="_blank">شقة 52</a>');
 
+
   // L.marker([18.27804884339589, 42.59111986095427]).addTo(RentMap)
   //   .bindPopup('<a href="https://maps.app.goo.gl/RuPiVjF83uTV26h89" target="_blank">شقة 53 </a>');
 
 </script>
+
 <script src="script.js" defer></script>
 
+    <!-- Your other JS scripts here -->
+
+    <script>
+      window.addEventListener("load", () => {
+        const header = document.querySelector(".sticky-header");
+        if (header) {
+          document.body.style.paddingTop = header.offsetHeight + "px";
+        }
+      });
+
+      window.addEventListener("resize", () => {
+        const header = document.querySelector(".sticky-header");
+        if (header) {
+          document.body.style.paddingTop = header.offsetHeight + "px";
+        }
+      });
+    </script>
 </body>
+</html>
+
 
 </html>
