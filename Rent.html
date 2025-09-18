@@ -10,47 +10,15 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
 <link href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" rel="stylesheet"/>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css" rel="stylesheet"/>
-<style>
-
-
-
-
-
-
-
-
-  .sticky-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  background: #dbd692;
-  display: flex;
-  align-items: center;
-  justify-content: center;   /* center all contents */
-  padding: 8px 20px;
-  z-index: 1000;
-  border-bottom: 1px solid #000000;
-}
-
-.sticky-header img {
-  height: 60px;
-  margin-right: 20px;        /* spacing between logo and buttons */
-}
-
-.header-buttons {
-  display: flex;
-  gap: 10px;
-}
-
+  <style>
         body {
+
                 background: linear-gradient(to bottom, #dbd692 , #ffffff);
                 font-family: Tahoma, sans-serif;
                 padding: 30px;
                 text-align: center;
                 direction: rtl;
             }
-            
         table {
             width: 100%;
             font-size: 14px;
@@ -71,41 +39,6 @@
             text-decoration: none;
             color: white;
         }
-html, body {
-  margin: 0;              /* remove default browser margins */
-  padding: 0;
-}
-
-.sticky-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  background: #dbd692;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px 30px;   /* more breathing space top & bottom */
-  z-index: 1000;
-  border-bottom: 2px solid #ccc;
-  box-sizing: border-box;
-}
-
-.sticky-header img {
-  height: 90px;          /* slightly bigger, scales well */
-  object-fit: contain;
-}
-
-body {
-  padding-top: 150px;    /* must be >= total header height */
-}
-
-
-
-
-
-
-        
     </style>
 </head>
 <body>
