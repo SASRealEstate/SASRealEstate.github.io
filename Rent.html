@@ -1943,26 +1943,6 @@ window.addEventListener('load', function() {
 
     <!-- Your other JS scripts here -->
 
-<script>
-  function fixHeaderSpacing(){
-    const header = document.querySelector(".sticky-header");
-    if(!header) return;
-
-    if(window.innerWidth <= 700){
-      // في الجوال: لا نضيف padding
-      document.body.style.paddingTop = "0px";
-    }else{
-      // في الديسكتوب: نضيف padding طبيعي
-      document.body.style.paddingTop = header.offsetHeight + "px";
-    }
-  }
-
-  window.addEventListener("load", fixHeaderSpacing);
-  window.addEventListener("resize", fixHeaderSpacing);
-</script>
-
-
-
 
 
 
