@@ -5,7 +5,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>قائمة الشقق للإيجار</title>
+<h2 class="page-title">قائمة الشقق للإيجار</h2>
 <link rel="icon" href="Logo.png" type="image/png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
 <link href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" rel="stylesheet"/>
@@ -17,6 +17,13 @@
   display:block;
   margin:0 auto;
 }
+
+
+.page-title{
+  text-align:center;
+  margin:20px 0;
+}
+
 
       body {
         background: linear-gradient(to bottom, #dbd692 , #ffffff);
@@ -72,7 +79,7 @@
 
 @media (max-width: 700px){
   .cards{
-    grid-template-columns: repeat(3, minmax(280px, 1fr));
+    grid-template-columns: repeat(3, minmax(290px, 1fr));
     max-width: 100%;
     margin: 0 auto;
     padding: 10px;
@@ -174,6 +181,14 @@
 }
 
 
+.filters-wrapper{
+  display:flex;
+  flex-wrap:wrap;
+  gap:15px;
+  justify-content:center;
+  align-items:center;
+  margin-bottom:20px;
+}
 
 
 
@@ -209,6 +224,9 @@
 <h2 style="text-align:center;">قائمة الشقق للإيجار</h2>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css" rel="stylesheet"/>
 <div style="margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;">
+
+  <div class="filters-wrapper">
+
 <label>مصعد:
   <select id="filterElevator">
     <option value="">الكل</option>
@@ -261,6 +279,7 @@
 <input id="maxPriceInput" placeholder="الحد الأعلى (السنوي)" style="margin: 5px; padding: 5px; width: 120px;" type="number"/>
 </div>
 
+</div>
 
 
 <div style="
@@ -276,6 +295,11 @@
 ">
 📌 ملاحظة: الأسعار والمعلومات يتم تحديثها بشكل دوري - للتأكد من توفر العقار يرجى التواصل معنا على واتساب الرقم اعلى الصفحه. 
 </div>
+
+
+
+
+
 
 <div class="cards" id="cards"></div>
 
