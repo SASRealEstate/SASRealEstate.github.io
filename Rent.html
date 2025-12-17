@@ -266,6 +266,18 @@ input{
   .card-actions a{ font-size:1.2rem; }
 }
 
+
+.yes{
+  color:#1e8e3e; /* أخضر */
+  font-weight:bold;
+}
+
+.no{
+  color:#d93025; /* أحمر */
+  font-weight:bold;
+}
+
+
 </style>
 
 
@@ -1961,9 +1973,29 @@ cards.innerHTML += `
       <div><i class="fa-solid fa-couch"></i> صالة: ${hall}</div>
       <div><i class="fa-solid fa-utensils"></i> مطبخ: ${kitchen}</div>
       <div><i class="fa-solid fa-box-archive"></i>مستودع: ${store}</div>
-      <div><i class="fa-solid fa-arrows-up-down"></i>مصعد: ${elevator}</div>
-      <div><i class="fa-solid fa-door-open"></i> مدخل: ${entrance}</div>
-      <div><i class="fa-solid fa-chair"></i> مؤثثة: ${furnished}</div>
+<div>
+  <i class="fa-solid fa-arrows-up-down"></i>
+  مصعد:
+  ${elevator === 'نعم'
+    ? '<span class="icon-yes">✔</span>'
+    : '<span class="icon-no">✖</span>'}
+</div>
+
+<div>
+  <i class="fa-solid fa-door-open"></i>
+  مدخل:
+  ${entrance === 'مستقل'
+    ? '<span class="icon-yes">✔</span>'
+    : '<span class="icon-no">✖</span>'}
+</div>
+
+<div>
+  <i class="fa-solid fa-chair"></i>
+  مؤثثة:
+  ${furnished === 'نعم'
+    ? '<span class="icon-yes">✔</span>'
+    : '<span class="icon-no">✖</span>'}
+</div>
       <div> مطبخ راكب: ${fittedKitchen}</div>
     </div>
     <!-- ⬆️ انتهى اللصق هنا ⬆️ -->
