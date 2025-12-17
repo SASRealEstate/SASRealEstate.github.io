@@ -39,7 +39,91 @@
             text-decoration: none;
             color: white;
         }
+
+        /* ===== CARDS VIEW ===== */
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+  gap:20px;
+  padding:20px;
+}
+
+.card{
+  background:#fff;
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,.15);
+  overflow:hidden;
+  transition:.3s;
+}
+.card:hover{transform:translateY(-5px)}
+
+.card-header{
+  background:#4a4e0b;
+  color:#fff;
+  padding:10px;
+  font-weight:bold;
+  text-align:center;
+}
+
+.card-body{
+  padding:15px;
+  font-size:14px;
+}
+
+.price{
+  font-size:20px;
+  color:#4a4e0b;
+  font-weight:bold;
+  margin:10px 0;
+}
+
+.features{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:5px;
+}
+
+.card-actions{
+  display:flex;
+  justify-content:space-between;
+  padding:10px;
+}
+
+.card-actions a{
+  background:#0d6efd;
+  color:#fff;
+  padding:6px 10px;
+  border-radius:6px;
+  font-size:13px;
+}
+
+/* اخفاء الجدول */
+#productTable{
+  display:none;
+}
+
+
+
+.card-image{
+  width:100%;
+  height:180px;
+  object-fit:cover;
+  background:#eee;
+}
+
     </style>
+
+
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer">
+
+
+
+
+
 </head>
 <body>
 <!-- Sticky Header -->
@@ -58,6 +142,24 @@
 <h2 style="text-align:center;">قائمة الشقق للإيجار</h2>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css" rel="stylesheet"/>
 <div style="margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;">
+<label>مصعد:
+  <select id="filterElevator">
+    <option value="">الكل</option>
+    <option value="نعم">نعم</option>
+    <option value="لا">لا</option>
+  </select>
+</label>
+
+<label>المدخل:
+  <select id="filterEntrance">
+    <option value="">الكل</option>
+    <option value="مستقل">مستقل</option>
+    <option value="مشترك">مشترك</option>
+  </select>
+</label>
+
+
+
 <label>مؤثثة:
         <select id="filterFurnished">
 <option value="">الكل</option>
@@ -65,6 +167,21 @@
 <option value="لا">لا</option>
 </select>
 </label>
+
+
+  <label>
+    عدد الغرف ≥
+    <select id="filterRooms">
+      <option value="">الكل</option>
+      <option value="1">1+</option>
+      <option value="2">2+</option>
+      <option value="3">3+</option>
+      <option value="4">4+</option>
+      <option value="5">5+</option>
+      <option value="6">6+</option>
+    </select>
+  </label>
+
 <div>
 <div style="margin-bottom: 5px;">الدور:</div>
 <label style="margin-left: 10px;"><input class="floorCheckbox" type="checkbox" value="1"/> 1</label><label style="margin-left: 10px;"><input class="floorCheckbox" type="checkbox" value="2"/> 2</label><label style="margin-left: 10px;"><input class="floorCheckbox" type="checkbox" value="3"/> 3</label>
@@ -72,9 +189,9 @@
 </div>
 <div style="margin-bottom: 20px; text-align: center;">
 <label for="minPriceInput" style="font-weight: bold;">من:</label>
-<input id="minPriceInput" placeholder="الحد الأدنى" style="margin: 5px; padding: 5px; width: 120px;" type="number"/>
+<input id="minPriceInput" placeholder="الحد الأدنى (السنوي)" style="margin: 5px; padding: 5px; width: 120px;" type="number"/>
 <label for="maxPriceInput" style="font-weight: bold;">إلى:</label>
-<input id="maxPriceInput" placeholder="الحد الأعلى" style="margin: 5px; padding: 5px; width: 120px;" type="number"/>
+<input id="maxPriceInput" placeholder="الحد الأعلى (السنوي)" style="margin: 5px; padding: 5px; width: 120px;" type="number"/>
 </div>
 
 
@@ -93,6 +210,7 @@
 📌 ملاحظة: الأسعار والمعلومات يتم تحديثها بشكل دوري - للتأكد من توفر العقار يرجى التواصل معنا على واتساب الرقم اعلى الصفحه. 
 </div>
 
+<div class="cards" id="cards"></div>
 
 <table class="dataframe display" id="productTable">
 
@@ -191,7 +309,7 @@
       <td>نعم</td>
       <td>نعم</td>
       <td>مستقل</td>
-      <td>حوش</td>
+      <td>حوش ارتداد</td>
       <td>36000</td>
       <td><a href="https://drive.google.com/drive/folders/10PFxU_EjftglCdwnOo050k6VjQpFCMzA?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
     </tr>
@@ -293,7 +411,7 @@
       <td>نعم</td>
       <td>مستقل</td>
       <td> حوش  - سنة كاملة 2000 - سنة دراسية 3000</td>
-      <td>36000</td>
+      <td>24000</td>
       <td><a href="https://drive.google.com/drive/folders/1idcLQbKuBxCrSmhq_S_9v5EACxygo-1R?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
     </tr>
 <!-- 
@@ -565,7 +683,7 @@
       <td><a href="https://drive.google.com/drive/folders/1SynI8qz7Y9h7IwTTkoXGpU75Cr2aislZ?usp=sharing" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
     </tr>
 
-    <tr>
+    <!-- <tr>
       <td>48</td>
       <td>شقة</td>
       <td><a href="https://maps.app.goo.gl/ygkRw82L12dNcZsd7" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📍 الموقع</a></td>
@@ -582,7 +700,7 @@
       <td>حوش - سنة دراسية - شامل الماء والكهرباء</td>
       <td>36000</td>
       <td><a href="https://drive.google.com/drive/folders/1F-nPkCupu87HBkW0S0DD5oUornGynLXv?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
-    </tr>    
+    </tr>     -->
 
 
     <!-- <tr>
@@ -1598,6 +1716,158 @@ window.addEventListener('load', function() {
         }
       });
     </script>
+
+
+
+
+
+<script>
+function strip(html){
+  return html.replace(/<[^>]*>?/gm,'').trim();
+}
+
+function buildCards(){
+  const cards=document.getElementById("cards");
+  cards.innerHTML="";
+
+  document.querySelectorAll("#productTable tbody tr").forEach(row=>{
+    const td=row.querySelectorAll("td");
+    if(td.length<15) return;
+
+    const id=strip(td[0].innerHTML);
+    const type=strip(td[1].innerHTML);
+    const location=td[2].querySelector("a")?.href || "#";
+    const floor=strip(td[3].innerHTML);
+    const rooms=strip(td[4].innerHTML);
+    const baths=strip(td[5].innerHTML);
+    const hall=strip(td[6].innerHTML);
+    const kitchen=strip(td[7].innerHTML);
+    const store=strip(td[8].innerHTML);
+    const elevator=strip(td[9].innerHTML);
+    const furnished=strip(td[10].innerHTML);
+    const fittedKitchen=strip(td[11].innerHTML);
+    const entrance=strip(td[12].innerHTML);
+    const notes=strip(td[13].innerHTML);
+    const price=strip(td[14].innerHTML);
+    const photos=td[15]?.querySelector("a")?.href || "#";
+
+// صورة افتراضية في حال لم تتوفر صورة
+let imageUrl = "https://via.placeholder.com/400x250?text=No+Image";
+
+// محاولة استخراج صورة من Google Drive
+if(photos.includes("drive.google.com")){
+  imageUrl = "https://drive.google.com/thumbnail?id=" + photos.split("/folders/")[1];
+}
+
+
+
+
+cards.innerHTML += `
+<div class="card"
+  data-floor="${floor}"
+  data-furnished="${furnished}"
+  data-elevator="${elevator}"
+  data-entrance="${entrance}"
+  data-price="${price}">
+
+  <div class="card-header">${type} – رقم ${id}</div>
+
+  <div class="card-body">
+<div class="price">
+  ${price} ريال /
+  <span style="font-size:14px;color:#666;">
+    ${Math.round(price / 12)} شهريًا
+  </span>
+</div>
+
+
+    <!-- ⬇️ الصق الجزئية هنا بالضبط ⬇️ -->
+    <div class="features">
+      <div><i class="fa-solid fa-stairs"></i> الدور: ${floor}</div>
+      <div><i class="fa-solid fa-bed"></i> غرف: ${rooms}</div>
+      <div><i class="fa-solid fa-shower"></i> حمامات: ${baths}</div>
+      <div><i class="fa-solid fa-couch"></i> صالة: ${hall}</div>
+      <div><i class="fa-solid fa-utensils"></i> مطبخ: ${kitchen}</div>
+      <div><i class="fa-solid fa-box-archive"></i>مستودع: ${store}</div>
+      <div><i class="fa-solid fa-arrows-up-down"></i>مصعد: ${elevator}</div>
+      <div><i class="fa-solid fa-door-open"></i> مدخل: ${entrance}</div>
+      <div><i class="fa-solid fa-chair"></i> مؤثثة: ${furnished}</div>
+      <div> مطبخ راكب: ${fittedKitchen}</div>
+    </div>
+    <!-- ⬆️ انتهى اللصق هنا ⬆️ -->
+
+    ${notes ? `<div style="margin-top:8px;color:#555">📝 ${notes}</div>` : ``}
+  </div>
+
+  <div class="card-actions">
+    ...
+  </div>
+</div>
+`;
+
+  });
+}
+
+window.addEventListener("load",buildCards);
+function applyCardFilters(){
+  const furnished = document.getElementById("filterFurnished")?.value || "";
+  const elevator  = document.getElementById("filterElevator")?.value || "";
+  const entrance  = document.getElementById("filterEntrance")?.value || "";
+
+  const minPrice = parseInt(document.getElementById("minPriceInput")?.value || 0);
+  const maxPrice = parseInt(document.getElementById("maxPriceInput")?.value || 9999999);
+
+  const selectedFloors = Array.from(
+    document.querySelectorAll(".floorCheckbox:checked")
+  ).map(cb => cb.value);
+
+  document.querySelectorAll(".card").forEach(card=>{
+    let show = true;
+
+    const cardFurnished = card.dataset.furnished;
+    const cardElevator  = card.dataset.elevator;
+    const cardEntrance  = card.dataset.entrance;
+    const cardFloor     = card.dataset.floor;
+    const cardPrice     = parseInt(card.dataset.price || 0);
+
+    if(furnished && cardFurnished !== furnished) show = false;
+    if(elevator && cardElevator !== elevator) show = false;
+    if(entrance && cardEntrance !== entrance) show = false;
+
+    if(selectedFloors.length && !selectedFloors.includes(cardFloor)) show = false;
+    if(cardPrice < minPrice || cardPrice > maxPrice) show = false;
+
+    card.style.display = show ? "" : "none";
+  });
+}
+
+/* ربط الفلاتر */
+[
+  "filterFurnished",
+  "filterElevator",
+  "filterEntrance",
+  "filterRooms",
+  "minPriceInput",
+  "maxPriceInput"
+].forEach(id=>{
+  document.getElementById(id)?.addEventListener("change",applyCardFilters);
+  document.getElementById(id)?.addEventListener("input",applyCardFilters);
+});
+
+document.querySelectorAll(".floorCheckbox").forEach(cb=>{
+  cb.addEventListener("change",applyCardFilters);
+});
+
+</script>
+
+
+
+
+
+
+
+
+
 </body>
 </html>
 
