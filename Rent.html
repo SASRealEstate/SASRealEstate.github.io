@@ -12,7 +12,26 @@
 <link href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" rel="stylesheet"/>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css" rel="stylesheet"/>
 </head>
-  <style>
+<style>
+
+/* ===============================
+   🌍 GLOBAL
+================================ */
+html{
+  font-size:25px;
+}
+
+body{
+  background: linear-gradient(to bottom, #dbd692 , #ffffff);
+  font-family: Tahoma, sans-serif;
+  padding:30px;
+  direction:rtl;
+}
+
+a{
+  text-decoration:none;
+  color:white;
+}
 
 label,
 select,
@@ -25,186 +44,24 @@ input{
   padding:6px 10px;
 }
 
-
-
-html{
-  font-size:25px; /* ⬅️ غيّرها إلى 19 أو 20 لو حبيت */
-}
-
-
-    .logo{
+/* ===============================
+   🏷️ HEADER
+================================ */
+.logo{
   height:300px;
   display:block;
   margin:0 auto;
 }
 
-
 .page-title{
   text-align:center;
   margin:20px 0;
+  font-size:32px;
 }
 
-
-      body {
-        background: linear-gradient(to bottom, #dbd692 , #ffffff);
-        font-family: Tahoma, sans-serif;
-        padding: 30px;
-        direction: rtl;
-      }
-
-        table {
-            width: 100%;
-            font-size: 14px;
-            border-collapse: collapse;
-        }
-        th, td {
-            text-align: center;
-            vertical-align: middle;
-            border: 1px solid #ccc;
-        }
-        th {
-            background-color: #f0f0f0;
-        }
-        tr:hover {
-            background-color: #f9f9f9;
-        }
-        a {
-            text-decoration: none;
-            color: white;
-        }
-
-        /* ===== CARDS VIEW ===== */
-.cards{
-  display:grid;
-  grid-template-columns:repeat(5, minmax(320px, 1fr));
-  gap:20px;
-  padding:20px;
-  max-width:1800px;
-  margin:0 auto;
-}
-
-/* Large laptops */
-@media (max-width: 1400px){
-  .cards{
-    grid-template-columns:repeat(4, 1fr);
-  }
-}
-
-/* Tablets */
-@media (max-width: 1100px){
-  .cards{
-    grid-template-columns:repeat(3, 1fr);
-  }
-}
-
-@media (max-width: 700px){
-  .cards{
-    grid-template-columns: repeat(3, minmax(350px, 1fr));
-    max-width: 100%;
-    margin: 0 auto;
-    padding: 20px;
-  }
-}
-
-
-/* 🔥 THIS IS THE FIX — ADD BELOW, DO NOT REPLACE */
-@media (max-width: 700px){
-  .cards{
-    max-width:100%;
-    margin:0;
-    padding-left:12px;
-    padding-right:12px;
-  }
-}
-
-
-
-
-
-.card{
-  background:#fff;
-  border-radius:12px;
-  box-shadow:0 4px 12px rgba(0,0,0,.15);
-  transition:.3s;
-  display:flex;
-  flex-direction:column;
-}
-
-.card:hover{transform:translateY(-5px)}
-
-.card-header{
-  background:#4a4e0b;
-  color:#fff;
-  padding:10px;
-  font-weight:bold;
-  text-align:center;
-  
-}
-
-.card-body{
-  padding:15px;
-  font-size:20px;
-  
-}
-
-.price{
-  font-size:20px;
-  color:#4a4e0b;
-  font-weight:bold;
-  margin:10px 0;
-}
-
-.features{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:5px;
-    font-size:1.05rem;
-
-}
-
-.card-actions{
-  display:flex;
-  gap:6px;
-  padding:10px;
-  margin-top:auto; /* ⭐ هذا السطر المهم */
-}
-
-.card-actions a{
-  flex:1;
-  background:#0d6efd;
-  color:#fff;
-  text-align:center;
-  padding:8px 6px;
-  border-radius:8px;
-  font-size:20px;
-  font-weight:bold;
-}
-
-
-/* اخفاء الجدول */
-#productTable{
-  display:none;
-}
-
-
-
-.card-image{
-  width:100%;
-  height:180px;
-  object-fit:cover;
-  background:#eee;
-}
-
-
-
-
-@media (max-width: 700px){
-  body{
-    padding: 8px;
-  }
-}
-
-
+/* ===============================
+   📦 FILTERS
+================================ */
 .filters-wrapper{
   display:flex;
   flex-wrap:wrap;
@@ -214,186 +71,17 @@ html{
   margin-bottom:20px;
 }
 
-
-
-
-
-
-/* ===============================
-   🔠 تكبير الخط العام
-================================ */
-
-/* العنوان */
-.page-title,
-h2{
-  font-size:32px;
-}
-
-/* الفلاتر */
 .filters-wrapper label{
   font-size:18px;
 }
 
 .filters-wrapper select{
   font-size:17px;
-  padding:6px 10px;
-}
-
-/* الملاحظة */
-.notice{
-  font-size:18px;
-  line-height:1.7;
 }
 
 /* ===============================
-   🧱 محتوى الكروت
+   🟨 NOTICE
 ================================ */
-
-/* عنوان الكرت */
-.card-header{
-  font-size:18px;
-}
-
-/* السعر */
-.price{
-  font-size:30px;
-}
-
-/* التفاصيل داخل الكرت */
-.features div{
-  font-size:24px;
-  line-height:1.6;
-}
-
-/* الملاحظات داخل الكرت */
-.card-body div[style*="📝"]{
-  font-size:15px;
-}
-
-/* أزرار الكرت */
-.card-actions a{
-  font-size:15px;
-  padding:10px 8px;
-}
-
-
-
-
-
-@media (max-width:700px){
-
-  h2{
-    font-size:2rem;
-  }
-
-  .filters-wrapper label,
-  .filters-wrapper select{
-    font-size:1.2rem;
-  }
-
-  .card-header{
-    font-size:1.2rem;
-  }
-
-  .price{
-    font-size:1.6rem;
-  }
-
-  .features div{
-    font-size:1.2rem;
-  }
-
-  .card-actions a{
-    font-size:1.1rem;
-  }
-}
-
-
-
-
-
-/* 🔥 تكبير الخط للجوال فقط */
-@media (max-width: 700px){
-  html{
-    font-size:22px; /* جرّب 22 أو 23 */
-  }
-}
-
-
-
-
-
-
-
-
-/* =====================================
-   📱 MOBILE CENTERING – FINAL
-===================================== */
-@media (max-width: 700px){
-
-  /* Logo */
-  .logo{
-    display:block;
-    margin: 0 auto 12px;
-  }
-
-  /* Page title */
-  .page-title,
-  h1,
-  h2{
-    text-align:center;
-  }
-
-  /* Header buttons */
-  .header-buttons{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:12px;
-    flex-wrap:wrap;
-    margin: 10px auto 15px;
-    text-align:center;
-  }
-
-  .header-buttons a{
-    font-size:1.1rem;
-    padding:10px 14px;
-  }
-
-  /* Filters */
-  .filters-wrapper{
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:center;
-    align-items:center;
-    gap:15px;
-    margin: 0 auto 20px;
-    text-align:center;
-  }
-
-  .filters-wrapper label{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    font-size:1.2rem;
-  }
-
-  .filters-wrapper select{
-    font-size:1.1rem;
-    padding:6px 10px;
-  }
-
-  /* Notice */
-  .notice{
-    margin-left:auto;
-    margin-right:auto;
-    text-align:center;
-  }
-}
-
-
-
-
 .notice{
   background:#fff7d1;
   padding:14px 18px;
@@ -404,41 +92,138 @@ h2{
   font-size:26px;
   font-weight:bold;
   text-align:center;
+  line-height:1.7;
 }
 
+/* ===============================
+   🧱 CARDS GRID
+================================ */
+.cards{
+  display:grid;
+  grid-template-columns:repeat(5, minmax(320px, 1fr));
+  gap:20px;
+  padding:20px;
+  max-width:1800px;
+  margin:0 auto;
+}
 
+@media (max-width:1400px){
+  .cards{ grid-template-columns:repeat(4,1fr); }
+}
 
+@media (max-width:1100px){
+  .cards{ grid-template-columns:repeat(3,1fr); }
+}
 
-
-
-
+@media (max-width:700px){
+  .cards{
+    grid-template-columns:repeat(3, minmax(350px,1fr));
+    max-width:100%;
+    margin:0;
+    padding:20px 12px;
+  }
+}
 
 /* ===============================
-   📱 MOBILE TOP CENTERING
-   يعمل فقط على الجوال
+   🧾 CARD
 ================================ */
-@media (max-width: 700px){
+.card{
+  background:#fff;
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,.15);
+  transition:.3s;
+  display:flex;
+  flex-direction:column;
+}
 
-  /* الشعار */
-  .logo{
-    display:block;
-    margin: 0 auto 15px;
-  }
+.card:hover{
+  transform:translateY(-5px);
+}
 
-  /* العنوان */
-  .page-title{
-    text-align:center;
-    margin:15px 0;
-  }
+.card-header{
+  background:#4a4e0b;
+  color:#fff;
+  padding:10px;
+  font-weight:bold;
+  text-align:center;
+  font-size:18px;
+}
 
-  /* أزرار الهيدر */
+.card-body{
+  padding:15px;
+  font-size:20px;
+}
+
+.price{
+  font-size:30px;
+  color:#4a4e0b;
+  font-weight:bold;
+  margin:10px 0;
+}
+
+.features{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:5px;
+}
+
+.features div{
+  font-size:24px;
+  line-height:1.6;
+}
+
+.card-body div[style*="📝"]{
+  font-size:15px;
+}
+
+.card-actions{
+  display:flex;
+  gap:6px;
+  padding:10px;
+  margin-top:auto;
+}
+
+.card-actions a{
+  flex:1;
+  background:#0d6efd;
+  color:#fff;
+  text-align:center;
+  padding:10px 8px;
+  border-radius:8px;
+  font-size:15px;
+  font-weight:bold;
+}
+
+/* ===============================
+   🧩 OTHER
+================================ */
+#productTable{ display:none; }
+
+.card-image{
+  width:100%;
+  height:180px;
+  object-fit:cover;
+  background:#eee;
+}
+
+/* ===============================
+   📱 MOBILE ONLY
+================================ */
+@media (max-width:700px){
+
+  html{ font-size:22px; }
+
+  body{ padding:8px; }
+
+  h2{ font-size:2rem; }
+
+  .logo{ margin:0 auto 15px; }
+
   .header-buttons{
     display:flex;
     flex-direction:column;
     align-items:center;
-    justify-content:center;
     gap:10px;
-    margin:10px auto 20px;
     width:100%;
   }
 
@@ -447,16 +232,16 @@ h2{
     max-width:420px;
     text-align:center;
     font-size:1.1rem;
+    padding:12px;
+    background:#4a4e0b;
+    border-radius:8px;
   }
 
-  /* الفلاتر */
   .filters-wrapper{
-    display:flex;
     flex-direction:column;
     align-items:center;
-    justify-content:center;
     gap:15px;
-    margin:0 auto 20px;
+    width:100%;
     text-align:center;
   }
 
@@ -474,59 +259,14 @@ h2{
     text-align:center;
   }
 
+  .price{ font-size:1.6rem; }
+
+  .features div{ font-size:1.2rem; }
+
+  .card-actions a{ font-size:1.2rem; }
 }
 
-
-
-
-
-
-/* =====================================
-   📱 FORCE CENTER TOP SECTION (FINAL)
-===================================== */
-@media (max-width:700px){
-
-  .top-container{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    width:100%;
-    text-align:center;
-  }
-
-  .top-container *{
-    text-align:center;
-  }
-
-  .logo{
-    margin:0 auto 15px;
-  }
-
-  .header-buttons{
-    align-items:center;
-    justify-content:center;
-  }
-
-  .filters-wrapper{
-    align-items:center;
-    justify-content:center;
-  }
-
-  .notice{
-    margin-left:auto;
-    margin-right:auto;
-  }
-}
-
-
-
-
-
-
-
-
-    </style>
+</style>
 
 
 <link rel="stylesheet"
@@ -543,17 +283,20 @@ h2{
 <body>
 <!-- Sticky Header -->
 <div class="sticky-header">
-  <a href="index.html">
 
-    <div class="top-container">
+  <div class="top-container">
 
-<img src="Logo.png" alt="شعار المكتب" class="logo">
-  </a>
-  <div class="header-buttons">
-<a href="tel:0534108666" style="margin:5px;padding:10px 15px;background-color:#4a4e0b;border-radius:5px;">📞 اتصل الآن</a>
-<a href="https://wa.me/966534108666" style="margin:5px;padding:10px 15px;background-color:#4a4e0b;border-radius:5px;">💬 واتساب</a>
-<a href="https://maps.app.goo.gl/2NUqCqLExX86fFG87" style="margin:5px;padding:10px 15px;background-color:#4a4e0b;border-radius:5px;">📍 موقع المكتب ، تقييمك يهمنا!</a>
-<a href="index.html" style="margin:5px;padding:10px 15px;background-color:#4a4e0b;border-radius:5px;">العودة للصفحة الرئيسية</a>
+    <a href="index.html">
+      <img src="Logo.png" alt="شعار المكتب" class="logo">
+    </a>
+
+    <div class="header-buttons">
+      <a href="tel:0534108666">📞 اتصل الآن</a>
+      <a href="https://wa.me/966534108666">💬 واتساب</a>
+      <a href="https://maps.app.goo.gl/2NUqCqLExX86fFG87">📍 موقع المكتب ، تقييمك يهمنا!</a>
+      <a href="index.html">العودة للصفحة الرئيسية</a>
+    </div>
+
   </div>
 </div>
 
