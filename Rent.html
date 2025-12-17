@@ -115,13 +115,30 @@ input{
 }
 
 @media (max-width:700px){
+
+  /* fix card layout */
   .cards{
-    grid-template-columns:repeat(3, minmax(350px,1fr));
-    max-width:100%;
-    margin:0;
-    padding:20px 12px;
+      grid-template-columns: 1fr !important;
+      justify-items:center;
+      width:100%;
   }
+
+  .card{
+      margin: 0 auto;
+  }
+
+  /* fix alignment issues */
+  .filters-wrapper,
+  .header-buttons,
+  .page-title,
+  .notice{
+      text-align:center !important;
+      margin-left:auto !important;
+      margin-right:auto !important;
+  }
+
 }
+
 
 /* ===============================
    🧾 CARD
@@ -390,12 +407,6 @@ input{
       width:100% !important;
       display:flex !important;
       flex-direction:column !important;
-  }
-
-  /* لإلغاء اتجاه اليمين */
-  .header-buttons,
-  .filters-wrapper{
-      direction:ltr !important;
   }
 
 }
