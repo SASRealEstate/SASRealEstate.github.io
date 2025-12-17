@@ -50,10 +50,18 @@
         /* ===== CARDS VIEW ===== */
 .cards{
   display:grid;
-  grid-template-columns:repeat(4, 1fr);
-  gap:16px;
-  padding:16px;
+
+  /* 👇 minimum width for each card */
+  grid-template-columns:repeat(5, minmax(320px, 1fr));
+
+  gap:20px;
+  padding:20px;
+
+  /* 👇 makes the whole grid wider */
+  max-width:1800px;
+  margin:0 auto;
 }
+
 
 @media (max-width: 1200px){
   .cards{ grid-template-columns:repeat(3, 1fr); }
