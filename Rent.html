@@ -6,11 +6,12 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <link rel="icon" href="Logo.png" type="image/png">
-<h2 class="page-title">قائمة الشقق للإيجار</h2>
+<title>قائمة شقق الإيجار</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
 <link href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" rel="stylesheet"/>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css" rel="stylesheet"/>
+</head>
   <style>
 
 label,
@@ -383,17 +384,24 @@ h2{
   }
 
   /* Notice */
+  .notice{
+    margin-left:auto;
+    margin-right:auto;
+    text-align:center;
+  }
+}
+
+
+
+
 .notice{
   background:#fff7d1;
   padding:14px 18px;
   border:1px solid #e6d79a;
   border-radius:8px;
-
   margin:20px auto;
-  max-width:1400px;
-  width:100%;
-
-  font-size:26px;   /* ⬅️ نفس الحجم اللي تريده */
+  width:95%;
+  font-size:26px;
   font-weight:bold;
   text-align:center;
 }
@@ -404,38 +412,70 @@ h2{
 
 
 
-/* =====================================
-   🔥 FORCE CENTER (RTL OVERRIDE)
-===================================== */
-@media (max-width:700px){
 
-  /* نكسر أي محاذاة يمين عامة */
-  .logo,
-  .notice,
-  .filters-wrapper,
-  .header-buttons,
+/* ===============================
+   📱 MOBILE TOP CENTERING
+   يعمل فقط على الجوال
+================================ */
+@media (max-width: 700px){
+
+  /* الشعار */
+  .logo{
+    display:block;
+    margin: 0 auto 15px;
+  }
+
+  /* العنوان */
   .page-title{
-    margin-left:auto !important;
-    margin-right:auto !important;
-    text-align:center !important;
-  }
-
-  /* الفلاتر نفسها */
-  .filters-wrapper{
-    justify-content:center !important;
-  }
-
-  .filters-wrapper label{
-    align-items:center !important;
-    text-align:center !important;
+    text-align:center;
+    margin:15px 0;
   }
 
   /* أزرار الهيدر */
   .header-buttons{
-    justify-content:center !important;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    margin:10px auto 20px;
+    width:100%;
   }
+
+  .header-buttons a{
+    width:90%;
+    max-width:420px;
+    text-align:center;
+    font-size:1.1rem;
+  }
+
+  /* الفلاتر */
+  .filters-wrapper{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:15px;
+    margin:0 auto 20px;
+    text-align:center;
+  }
+
+  .filters-wrapper label{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    font-size:1.2rem;
+  }
+
+  .filters-wrapper select,
+  .filters-wrapper input{
+    width:100%;
+    max-width:300px;
+    text-align:center;
+  }
+
 }
-}
+
 
 
 
@@ -533,10 +573,19 @@ h2{
 </div>
 
 
-<div class="notice">
-📌 ملاحظة: الأسعار والمعلومات يتم تحديثها بشكل دوري - للتأكد من توفر العقار يرجى التواصل معنا على واتساب الرقم أعلى الصفحة.
+<div style="
+    background:#fff7d1;
+    padding:14px 18px;
+    border:1px solid #e6d79a;
+    border-radius:8px;
+    margin:20px auto;
+    width:95%;
+    font-size:26px;
+    font-weight:bold;
+    text-align:center;
+">
+📌 ملاحظة: الأسعار والمعلومات يتم تحديثها بشكل دوري - للتأكد من توفر العقار يرجى التواصل معنا على واتساب الرقم اعلى الصفحه. 
 </div>
-
 
 
 
