@@ -79,6 +79,26 @@ input{
 }
 
 /* ===============================
+   HEADER BUTTONS
+================================ */
+.header-buttons{
+  display:flex;
+  flex-wrap:wrap;
+  gap:15px;
+  justify-content:center;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.header-buttons label{
+  font-size:18px;
+}
+
+.header-buttons select{
+  font-size:17px;
+}
+
+/* ===============================
    🟨 NOTICE
 ================================ */
 .notice{
@@ -111,15 +131,14 @@ input{
 }
 
 @media (max-width:1100px){
-  .cards{ grid-template-columns:repeat(3,1fr); }
+  .cards{ grid-template-columns:repeat(2,1fr); }
 }
 
-@media (max-width:700px){
-  .cards{
-    grid-template-columns:repeat(3, minmax(350px,1fr));
-    max-width:100%;
-    margin:0;
-    padding:20px 12px;
+@media (max-width:700px) {
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(350px, 1fr));
+    gap: 12px;
   }
 }
 
@@ -194,7 +213,7 @@ input{
 }
 
 /* ===============================
-   🧩 OTHER
+   OTHER
 ================================ */
 #productTable{ display:none; }
 
@@ -206,80 +225,20 @@ input{
 }
 
 /* ===============================
-   📱 MOBILE ONLY
+   YES/NO COLORS
 ================================ */
-@media (max-width:700px){
-
-  html{ font-size:22px; }
-
-  body{ padding:8px; }
-
-  h2{ font-size:2rem; }
-
-  .logo{ margin:0 auto 15px; }
-
-  .header-buttons{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:10px;
-    width:100%;
-  }
-
-  .header-buttons a{
-    width:90%;
-    max-width:420px;
-    text-align:center;
-    font-size:1.1rem;
-    padding:12px;
-    background:#4a4e0b;
-    border-radius:8px;
-  }
-
-  .filters-wrapper{
-    flex-direction:column;
-    align-items:center;
-    gap:15px;
-    width:100%;
-    text-align:center;
-  }
-
-  .filters-wrapper label{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    font-size:1.2rem;
-  }
-
-  .filters-wrapper select,
-  .filters-wrapper input{
-    width:100%;
-    max-width:300px;
-    text-align:center;
-  }
-
-  .price{ font-size:1.6rem; }
-
-  .features div{ font-size:1.2rem; }
-
-  .card-actions a{ font-size:1.2rem; }
-}
-
-
 .yes{
-  color:#1e8e3e; /* أخضر */
+  color:#1e8e3e;
   font-weight:bold;
 }
 
 .no{
-  color:#d93025; /* أحمر */
+  color:#d93025;
   font-weight:bold;
 }
 
-
-
 /* ===============================
-   🔘 HEADER BUTTONS – FIX
+   HEADER BUTTON STYLING
 ================================ */
 .header-buttons a,
 .header-buttons button{
@@ -299,55 +258,65 @@ input{
   background:#5c6110;
 }
 
-
-
-@media (max-width:700px){
-  .header-buttons a{
-    width:90%;
-    max-width:420px;
-  }
-}
-
-
-
-
 /* ===============================
-   🔧 REMOVE TOP GAP (MOBILE)
+   📱 MOBILE
 ================================ */
 @media (max-width:700px){
 
+  html{ font-size:22px; }
+  body{ padding:8px; margin:0; text-align:center !important; }
 
-  body{
-    text-align:center !important;
-  }
+  .logo{ margin:0 auto 15px; }
 
-    .top-container{
-        width:100% !important;
-        max-width:100% !important;
-        display:flex;
-        flex-direction:column;
-        align-items:center;
-        justify-content:center;
-  }
-
-  .header-buttons,
-  .filters-wrapper,
-  .notice,
-  .page-title{
-    width:100%;
-    text-align:center;
+  .header-buttons{
     display:flex;
     flex-direction:column;
     align-items:center;
-    justify-content:center;
+    gap:10px;
+    width:100%;
   }
 
+  .header-buttons a{
+    width:90%;
+    max-width:420px;
+    text-align:center;
+    font-size:1.1rem;
+    padding:12px;
+    background:#4a4e0b;
+    border-radius:8px;
+    display:block !important;
+    margin:6px auto !important;
+  }
 
+  .filters-wrapper{
+    width:100%;
+    text-align:center;
+    display:block !important;
+    margin:0 auto !important;
+  }
 
+  .filters-wrapper label,
+  .filters-wrapper select,
+  .filters-wrapper input{
+    width:100% !important;
+    max-width:300px;
+  }
 
+  .notice{
+    margin: 20px auto !important;
+    width:95% !important;
+  }
+
+  .page-title,
+  h2{
+    text-align:center !important;
+    width:100% !important;
+    margin:10px auto !important;
+  }
 
   .top-container{
-    width:100%;
+    width:100% !important;
+    max-width:100% !important;
     display:flex;
     flex-direction:column;
     align-items:center;
@@ -355,140 +324,33 @@ input{
     padding-top:5px;
   }
 
-
+  .sticky-header .top-container{
+    flex-direction:column !important;
+    justify-content:center !important;
+    align-items:center !important;
+    width:100% !important;
+  }
 
   .logo{
+    max-width:80vw !important;
+    height:auto !important;
     margin-top:0 !important;
     padding-top:0 !important;
   }
-}
 
-
-/* ===============================
-   📱 MOBILE – FORCE CENTER EVERYTHING
-================================ */
-@media (max-width:700px){
-
-  body{
-    text-align:center !important;
-  }
-
-  .top-container,
-  .logo,
-  .header-buttons,
-  .filters-wrapper,
-  .notice,
-  .page-title,
-  h2,
-  .filters-wrapper > *,
-  .header-buttons a{
-      margin:0 auto !important;
-      text-align:center !important;
-      justify-content:center !important;
-      align-items:center !important;
-      width:100% !important;
-      display:flex !important;
-      flex-direction:column !important;
-  }
-
-  /* لإلغاء اتجاه اليمين */
-  .header-buttons,
-  .filters-wrapper{
-      direction:ltr !important;
-  }
+  .features div{ font-size:1.2rem; }
+  .price{ font-size:1.6rem; }
+  .card-actions a{ font-size:1.2rem; }
 
 }
 
-@media (max-width:700px){
-
-  body{
-    margin:0;
-    padding:0;
-  }
-
-  /* this is the key 💥 */
-  .container,
-  main,
-  #wrapper,
-  body > div:first-child{
-    width:100% !important;
-    margin:0 auto !important;
-    text-align:center !important;
-    display:block !important;
-  }
-
-  /* center header buttons */
-  .header-buttons{
-    margin:0 auto !important;
-    text-align:center !important;
-    width:100% !important;
-  }
-
-  .header-buttons a{
-    display:block !important;
-    width:90% !important;
-    margin:6px auto !important;
-  }
-
-  /* center filters */
-  .filters-wrapper{
-    margin:0 auto !important;
-    text-align:center !important;
-    width:100% !important;
-    display:block !important;
-  }
-
-  .filters-wrapper label{
-    display:block !important;
-    width:100% !important;
-    text-align:center !important;
-  }
-
-  /* center notice */
-  .notice{
-    margin: 20px auto !important;
-    width:95% !important;
-    text-align:center !important;
-  }
-
-  /* center page title */
-  .page-title,
-  h2{
-    text-align:center !important;
-    width:100% !important;
-    margin:10px auto !important;
-  }
-}
+</style>
 
 
 
 
 
 
-
-
-
-@media(max-width:700px){
-
-    .top-container{
-        width:100% !important;
-        max-width:100% !important;
-        display:flex;
-        flex-direction:column;
-        align-items:center;
-        justify-content:center;
-    }
-
-    .top-container * {
-        max-width:100% !important;
-    }
-
-    .logo {
-        max-width:80vw !important;
-        height:auto !important;
-    }
-
-}
 
 
 
@@ -512,8 +374,6 @@ input{
 
 </head>
 <body>
-<!-- Sticky Header -->
-<div class="sticky-header">
 
   <div class="top-container">
 
@@ -529,7 +389,7 @@ input{
     </div>
 
   </div>
-</div>
+
 
 <h2 class="page-title">قائمة الشقق للإيجار</h2>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css" rel="stylesheet"/>
@@ -1714,7 +1574,7 @@ input{
     </tr>  -->
 
 
- <!-- <tr>
+  <tr>
       <td>79</td>
       <td>شقة</td>
       <td><a href="https://maps.app.goo.gl/U299xNFhVE5e6zJk7" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📍 الموقع</a></td>
@@ -1731,7 +1591,7 @@ input{
       <td>سطح خاص</td>
       <td>22000</td>
       <td><a href="https://drive.google.com/drive/folders/1Z5MzMnMXn_2PereDOpe3RgKWomKKnGDR?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
-    </tr> -->
+    </tr>
 
 
 
@@ -1840,7 +1700,7 @@ window.addEventListener('load', function() {
 </script>
 
 <h2 style="text-align:center;">خريطة المواقع</h2>
-<div id="RentMap" style="height: 500px; width: 300%; margin: 0 auto; border-radius: 10px;"></div>
+<div id="RentMap" style="height: 500px; width: 200%; margin: 0 auto; border-radius: 10px;"></div>
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
 
