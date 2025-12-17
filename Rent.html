@@ -70,12 +70,15 @@
   }
 }
 
-/* Mobile */
 @media (max-width: 700px){
   .cards{
-    grid-template-columns:repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(280px, 1fr));
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 10px;
   }
 }
+
 
 /* 🔥 THIS IS THE FIX — ADD BELOW, DO NOT REPLACE */
 @media (max-width: 700px){
@@ -160,6 +163,20 @@
   object-fit:cover;
   background:#eee;
 }
+
+
+
+
+@media (max-width: 700px){
+  body{
+    padding: 8px;
+  }
+}
+
+
+
+
+
 
     </style>
 
