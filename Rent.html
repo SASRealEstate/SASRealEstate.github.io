@@ -6,10 +6,30 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <link rel="icon" href="Logo.png" type="image/png">
+<h2 class="page-title">قائمة الشقق للإيجار</h2>
+
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
 <link href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" rel="stylesheet"/>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css" rel="stylesheet"/>
   <style>
+
+label,
+select,
+input{
+  font-size:1.1rem;
+}
+
+select,
+input{
+  padding:6px 10px;
+}
+
+
+
+html{
+  font-size:25px; /* ⬅️ غيّرها إلى 19 أو 20 لو حبيت */
+}
+
 
     .logo{
   height:300px;
@@ -117,11 +137,13 @@
   padding:10px;
   font-weight:bold;
   text-align:center;
+  
 }
 
 .card-body{
   padding:15px;
-  font-size:14px;
+  font-size:20px;
+  
 }
 
 .price{
@@ -135,6 +157,8 @@
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:5px;
+    font-size:1.05rem;
+
 }
 
 .card-actions{
@@ -151,7 +175,7 @@
   text-align:center;
   padding:8px 6px;
   border-radius:8px;
-  font-size:13px;
+  font-size:20px;
   font-weight:bold;
 }
 
@@ -231,12 +255,12 @@ h2{
 
 /* السعر */
 .price{
-  font-size:22px;
+  font-size:30px;
 }
 
 /* التفاصيل داخل الكرت */
 .features div{
-  font-size:16px;
+  font-size:20px;
   line-height:1.6;
 }
 
@@ -370,12 +394,12 @@ h2{
 
 <div style="
     background:#fff7d1;
-    padding:10px 15px;
+    padding:14px 18px;
     border:1px solid #e6d79a;
     border-radius:8px;
     margin:20px auto;
     width:95%;
-    font-size:16px;
+    font-size:26px;
     font-weight:bold;
     text-align:center;
 ">
@@ -1954,7 +1978,7 @@ cards.innerHTML += `
   <div class="card-body">
 <div class="price">
   ${price} ريال /
-  <span style="font-size:14px;color:#666;">
+  <span style="font-size:18px;color:#666;">
     ${Math.round(price / 12)} شهريًا
   </span>
 </div>
