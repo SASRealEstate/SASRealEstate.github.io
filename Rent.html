@@ -52,9 +52,11 @@
   background:#fff;
   border-radius:12px;
   box-shadow:0 4px 12px rgba(0,0,0,.15);
-  overflow:hidden;
   transition:.3s;
+  display:flex;
+  flex-direction:column;
 }
+
 .card:hover{transform:translateY(-5px)}
 
 .card-header{
@@ -85,17 +87,22 @@
 
 .card-actions{
   display:flex;
-  justify-content:space-between;
+  gap:6px;
   padding:10px;
+  margin-top:auto; /* ⭐ هذا السطر المهم */
 }
 
 .card-actions a{
+  flex:1;
   background:#0d6efd;
   color:#fff;
-  padding:6px 10px;
-  border-radius:6px;
+  text-align:center;
+  padding:8px 6px;
+  border-radius:8px;
   font-size:13px;
+  font-weight:bold;
 }
+
 
 /* اخفاء الجدول */
 #productTable{
@@ -1798,10 +1805,12 @@ cards.innerHTML += `
 
     ${notes ? `<div style="margin-top:8px;color:#555">📝 ${notes}</div>` : ``}
   </div>
+<div class="card-actions">
+  <a href="${location}" target="_blank">📍 الموقع</a>
+  <a href="${photos}" target="_blank">📷 الصور</a>
+  <a href="https://wa.me/966534108666?text=مهتم%20بالشقة%20رقم%20${id}" target="_blank">💬 واتساب</a>
+</div>
 
-  <div class="card-actions">
-    ...
-  </div>
 </div>
 `;
 
