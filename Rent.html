@@ -325,15 +325,15 @@ h2{
 
 
 
-/* ===============================
-   📱 MOBILE CENTERING (TOP ONLY)
-================================ */
+/* =====================================
+   📱 MOBILE CENTERING – FINAL
+===================================== */
 @media (max-width: 700px){
 
   /* Logo */
   .logo{
     display:block;
-    margin: 0 auto 10px;
+    margin: 0 auto 12px;
   }
 
   /* Page title */
@@ -343,41 +343,7 @@ h2{
     text-align:center;
   }
 
-  /* Notice */
-  .notice{
-    margin-left:auto;
-    margin-right:auto;
-    text-align:center;
-  }
-
-  /* Filters */
-  .filters-wrapper{
-    justify-content:center;
-    text-align:center;
-  }
-
-  .filters-wrapper label{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-  }
-
-  /* Top buttons (if any) */
-  .top-buttons,
-  .header-buttons{
-    display:flex;
-    justify-content:center;
-    flex-wrap:wrap;
-    gap:10px;
-  }
-}
-
-
-/* ===============================
-   📱 MOBILE CENTERING (HEADER BUTTONS)
-================================ */
-@media (max-width: 700px){
-
+  /* Header buttons */
   .header-buttons{
     display:flex;
     justify-content:center;
@@ -392,7 +358,49 @@ h2{
     font-size:1.1rem;
     padding:10px 14px;
   }
+
+  /* Filters */
+  .filters-wrapper{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    align-items:center;
+    gap:15px;
+    margin: 0 auto 20px;
+    text-align:center;
+  }
+
+  .filters-wrapper label{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    font-size:1.2rem;
+  }
+
+  .filters-wrapper select{
+    font-size:1.1rem;
+    padding:6px 10px;
+  }
+
+  /* Notice */
+.notice{
+  background:#fff7d1;
+  padding:14px 18px;
+  border:1px solid #e6d79a;
+  border-radius:8px;
+
+  margin:20px auto;
+  max-width:1400px;
+  width:100%;
+
+  font-size:26px;   /* ⬅️ نفس الحجم اللي تريده */
+  font-weight:bold;
+  text-align:center;
 }
+
+
+
+
 
 
 
@@ -416,7 +424,7 @@ h2{
 <!-- Sticky Header -->
 <div class="sticky-header">
   <a href="index.html">
-<img src="Logo.png" class="logo" alt="شعار المكتب">
+<img src="Logo.png" alt="شعار المكتب" class="logo">
   </a>
   <div class="header-buttons">
 <a href="tel:0534108666" style="margin:5px;padding:10px 15px;background-color:#4a4e0b;border-radius:5px;">📞 اتصل الآن</a>
@@ -487,19 +495,10 @@ h2{
 </div>
 
 
-<div style="
-    background:#fff7d1;
-    padding:14px 18px;
-    border:1px solid #e6d79a;
-    border-radius:8px;
-    margin:20px auto;
-    width:95%;
-    font-size:26px;
-    font-weight:bold;
-    text-align:center;
-">
-📌 ملاحظة: الأسعار والمعلومات يتم تحديثها بشكل دوري - للتأكد من توفر العقار يرجى التواصل معنا على واتساب الرقم اعلى الصفحه. 
+<div class="notice">
+📌 ملاحظة: الأسعار والمعلومات يتم تحديثها بشكل دوري - للتأكد من توفر العقار يرجى التواصل معنا على واتساب الرقم أعلى الصفحة.
 </div>
+
 
 
 
