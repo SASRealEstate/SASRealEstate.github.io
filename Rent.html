@@ -366,6 +366,40 @@ input{
 }
 
 
+/* ===============================
+   📱 MOBILE – FORCE CENTER EVERYTHING
+================================ */
+@media (max-width:700px){
+
+  body{
+    text-align:center !important;
+  }
+
+  .top-container,
+  .logo,
+  .header-buttons,
+  .filters-wrapper,
+  .notice,
+  .page-title,
+  h2,
+  .filters-wrapper > *,
+  .header-buttons a{
+      margin:0 auto !important;
+      text-align:center !important;
+      justify-content:center !important;
+      align-items:center !important;
+      width:100% !important;
+      display:flex !important;
+      flex-direction:column !important;
+  }
+
+  /* لإلغاء اتجاه اليمين */
+  .header-buttons,
+  .filters-wrapper{
+      direction:ltr !important;
+  }
+
+}
 
 
 
