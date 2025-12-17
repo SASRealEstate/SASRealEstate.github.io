@@ -299,7 +299,7 @@ h2{
   }
 
   .features div{
-    font-size:1.1rem;
+    font-size:1.2rem;
   }
 
   .card-actions a{
@@ -317,6 +317,84 @@ h2{
     font-size:22px; /* جرّب 22 أو 23 */
   }
 }
+
+
+
+
+
+
+
+
+/* ===============================
+   📱 MOBILE CENTERING (TOP ONLY)
+================================ */
+@media (max-width: 700px){
+
+  /* Logo */
+  .logo{
+    display:block;
+    margin: 0 auto 10px;
+  }
+
+  /* Page title */
+  .page-title,
+  h1,
+  h2{
+    text-align:center;
+  }
+
+  /* Notice */
+  .notice{
+    margin-left:auto;
+    margin-right:auto;
+    text-align:center;
+  }
+
+  /* Filters */
+  .filters-wrapper{
+    justify-content:center;
+    text-align:center;
+  }
+
+  .filters-wrapper label{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  /* Top buttons (if any) */
+  .top-buttons,
+  .header-buttons{
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+}
+
+
+/* ===============================
+   📱 MOBILE CENTERING (HEADER BUTTONS)
+================================ */
+@media (max-width: 700px){
+
+  .header-buttons{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+    margin: 10px auto 15px;
+    text-align:center;
+  }
+
+  .header-buttons a{
+    font-size:1.1rem;
+    padding:10px 14px;
+  }
+}
+
+
 
 
 
@@ -338,7 +416,7 @@ h2{
 <!-- Sticky Header -->
 <div class="sticky-header">
   <a href="index.html">
-<img src="Logo.png" alt="شعار المكتب" class="logo">
+<img src="Logo.png" class="logo" alt="شعار المكتب">
   </a>
   <div class="header-buttons">
 <a href="tel:0534108666" style="margin:5px;padding:10px 15px;background-color:#4a4e0b;border-radius:5px;">📞 اتصل الآن</a>
