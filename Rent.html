@@ -18,14 +18,13 @@
   margin:0 auto;
 }
 
-        body {
+      body {
+        background: linear-gradient(to bottom, #dbd692 , #ffffff);
+        font-family: Tahoma, sans-serif;
+        padding: 30px;
+        direction: rtl;
+      }
 
-                background: linear-gradient(to bottom, #dbd692 , #ffffff);
-                font-family: Tahoma, sans-serif;
-                padding: 30px;
-                text-align: center;
-                direction: rtl;
-            }
         table {
             width: 100%;
             font-size: 14px;
@@ -71,13 +70,22 @@
   }
 }
 
-/* Mobile (THIS is the key change) */
+/* Mobile */
 @media (max-width: 700px){
   .cards{
     grid-template-columns:repeat(2, 1fr);
   }
 }
 
+/* 🔥 THIS IS THE FIX — ADD BELOW, DO NOT REPLACE */
+@media (max-width: 700px){
+  .cards{
+    max-width:100%;
+    margin:0;
+    padding-left:12px;
+    padding-right:12px;
+  }
+}
 
 
 
