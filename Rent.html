@@ -48,6 +48,28 @@
   padding:16px;
 }
 
+/* تابلت */
+@media (max-width: 1200px){
+  .cards{
+    grid-template-columns:repeat(4, 1fr);
+  }
+}
+
+/* جوال كبير */
+@media (max-width: 900px){
+  .cards{
+    grid-template-columns:repeat(3, 1fr);
+  }
+}
+
+/* جوال صغير */
+@media (max-width: 600px){
+  .cards{
+    grid-template-columns:repeat(3, 1fr);
+  }
+}
+
+
 
 .card{
   background:#fff;
