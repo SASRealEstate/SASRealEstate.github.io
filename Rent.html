@@ -1943,10 +1943,12 @@ if(photos.includes("drive.google.com")){
 cards.innerHTML += `
 <div class="card"
   data-floor="${floor}"
+  data-rooms="${rooms}"
   data-furnished="${furnished}"
   data-elevator="${elevator}"
   data-entrance="${entrance}"
   data-price="${price}">
+
 
   <div class="card-header">${type} – رقم ${id}</div>
 
@@ -1993,6 +1995,7 @@ function applyCardFilters(){
   const furnished = document.getElementById("filterFurnished")?.value || "";
   const elevator  = document.getElementById("filterElevator")?.value || "";
   const entrance  = document.getElementById("filterEntrance")?.value || "";
+  const minRooms  = parseInt(document.getElementById("filterRooms")?.value || 0);
 
   const minPrice = parseInt(document.getElementById("minPriceInput")?.value || 0);
   const maxPrice = parseInt(document.getElementById("maxPriceInput")?.value || 9999999);
@@ -2008,18 +2011,21 @@ function applyCardFilters(){
     const cardElevator  = card.dataset.elevator;
     const cardEntrance  = card.dataset.entrance;
     const cardFloor     = card.dataset.floor;
+    const cardRooms     = parseInt(card.dataset.rooms || 0);
     const cardPrice     = parseInt(card.dataset.price || 0);
 
     if(furnished && cardFurnished !== furnished) show = false;
     if(elevator && cardElevator !== elevator) show = false;
     if(entrance && cardEntrance !== entrance) show = false;
 
+    if(minRooms && cardRooms < minRooms) show = false;
     if(selectedFloors.length && !selectedFloors.includes(cardFloor)) show = false;
     if(cardPrice < minPrice || cardPrice > maxPrice) show = false;
 
     card.style.display = show ? "" : "none";
   });
 }
+
 
 /* ربط الفلاتر */
 [
