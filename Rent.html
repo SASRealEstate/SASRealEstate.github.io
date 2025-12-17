@@ -50,26 +50,33 @@
         /* ===== CARDS VIEW ===== */
 .cards{
   display:grid;
-
-  /* 👇 minimum width for each card */
   grid-template-columns:repeat(5, minmax(320px, 1fr));
-
   gap:20px;
   padding:20px;
-
-  /* 👇 makes the whole grid wider */
   max-width:1800px;
   margin:0 auto;
 }
 
+/* Large tablets / small desktops */
+@media (max-width: 1400px){
+  .cards{ grid-template-columns:repeat(4, 1fr); }
+}
 
-@media (max-width: 1200px){
+/* Tablets */
+@media (max-width: 1000px){
   .cards{ grid-template-columns:repeat(3, 1fr); }
 }
 
-@media (max-width: 900px){
-  .cards{ grid-template-columns:repeat(3, 1fr); }
+/* Mobile */
+@media (max-width: 700px){
+  .cards{ grid-template-columns:repeat(2, 1fr); }
 }
+
+/* Small mobile */
+@media (max-width: 480px){
+  .cards{ grid-template-columns:1fr; }
+}
+
 
 
 
