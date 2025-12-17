@@ -43,10 +43,33 @@
         /* ===== CARDS VIEW ===== */
 .cards{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-  gap:20px;
-  padding:20px;
+  grid-template-columns:repeat(5, 1fr);
+  gap:16px;
+  padding:16px;
 }
+
+/* تابلت */
+@media (max-width: 1200px){
+  .cards{
+    grid-template-columns:repeat(4, 1fr);
+  }
+}
+
+/* جوال كبير */
+@media (max-width: 900px){
+  .cards{
+    grid-template-columns:repeat(3, 1fr);
+  }
+}
+
+/* جوال صغير */
+@media (max-width: 600px){
+  .cards{
+    grid-template-columns:repeat(2, 1fr);
+  }
+}
+
+
 
 .card{
   background:#fff;
