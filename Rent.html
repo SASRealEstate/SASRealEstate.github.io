@@ -321,14 +321,13 @@ input{
     text-align:center !important;
   }
 
-  .top-container{
-    width:100%;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    padding-top:5px;
-    margin:0 auto;
+    .top-container{
+        width:100% !important;
+        max-width:100% !important;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
   }
 
   .header-buttons,
@@ -470,6 +469,29 @@ input{
     outline: 1px solid red;
 }
 
+
+
+@media(max-width:700px){
+
+    .top-container{
+        width:100% !important;
+        max-width:100% !important;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
+    }
+
+    .top-container * {
+        max-width:100% !important;
+    }
+
+    .logo {
+        max-width:80vw !important;
+        height:auto !important;
+    }
+
+}
 
 
 </style>
