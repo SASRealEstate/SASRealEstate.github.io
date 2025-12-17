@@ -57,25 +57,27 @@
   margin:0 auto;
 }
 
-/* Large tablets / small desktops */
+/* Large laptops */
 @media (max-width: 1400px){
-  .cards{ grid-template-columns:repeat(4, 1fr); }
+  .cards{
+    grid-template-columns:repeat(4, 1fr);
+  }
 }
 
 /* Tablets */
-@media (max-width: 1000px){
-  .cards{ grid-template-columns:repeat(3, 1fr); }
+@media (max-width: 1100px){
+  .cards{
+    grid-template-columns:repeat(3, 1fr);
+  }
 }
 
-/* Mobile */
+/* Mobile (THIS is the key change) */
 @media (max-width: 700px){
-  .cards{ grid-template-columns:repeat(2, 1fr); }
+  .cards{
+    grid-template-columns:repeat(2, 1fr);
+  }
 }
 
-/* Small mobile */
-@media (max-width: 480px){
-  .cards{ grid-template-columns:1fr; }
-}
 
 
 
