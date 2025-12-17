@@ -948,7 +948,7 @@ input{
       <td>1</td>
       <td>1</td>
       <td>-</td>
-      <td>نعم</td>
+      <td>-</td>
       <td>لا</td>
       <td>نعم</td>
       <td>مشترك</td>
@@ -1380,7 +1380,7 @@ input{
 
 
 
-        <tr>
+        <!-- <tr>
       <td>72</td>
       <td>شقة</td>
       <td><a href="https://maps.app.goo.gl/AU74ppgorMJ9aa1h9" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📍 الموقع</a></td>
@@ -1392,12 +1392,12 @@ input{
       <td>1</td>
       <td>-</td>
       <td>لا</td>
-      <td>-</td>
+      <td>نعم</td>
       <td>مستقل</td>
       <td>-</td>
       <td>22000</td>
       <td><a href="https://drive.google.com/drive/folders/1U28oidfCLjQn8bbO5R8ErYvVD8z_09uF?usp=sharing" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
-    </tr>
+    </tr> -->
     
 
 
@@ -2029,7 +2029,13 @@ cards.innerHTML += `
     ? '<span class="icon-yes">✔</span>'
     : '<span class="icon-no">✖</span>'}
 </div>
-      <div> مطبخ راكب: ${fittedKitchen}</div>
+      <div> 
+    مطبخ راكب: 
+    ${fittedKitchen === 'نعم'
+    ? '<span class="icon-yes">✔</span>'
+    : '<span class="icon-no">✖</span>'}
+        
+        </div>
     </div>
     <!-- ⬆️ انتهى اللصق هنا ⬆️ -->
 
