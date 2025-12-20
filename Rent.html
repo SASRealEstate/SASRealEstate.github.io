@@ -293,6 +293,7 @@ input{
     text-align:center;
     display:block !important;
     margin:0 auto !important;
+    
   }
 
   .filters-wrapper label,
@@ -407,6 +408,19 @@ input{
     <option value="لا">لا</option>
   </select>
 </label>
+
+<label>
+    ترتيب حسب
+    <select id="sortSelect">
+      <option value="">— اختر —</option>
+      <option value="floor-asc">الدور ↑</option>
+      <option value="floor-desc">الدور ↓</option>
+      <option value="price-asc">السعر ↑</option>
+      <option value="price-desc">السعر ↓</option>
+      <option value="rooms-asc">عدد الغرف ↑</option>
+      <option value="rooms-desc">عدد الغرف ↓</option>
+    </select>
+  </label>
 
 <br>
 <br>
@@ -2145,8 +2159,41 @@ document.querySelectorAll(".floorCheckbox").forEach(cb=>{
   cb.addEventListener("change",applyCardFilters);
 });
 
+
+
+
+
+
+
 </script>
 
+<script>
+document.getElementById("sortSelect").addEventListener("change", function () {
+
+  const container = document.querySelector(".cards");
+  const cards = Array.from(container.children);
+  const value = this.value;
+
+  if (!value) return;
+
+  let key = "";
+  let dir = 1;
+
+  if (value.includes("floor")) key = "floor";
+  if (value.includes("price")) key = "price";
+  if (value.includes("rooms")) key = "rooms";
+
+  if (value.endsWith("desc")) dir = -1;
+
+  cards.sort((a, b) => {
+    const aVal = parseInt(a.dataset[key] || 0, 10);
+    const bVal = parseInt(b.dataset[key] || 0, 10);
+    return (aVal - bVal) * dir;
+  });
+
+  cards.forEach(card => container.appendChild(card));
+});
+</script>
 
 
 
