@@ -14,9 +14,7 @@
 </head>
 <style>
 
-/* ===============================
-   🌍 GLOBAL
-================================ */
+
 html{
   font-size:25px;
 }
@@ -43,9 +41,7 @@ input{
   padding:6px 10px;
 }
 
-/* ===============================
-   🏷️ HEADER
-================================ */
+
 .logo{
   height:300px;
   display:block;
@@ -58,9 +54,7 @@ input{
   font-size:32px;
 }
 
-/* ===============================
-   📦 FILTERS
-================================ */
+
 .filters-wrapper{
   display:flex;
   flex-wrap:wrap;
@@ -78,9 +72,7 @@ input{
   font-size:17px;
 }
 
-/* ===============================
-   HEADER BUTTONS
-================================ */
+
 .header-buttons{
   display:flex;
   flex-wrap:wrap;
@@ -98,9 +90,7 @@ input{
   font-size:17px;
 }
 
-/* ===============================
-   🟨 NOTICE
-================================ */
+
 .notice{
   background:#fff7d1;
   padding:14px 18px;
@@ -114,9 +104,7 @@ input{
   line-height:1.7;
 }
 
-/* ===============================
-   🧱 CARDS GRID
-================================ */
+
 .cards{
   display:grid;
   grid-template-columns:repeat(5, minmax(320px, 1fr));
@@ -142,9 +130,7 @@ input{
   }
 }
 
-/* ===============================
-   🧾 CARD
-================================ */
+
 .card{
   background:#fff;
   border-radius:12px;
@@ -212,9 +198,7 @@ input{
   font-weight:bold;
 }
 
-/* ===============================
-   OTHER
-================================ */
+
 #productTable{ display:none; }
 
 .card-image{
@@ -224,9 +208,7 @@ input{
   background:#eee;
 }
 
-/* ===============================
-   YES/NO COLORS
-================================ */
+
 .yes{
   color:#1e8e3e;
   font-weight:bold;
@@ -237,9 +219,7 @@ input{
   font-weight:bold;
 }
 
-/* ===============================
-   HEADER BUTTON STYLING
-================================ */
+
 .header-buttons a,
 .header-buttons button{
   background:#4a4e0b;
@@ -258,9 +238,7 @@ input{
   background:#5c6110;
 }
 
-/* ===============================
-   📱 MOBILE
-================================ */
+
 @media (max-width:700px){
 
   html{ font-size:22px; }
@@ -924,7 +902,7 @@ input{
     </tr> -->
 
 
-      <td>42</td>
+      <!-- <td>42</td>
       <td>شقة</td>
       <td><a href="https://maps.app.goo.gl/BYBBzmMju8PEiJKYA" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📍 الموقع</a></td>
       <td>1</td>
@@ -940,7 +918,7 @@ input{
       <td>حوش - شامل الماء والكهرباء</td>
       <td>16800</td>
       <td><a href="https://drive.google.com/drive/folders/1jqLNndd8GKPjaUu5vBmMx2-iDKTE3EXk?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
-    </tr>
+    </tr> -->
 
 
     <tr>
@@ -1078,7 +1056,7 @@ input{
       <td><a href="https://drive.google.com/drive/folders/1ZSQ-Yz58mHOZ3--QmzURK4sSeFAkpIYR?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
   </tr>  
 
- <!-- <tr>
+  <tr>
       <td>51</td>
       <td>شقة</td>
       <td><a href="https://maps.app.goo.gl/drCBRoJfP3K4ByCFA" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📍 الموقع</a></td>
@@ -1092,10 +1070,10 @@ input{
       <td>نعم</td>
       <td>نعم</td>
       <td>مشترك</td>
-      <td>سنة كاملة 2000 , سنة دراسية 2400</td>
+      <td></td>
       <td>24000</td>
       <td><a href="https://drive.google.com/drive/folders/1aMyYDLDTuZzQ4pkXi3FCCiUraFiRucO5?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
-  </tr> -->
+  </tr>
 
   <!-- <tr>
       <td>52</td>
@@ -1950,7 +1928,7 @@ input{
       <td>ايجار شهري او يومي - حوش</td>
       <td>20400</td>
       <td><a href="https://drive.google.com/drive/folders/1wNi_zKCsHDy4z4JFIxT85I_oLMlEyC9-?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
-    </tr>
+  </tr>
 
        <tr>
       <td>94</td>
@@ -2214,8 +2192,8 @@ window.addEventListener('load', function() {
   //   .bindPopup('<a href="https://maps.app.goo.gl/BzjH7LpjhVvkrmK58" target="_blank">شقة 41 </a>');
 
 
-  L.marker([18.275486353375104, 42.590893221478886]).addTo(RentMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/BYBBzmMju8PEiJKYA" target="_blank">شقة 42 </a>');
+  // L.marker([18.275486353375104, 42.590893221478886]).addTo(RentMap)
+  //  .bindPopup('<a href="https://maps.app.goo.gl/BYBBzmMju8PEiJKYA" target="_blank">شقة 42 </a>');
 
 
   L.marker([18.300003979754557, 42.59276555092437]).addTo(RentMap)
@@ -2239,8 +2217,8 @@ window.addEventListener('load', function() {
   L.marker([18.278120640635713, 42.59035131773256]).addTo(RentMap)
     .bindPopup('<a href="https://maps.app.goo.gl/VbQeNJYs7Sqn8s2w8" target="_blank">شقة 50 </a>');
 
-//  L.marker([18.274442000000004, 42.59708954232851]).addTo(RentMap)
- //    .bindPopup('<a href="https://maps.app.goo.gl/drCBRoJfP3K4ByCFA" target="_blank">شقة 51 </a>');
+  L.marker([18.274442000000004, 42.59708954232851]).addTo(RentMap)
+     .bindPopup('<a href="https://maps.app.goo.gl/drCBRoJfP3K4ByCFA" target="_blank">شقة 51 </a>');
 
   // L.marker([18.28398809764962, 42.596285878678835]).addTo(RentMap)
   //  .bindPopup('<a href="https://maps.app.goo.gl/RuPiVjF83uTV26h89" target="_blank">شقة 52</a>');
