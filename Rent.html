@@ -2915,7 +2915,7 @@ cards.innerHTML += `
   <a href="${location}" target="_blank">📍 الموقع</a>
   <a href="${photos}" target="_blank">📷 الصور</a>
   <a href="https://wa.me/966534108666?text=السلام عليكم , انا مهتم%20بالشقة%20رقم%20${id}" target="_blank">💬 واتساب</a>
-  <a href="#" onclick="
+<a href="#" onclick="
   const text = \`رقم: ${id}
 نوع العقار: ${type}
 الدور: ${floor}
@@ -2929,7 +2929,8 @@ cards.innerHTML += `
 مطبخ راكب: ${fittedKitchen}
 مدخل: ${entrance}
 ملاحظات: ${notes}
-السعر: ${price} ريال
+السعر: ${price} ريال 
+الشهري: ${monthlyPrice.toLocaleString()} ريال شهرياً
 نوع الإيجار: ${rentType}
 الصور: ${photos}\`;
   navigator.clipboard.writeText(text);
