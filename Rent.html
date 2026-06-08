@@ -365,6 +365,10 @@ input{
       <a href="https://wa.me/966534108666">💬 واتساب</a>
       <a href="https://maps.app.goo.gl/2NUqCqLExX86fFG87">📍 موقع المكتب ، تقييمك يهمنا!</a>
       <a href="index.html">العودة للصفحة الرئيسية</a>
+
+      <button onclick="copyByRentType('سنة كاملة')">نسخ كل سنة كاملة</button>
+      <button onclick="copyByRentType('سنة دراسية')">نسخ كل سنة دراسية</button>
+      <button onclick="copyByRentType('صيفية')">نسخ كل صيفية</button>
     </div>
 
   </div>
@@ -875,7 +879,7 @@ input{
       <td>شقة</td>
       <td><a href="https://maps.app.goo.gl/3vf9qdefgzduQPGXA" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📍 الموقع</a></td>
       <td>1</td>
-      <td>6</td>
+      <td>5</td>
       <td>4</td>
       <td>1</td>
       <td>1</td>
@@ -885,7 +889,7 @@ input{
       <td>نعم</td>
       <td>مستقل</td>
       <td>شامل الماء والكهرباء - حوش ومدخل سيارة</td>
-      <td>36000</td>
+      <td>34000</td>
       <td>صيفية</td>
       <td><a href="https://drive.google.com/drive/folders/1OdfcGnASrz0z9JaASCojRnNYyDPZpx2I?usp=sharing" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
     </tr>
@@ -3118,6 +3122,50 @@ cards.innerHTML += `
 
   });
 }
+
+
+function copyByRentType(targetType) {
+  const cards = Array.from(document.querySelectorAll('.card'))
+    .filter(card => card.dataset.rentType === targetType);
+
+  if (!cards.length) {
+    alert(`لا توجد شقق من نوع ${targetType}`);
+    return;
+  }
+
+  const allText = cards.map(card => {
+    const id = card.querySelector('.card-header')?.textContent?.trim() || '';
+    const price = card.dataset.price || '';
+    const floor = card.dataset.floor || '';
+    const rooms = card.dataset.rooms || '';
+
+    const locationLink = card.querySelector('.card-actions a[href*="maps.app"]')?.href || '';
+    const photoLink = card.querySelector('.card-actions a[href*="drive.google.com"], .card-actions a[href*="photos"]')?.href || '';
+
+    const features = Array.from(card.querySelectorAll('.features div'))
+      .map(el => el.textContent.trim())
+      .join(' | ');
+
+    const notesEl = card.querySelector('.card-body div[style*="color: #555"], .card-body div[style*="color:#555"]');
+    const notes = notesEl ? notesEl.textContent.trim() : '';
+
+    return `رقم: ${id}
+النوع: ${targetType}
+السعر: ${price}
+الدور: ${floor}
+الغرف: ${rooms}
+المميزات: ${features}
+${notes ? `ملاحظات: ${notes}\n` : ''}الموقع: ${locationLink}
+الصور: ${photoLink}`;
+  }).join('\n\n----------------------\n\n');
+
+  navigator.clipboard.writeText(allText).then(() => {
+    alert(`تم نسخ جميع شقق ${targetType}`);
+  }).catch(() => {
+    alert('حدث خطأ أثناء النسخ');
+  });
+}
+
 
 window.addEventListener("load",buildCards);
 function applyCardFilters(){
