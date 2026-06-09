@@ -889,7 +889,7 @@ input{
       <td>نعم</td>
       <td>مستقل</td>
       <td>شامل الماء والكهرباء - حوش ومدخل سيارة</td>
-      <td>34000</td>
+      <td>30000</td>
       <td>صيفية</td>
       <td><a href="https://drive.google.com/drive/folders/1OdfcGnASrz0z9JaASCojRnNYyDPZpx2I?usp=sharing" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
     </tr>
@@ -3142,9 +3142,13 @@ function copyByRentType(targetType) {
     const locationLink = card.querySelector('.card-actions a[href*="maps.app"]')?.href || '';
     const photoLink = card.querySelector('.card-actions a[href*="drive.google.com"], .card-actions a[href*="photos"]')?.href || '';
 
-    const features = Array.from(card.querySelectorAll('.features div'))
-      .map(el => el.textContent.trim())
-      .join(' | ');
+    const featureItems = Array.from(card.querySelectorAll('.features div'))
+      .map(el => el.textContent.replace(/\s+/g, ' ').trim());
+
+    const firstLine = featureItems.slice(0, 6).join(' | ');   // إلى مستودع
+    const secondLine = featureItems.slice(6).join(' | ');     // من مصعد وما بعده
+
+    const features = secondLine ? `${firstLine}\n${secondLine}` : firstLine;
 
     const notesEl = card.querySelector('.card-body div[style*="color: #555"], .card-body div[style*="color:#555"]');
     const notes = notesEl ? notesEl.textContent.trim() : '';
@@ -3154,7 +3158,7 @@ function copyByRentType(targetType) {
 السعر: ${price}
 الدور: ${floor}
 الغرف: ${rooms}
-المميزات: ${features}
+المميزات: ${features}\n
 ${notes ? `ملاحظات: ${notes}\n` : ''}الموقع: ${locationLink}
 الصور: ${photoLink}`;
   }).join('\n\n----------------------\n\n');
