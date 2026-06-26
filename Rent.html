@@ -535,7 +535,7 @@ input{
     <th>مصعد</th>
     <th>مؤثثة</th>
     <th>مطبخ راكب</th>
-    <th>مدخل</th>
+    <th>مستقل</th>
     <th>مواصفات أخرى</th>
     <th>اجمالي الإيجار</th>
     <th>نوع الإيجار</th>
@@ -2321,7 +2321,7 @@ input{
       <td>1</td>
       <td>1</td>
       <td>-</td>
-      <td>-</td>
+      <td>لا</td>
       <td>نعم</td>
       <td>نعم</td>
       <td>مشترك</td>
@@ -2644,9 +2644,48 @@ input{
       <td>36000</td>
       <td>سنة كاملة</td>
       <td><a href="https://drive.google.com/drive/folders/1-gfSID1YpGD-DuT2TRceTTJe9S9hxTMp?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
-    </tr> -->
+    </tr> 
+    
+          <td>123</td>
+      <td>شقة وملحق</td>
+      <td><a href="https://maps.app.goo.gl/cc644qLxUKgR5KW18" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📍 الموقع</a></td>
+      <td>2</td>
+      <td>6</td>
+      <td>4</td>
+      <td>1</td>
+      <td>1</td>
+      <td>-</td>
+      <td>لا</td>
+      <td>لا</td>
+      <td>نعم</td>
+      <td>مشترك</td>
+      <td></td>
+      <td>36000</td>
+      <td>سنة كاملة</td>
+      <td><a href="https://drive.google.com/drive/folders/1-gfSID1YpGD-DuT2TRceTTJe9S9hxTMp?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
+    </tr> 
+    
+    
+    -->
 
-
+      <td>124</td>
+      <td>شقة</td>
+      <td><a href="https://maps.app.goo.gl/HCfpfmHjCsgUhLyLA" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📍 الموقع</a></td>
+      <td>1</td>
+      <td>4</td>
+      <td>2</td>
+      <td>1</td>
+      <td>1</td>
+      <td>-</td>
+      <td>-</td>
+      <td>لا</td>
+      <td>نعم</td>
+      <td>مشترك</td>
+      <td>-</td>
+      <td>20000</td>
+      <td>سنة كاملة</td>
+      <td><a href="https://drive.google.com/drive/folders/1TvFd5OiknYYHpAPt0YR-jBcK56E9GGt3?usp=drive_link" target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;">📷 صور</a></td>
+    </tr>
 
 
 
@@ -3151,15 +3190,27 @@ window.addEventListener('load', function() {
      //   L.marker([18.20775695990489, 42.52044295214917]).addTo(RentMap)
     //  .bindPopup('<a href="https://maps.app.goo.gl/Jc57NRpMvQaQt5u27" target="_blank">شقة 118 </a>');  
 
-         L.marker([18.216843136270253, 42.5907105186301]).addTo(RentMap)
+      L.marker([18.216843136270253, 42.5907105186301]).addTo(RentMap)
       .bindPopup('<a href="https://maps.app.goo.gl/XPttRZf8dMfJqoDL7" target="_blank">شقة 119 </a>'); 
 
-               L.marker([18.281448526258288, 42.592468393632615]).addTo(RentMap)
+      L.marker([18.281448526258288, 42.592468393632615]).addTo(RentMap)
       .bindPopup('<a href="https://maps.app.goo.gl/cc644qLxUKgR5KW18" target="_blank">شقة 120 </a>'); 
 
 
-               L.marker([18.28145173868868, 42.59258680527104]).addTo(RentMap)
+      L.marker([18.28145173868868, 42.59258680527104]).addTo(RentMap)
       .bindPopup('<a href="https://maps.app.goo.gl/5Pduj4gGweZcCjqq9" target="_blank">ملحق 121 </a>'); 
+
+
+    //  L.marker([18.28145173868868, 42.59258680527104]).addTo(RentMap)
+    //  .bindPopup('<a href="https://maps.app.goo.gl/5Pduj4gGweZcCjqq9" target="_blank">شقة وملحق 122 </a>');
+
+
+    //  L.marker([18.28145173868868, 42.59258680527104]).addTo(RentMap)
+    //  .bindPopup('<a href="https://maps.app.goo.gl/5Pduj4gGweZcCjqq9" target="_blank">شقة وملحق 123 </a>');
+
+
+      L.marker([18.277905109470616, 42.59009727116476]).addTo(RentMap)
+      .bindPopup('<a href="https://maps.app.goo.gl/HCfpfmHjCsgUhLyLA" target="_blank">شقة 124 </a>'); 
 
 </script>
 
@@ -3261,7 +3312,7 @@ cards.innerHTML += `
 
 <div>
   <i class="fa-solid fa-door-open"></i>
-  مدخل:
+  مستقل:
   ${entrance === 'مستقل'
     ? '<span class="icon-yes">✔</span>'
     : '<span class="icon-no">✖</span>'}
@@ -3302,7 +3353,7 @@ cards.innerHTML += `
 مصعد: ${elevator}
 مؤثثة: ${furnished}
 مطبخ راكب: ${fittedKitchen}
-مدخل: ${entrance}
+مستقل: ${entrance}
 ملاحظات: ${notes}
 السعر: ${price} ريال 
 الشهري: ${monthlyPrice.toLocaleString()} ريال شهرياً
