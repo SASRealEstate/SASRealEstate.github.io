@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="Logo.png" type="image/png">
+<title>لوحة التحكم | تطوير ساس العقارية</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer">
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+
+<style>
+
+:root{
+  --olive:#4a4e0b;
+  --olive-dark:#2f3207;
+  --gold:#b8922e;
+  --gold-light:#f4e9c8;
+  --cream:#fbf9f0;
+  --ink:#26290f;
+  --muted:#6c7057;
+  --line:#e7e2cd;
+  --green:#1cab52;
+  --danger:#d93025;
+  --danger-dark:#b3261a;
+  --radius:12px;
+  --shadow:0 8px 24px rgba(38,41,15,.10);
+}
+
+*{ box-sizing:border-box; }
+
+body{
+  margin:0;
+  min-height:100vh;
+  background:linear-gradient(to bottom, var(--cream), #fff 400px);
+  font-family:"Tajawal", Tahoma, sans-serif;
+  color:var(--ink);
+  direction:rtl;
+  overflow-x:hidden;
+}
+
+a{ color:inherit; }
+
+input, select, textarea, button{ font-family:inherit; font-size:1rem; }
+
+input, select, textarea{
+  width:100%;
+  padding:9px 12px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:#fff;
+  color:var(--ink);
+}
+
+input:focus, select:focus, textarea:focus{
+  outline:none;
+  border-color:var(--olive);
+  box-shadow:0 0 0 3px rgba(74,78,11,.12);
+}
+
+button{ cursor:pointer; border:none; }
+
+/* ===== Login screen ===== */
+
+#loginScreen{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.login-box{
+  background:#fff;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:36px 30px;
+  width:100%;
+  max-width:360px;
+  text-align:center;
+}
+
+.login-box img{ height:70px; margin-bottom:14px; }
+.login-box h1{ font-size:1.3rem; margin:0 0 20px; color:var(--olive-dark); }
+.login-box .field{ text-align:right; margin-bottom:14px; }
+.login-box label{ display:block; font-size:.85rem; font-weight:700; margin-bottom:6px; color:var(--olive-dark); }
+
+.btn-primary{
+  width:100%;
+  background:var(--olive);
+  color:#fff;
+  padding:11px;
+  border-radius:8px;
+  font-weight:700;
+  transition:.2s;
+}
+.btn-primary:hover{ background:var(--olive-dark); }
+
+.error-msg{ color:var(--danger); font-size:.85rem; margin-top:12px; min-height:1.2em; }
+
+/* ===== Dashboard ===== */
+
+#dashboardScreen{ display:none; }
+
+.admin-header{
+  background:linear-gradient(135deg, var(--olive-dark), var(--olive));
+  color:#fff;
+  padding:16px 24px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:12px;
+}
+
+.admin-header .title{ display:flex; align-items:center; gap:10px; font-weight:700; }
+.admin-header img{ height:40px; border-radius:6px; background:#fff; padding:2px; }
+
+.admin-header .actions{ display:flex; gap:10px; flex-wrap:wrap; }
+
+.btn-header{
+  background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.3);
+  color:#fff;
+  padding:9px 16px;
+  border-radius:999px;
+  font-size:.85rem;
+  font-weight:500;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  transition:.2s;
+}
+.btn-header:hover{ background:#fff; color:var(--olive-dark); }
+
+.admin-body{
+  max-width:1100px;
+  margin:24px auto;
+  padding:0 20px 60px;
+}
+
+.panel{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:22px;
+  margin-bottom:22px;
+}
+
+.panel h2{ margin:0 0 18px; font-size:1.15rem; color:var(--olive-dark); display:flex; align-items:center; gap:8px; }
+
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));
+  gap:14px;
+}
+
+.form-grid .field label{ display:block; font-size:.8rem; font-weight:700; margin-bottom:6px; color:var(--olive-dark); }
+.form-grid .field.wide{ grid-column:1 / -1; }
+
+.form-actions{ margin-top:18px; display:flex; gap:10px; flex-wrap:wrap; }
+
+.btn-save{ background:var(--olive); color:#fff; padding:11px 26px; border-radius:8px; font-weight:700; }
+.btn-save:hover{ background:var(--olive-dark); }
+
+.btn-cancel{ background:#eee; color:var(--ink); padding:11px 22px; border-radius:8px; font-weight:700; }
+.btn-cancel:hover{ background:#e0e0e0; }
+
+.btn-import{ background:var(--gold-light); color:#5a4713; border:1px solid #e6d18f; padding:9px 18px; border-radius:8px; font-weight:700; font-size:.85rem; }
+.btn-import:hover{ background:#f0e2b6; }
+
+/* ===== Listings table ===== */
+
+.listings-table{ width:100%; border-collapse:collapse; font-size:.9rem; }
+.listings-table th, .listings-table td{ padding:10px 8px; text-align:center; border-bottom:1px solid var(--line); }
+.listings-table th{ background:var(--cream); color:var(--olive-dark); font-size:.82rem; }
+.listings-table tr:hover td{ background:#fbfaf3; }
+
+.badge-rent{ background:var(--gold); color:#fff; padding:3px 10px; border-radius:999px; font-size:.72rem; font-weight:700; }
+
+.row-actions{ display:flex; gap:6px; justify-content:center; }
+.row-actions button{ padding:6px 10px; border-radius:6px; font-size:.8rem; }
+.btn-edit{ background:#2f6690; color:#fff; }
+.btn-edit:hover{ background:#234d6c; }
+.btn-delete{ background:var(--danger); color:#fff; }
+.btn-delete:hover{ background:var(--danger-dark); }
+
+.empty-state{ text-align:center; color:var(--muted); padding:30px; font-size:.95rem; }
+
+.status-msg{ margin-top:10px; font-size:.85rem; }
+.status-msg.ok{ color:var(--green); }
+.status-msg.err{ color:var(--danger); }
+
+.setup-warning{
+  background:#fff3cd;
+  border:1px solid #ffe08a;
+  color:#7a5b00;
+  padding:14px 18px;
+  border-radius:10px;
+  margin-bottom:20px;
+  font-size:.9rem;
+  line-height:1.7;
+  text-align:center;
+}
+
+@media (max-width:700px){
+  .admin-header{ flex-direction:column; text-align:center; }
+  .panel{ padding:16px; }
+  .listings-table{ font-size:.78rem; }
+  .listings-table th, .listings-table td{ padding:7px 4px; }
+}
+
+</style>
+</head>
+<body>
+
+<div id="setupWarning" class="setup-warning" style="display:none; margin:20px;">
+  ⚠️ لم يتم إعداد Firebase بعد. افتح ملف <code>firebase-config.js</code> وضع بيانات مشروعك فيه حتى تعمل لوحة التحكم.
+</div>
+
+<div id="loginScreen">
+  <div class="login-box">
+    <img src="Logo.png" alt="شعار المكتب">
+    <h1>تسجيل دخول لوحة التحكم</h1>
+    <div class="field">
+      <label for="loginEmail">البريد الإلكتروني</label>
+      <input type="email" id="loginEmail" placeholder="admin@example.com">
+    </div>
+    <div class="field">
+      <label for="loginPassword">كلمة المرور</label>
+      <input type="password" id="loginPassword" placeholder="••••••••">
+    </div>
+    <button class="btn-primary" onclick="doLogin()"><i class="fa-solid fa-right-to-bracket"></i> دخول</button>
+    <div id="loginError" class="error-msg"></div>
+  </div>
+</div>
+
+<div id="dashboardScreen">
+
+  <header class="admin-header">
+    <div class="title">
+      <img src="Logo.png" alt="شعار المكتب">
+      <span>لوحة تحكم العروض</span>
+    </div>
+    <div class="actions">
+      <a class="btn-header" href="Rent.html" target="_blank"><i class="fa-solid fa-eye"></i> عرض الصفحة</a>
+      <button class="btn-header" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i> خروج</button>
+    </div>
+  </header>
+
+  <div class="admin-body">
+
+    <div class="panel">
+      <h2><i class="fa-solid fa-plus"></i> <span id="formTitle">إضافة عرض جديد</span></h2>
+
+      <form id="listingForm" onsubmit="return saveListing(event)">
+        <div class="form-grid">
+
+          <div class="field">
+            <label for="f_id">رقم العرض *</label>
+            <input type="number" id="f_id" required>
+          </div>
+
+          <div class="field">
+            <label for="f_type">نوع العقار</label>
+            <input type="text" id="f_type" value="شقة">
+          </div>
+
+          <div class="field">
+            <label for="f_rentType">نوع الإيجار</label>
+            <select id="f_rentType">
+              <option value="سنة كاملة">سنة كاملة</option>
+              <option value="سنة دراسية">سنة دراسية</option>
+              <option value="صيفية">صيفية</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="f_price">الإيجار السنوي (ريال) *</label>
+            <input type="number" id="f_price" required>
+          </div>
+
+          <div class="field">
+            <label for="f_floor">الدور</label>
+            <input type="text" id="f_floor">
+          </div>
+
+          <div class="field">
+            <label for="f_rooms">عدد الغرف</label>
+            <input type="text" id="f_rooms">
+          </div>
+
+          <div class="field">
+            <label for="f_baths">دورات المياه</label>
+            <input type="text" id="f_baths">
+          </div>
+
+          <div class="field">
+            <label for="f_hall">صالة</label>
+            <input type="text" id="f_hall">
+          </div>
+
+          <div class="field">
+            <label for="f_kitchen">مطبخ</label>
+            <input type="text" id="f_kitchen">
+          </div>
+
+          <div class="field">
+            <label for="f_store">مستودع</label>
+            <input type="text" id="f_store">
+          </div>
+
+          <div class="field">
+            <label for="f_elevator">مصعد</label>
+            <select id="f_elevator">
+              <option value="لا">لا</option>
+              <option value="نعم">نعم</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="f_furnished">مؤثثة</label>
+            <select id="f_furnished">
+              <option value="لا">لا</option>
+              <option value="نعم">نعم</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="f_fittedKitchen">مطبخ راكب</label>
+            <select id="f_fittedKitchen">
+              <option value="لا">لا</option>
+              <option value="نعم">نعم</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="f_entrance">المدخل</label>
+            <select id="f_entrance">
+              <option value="مشترك">مشترك</option>
+              <option value="مستقل">مستقل</option>
+            </select>
+          </div>
+
+          <div class="field wide">
+            <label for="f_location">رابط الموقع (خرائط جوجل)</label>
+            <input type="url" id="f_location" placeholder="https://maps.app.goo.gl/...">
+          </div>
+
+          <div class="field wide">
+            <label for="f_photos">رابط الصور (Google Drive)</label>
+            <input type="url" id="f_photos" placeholder="https://drive.google.com/...">
+          </div>
+
+          <div class="field wide">
+            <label for="f_notes">ملاحظات</label>
+            <textarea id="f_notes" rows="2"></textarea>
+          </div>
+
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-save"><i class="fa-solid fa-floppy-disk"></i> <span id="saveBtnText">حفظ العرض</span></button>
+          <button type="button" class="btn-cancel" id="cancelEditBtn" style="display:none;" onclick="resetForm()">إلغاء التعديل</button>
+        </div>
+
+        <div id="formStatus" class="status-msg"></div>
+      </form>
+    </div>
+
+    <div class="panel">
+      <h2><i class="fa-solid fa-list"></i> العروض الحالية (<span id="listingsCount">0</span>)</h2>
+
+      <div style="margin-bottom:16px;">
+        <button class="btn-import" onclick="importFromRentPage()"><i class="fa-solid fa-file-import"></i> استيراد العروض الحالية من الصفحة</button>
+        <span style="font-size:.78rem;color:var(--muted);margin-right:8px;">(مرة واحدة فقط لنقل العروض القديمة إلى قاعدة البيانات)</span>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table class="listings-table">
+          <thead>
+            <tr>
+              <th>رقم</th>
+              <th>النوع</th>
+              <th>السعر</th>
+              <th>نوع الإيجار</th>
+              <th>الدور</th>
+              <th>الغرف</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="listingsTableBody"></tbody>
+        </table>
+        <div id="emptyState" class="empty-state" style="display:none;">لا توجد عروض بعد. أضف عرضًا جديدًا أو استورد العروض الحالية.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+
+if (!window.db || !window.auth) {
+  document.getElementById("setupWarning").style.display = "block";
+}
+
+let editingDocId = null;
+
+function doLogin(){
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value;
+  const errEl = document.getElementById("loginError");
+  errEl.textContent = "";
+
+  if (!window.auth){
+    errEl.textContent = "Firebase غير مُهيأ. راجع ملف firebase-config.js";
+    return;
+  }
+
+  auth.signInWithEmailAndPassword(email, password).catch(e => {
+    errEl.textContent = "فشل تسجيل الدخول: تأكد من البريد وكلمة المرور";
+    console.error(e);
+  });
+}
+
+function doLogout(){
+  if (window.auth) auth.signOut();
+}
+
+if (window.auth){
+  auth.onAuthStateChanged(user => {
+    if (user){
+      document.getElementById("loginScreen").style.display = "none";
+      document.getElementById("dashboardScreen").style.display = "block";
+      listenToListings();
+    } else {
+      document.getElementById("loginScreen").style.display = "flex";
+      document.getElementById("dashboardScreen").style.display = "none";
+    }
+  });
+}
+
+function fieldIds(){
+  return ["id","type","rentType","price","floor","rooms","baths","hall","kitchen",
+          "store","elevator","furnished","fittedKitchen","entrance","location","photos","notes"];
+}
+
+function resetForm(){
+  editingDocId = null;
+  document.getElementById("listingForm").reset();
+  document.getElementById("formTitle").textContent = "إضافة عرض جديد";
+  document.getElementById("saveBtnText").textContent = "حفظ العرض";
+  document.getElementById("cancelEditBtn").style.display = "none";
+  document.getElementById("f_id").disabled = false;
+  document.getElementById("formStatus").textContent = "";
+}
+
+function saveListing(event){
+  event.preventDefault();
+  const statusEl = document.getElementById("formStatus");
+  statusEl.className = "status-msg";
+  statusEl.textContent = "";
+
+  const id = document.getElementById("f_id").value.trim();
+  if (!id){
+    statusEl.textContent = "رقم العرض مطلوب";
+    statusEl.className = "status-msg err";
+    return false;
+  }
+
+  const data = {};
+  fieldIds().forEach(key => {
+    const el = document.getElementById("f_" + key);
+    data[key] = el.value.trim();
+  });
+
+  db.collection("listings").doc(String(id)).set(data)
+    .then(() => {
+      statusEl.textContent = "تم الحفظ بنجاح ✔";
+      statusEl.className = "status-msg ok";
+      resetForm();
+    })
+    .catch(e => {
+      statusEl.textContent = "حدث خطأ أثناء الحفظ: " + e.message;
+      statusEl.className = "status-msg err";
+      console.error(e);
+    });
+
+  return false;
+}
+
+function editListing(docId, data){
+  editingDocId = docId;
+  fieldIds().forEach(key => {
+    const el = document.getElementById("f_" + key);
+    if (el) el.value = data[key] || "";
+  });
+  document.getElementById("f_id").disabled = true;
+  document.getElementById("formTitle").textContent = "تعديل عرض رقم " + docId;
+  document.getElementById("saveBtnText").textContent = "حفظ التعديلات";
+  document.getElementById("cancelEditBtn").style.display = "inline-block";
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function deleteListing(docId){
+  if (!confirm("هل أنت متأكد من حذف العرض رقم " + docId + "؟")) return;
+  db.collection("listings").doc(docId).delete().catch(e => {
+    alert("حدث خطأ أثناء الحذف: " + e.message);
+    console.error(e);
+  });
+}
+
+function listenToListings(){
+  db.collection("listings").onSnapshot(snap => {
+    const tbody = document.getElementById("listingsTableBody");
+    const emptyState = document.getElementById("emptyState");
+    tbody.innerHTML = "";
+
+    const docs = snap.docs.sort((a,b) => (parseInt(a.id)||0) - (parseInt(b.id)||0));
+    document.getElementById("listingsCount").textContent = docs.length;
+
+    if (docs.length === 0){
+      emptyState.style.display = "block";
+      return;
+    }
+    emptyState.style.display = "none";
+
+    docs.forEach(doc => {
+      const d = doc.data();
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${doc.id}</td>
+        <td>${d.type || ""}</td>
+        <td>${d.price || ""} ريال</td>
+        <td><span class="badge-rent">${d.rentType || ""}</span></td>
+        <td>${d.floor || ""}</td>
+        <td>${d.rooms || ""}</td>
+        <td>
+          <div class="row-actions">
+            <button class="btn-edit" data-doc-id="${doc.id}"><i class="fa-solid fa-pen"></i></button>
+            <button class="btn-delete" data-doc-id="${doc.id}"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        </td>
+      `;
+      tr.querySelector(".btn-edit").addEventListener("click", () => editListing(doc.id, d));
+      tr.querySelector(".btn-delete").addEventListener("click", () => deleteListing(doc.id));
+      tbody.appendChild(tr);
+    });
+  }, err => {
+    console.error("خطأ في تحميل العروض", err);
+  });
+}
+
+async function importFromRentPage(){
+  if (!confirm("سيتم استيراد كل العروض الحالية من صفحة Rent.html إلى قاعدة البيانات. إذا كان العرض موجودًا مسبقًا (بنفس الرقم) سيتم تحديثه. متابعة؟")) return;
+
+  try{
+    const res = await fetch("Rent.html");
+    const html = await res.text();
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    const rows = doc.querySelectorAll("#productTable tbody tr");
+
+    const strip = s => (s || "").replace(/<[^>]*>?/gm, "").trim();
+    let count = 0;
+    const batch = db.batch();
+
+    rows.forEach(row => {
+      const td = row.querySelectorAll("td");
+      if (td.length < 15) return;
+
+      const id = strip(td[0].innerHTML);
+      if (!id) return;
+
+      const data = {
+        type: strip(td[1].innerHTML),
+        location: td[2].querySelector("a")?.getAttribute("href") || "",
+        floor: strip(td[3].innerHTML),
+        rooms: strip(td[4].innerHTML),
+        baths: strip(td[5].innerHTML),
+        hall: strip(td[6].innerHTML),
+        kitchen: strip(td[7].innerHTML),
+        store: strip(td[8].innerHTML),
+        elevator: strip(td[9].innerHTML),
+        furnished: strip(td[10].innerHTML),
+        fittedKitchen: strip(td[11].innerHTML),
+        entrance: strip(td[12].innerHTML),
+        notes: strip(td[13].innerHTML),
+        price: strip(td[14].innerHTML),
+        rentType: td[15] ? strip(td[15].innerHTML) : "سنة كاملة",
+        photos: td[16]?.querySelector("a")?.getAttribute("href") || ""
+      };
+
+      batch.set(db.collection("listings").doc(id), data);
+      count++;
+    });
+
+    await batch.commit();
+    alert("تم استيراد " + count + " عرضًا بنجاح");
+  }catch(e){
+    alert("حدث خطأ أثناء الاستيراد: " + e.message);
+    console.error(e);
+  }
+}
+
+</script>
+
+</body>
+</html>
