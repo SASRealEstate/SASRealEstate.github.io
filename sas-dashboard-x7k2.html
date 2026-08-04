@@ -151,6 +151,26 @@ button{ cursor:pointer; border:none; }
   padding:0 20px 60px;
 }
 
+.tabs{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:20px;
+}
+
+.tab-btn{
+  background:#fff;
+  border:1px solid var(--line);
+  color:var(--olive-dark);
+  padding:11px 22px;
+  border-radius:999px;
+  font-weight:700;
+  font-size:.9rem;
+  transition:.2s;
+}
+.tab-btn:hover{ background:var(--cream); }
+.tab-btn.active{ background:var(--olive); color:#fff; border-color:var(--olive); }
+
 .panel{
   background:#fff;
   border:1px solid var(--line);
@@ -190,6 +210,8 @@ button{ cursor:pointer; border:none; }
 .listings-table tr:hover td{ background:#fbfaf3; }
 
 .badge-rent{ background:var(--gold); color:#fff; padding:3px 10px; border-radius:999px; font-size:.72rem; font-weight:700; }
+.badge-active{ background:var(--green); color:#fff; padding:3px 10px; border-radius:999px; font-size:.72rem; font-weight:700; }
+.badge-archived{ background:#8a8d73; color:#fff; padding:3px 10px; border-radius:999px; font-size:.72rem; font-weight:700; }
 
 .row-actions{ display:flex; gap:6px; justify-content:center; }
 .row-actions button{ padding:6px 10px; border-radius:6px; font-size:.8rem; }
@@ -221,6 +243,7 @@ button{ cursor:pointer; border:none; }
   .panel{ padding:16px; }
   .listings-table{ font-size:.78rem; }
   .listings-table th, .listings-table td{ padding:7px 4px; }
+  .tabs{ justify-content:center; }
 }
 
 </style>
@@ -256,121 +279,20 @@ button{ cursor:pointer; border:none; }
       <span>لوحة تحكم العروض</span>
     </div>
     <div class="actions">
-      <a class="btn-header" href="Rent.html" target="_blank"><i class="fa-solid fa-eye"></i> عرض الصفحة</a>
+      <a class="btn-header" id="viewPageLink" href="Rent.html" target="_blank"><i class="fa-solid fa-eye"></i> عرض الصفحة</a>
       <button class="btn-header" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i> خروج</button>
     </div>
   </header>
 
   <div class="admin-body">
 
+    <div class="tabs" id="categoryTabs"></div>
+
     <div class="panel">
       <h2><i class="fa-solid fa-plus"></i> <span id="formTitle">إضافة عرض جديد</span></h2>
 
       <form id="listingForm" onsubmit="return saveListing(event)">
-        <div class="form-grid">
-
-          <div class="field">
-            <label for="f_id">رقم العرض *</label>
-            <input type="number" id="f_id" required>
-          </div>
-
-          <div class="field">
-            <label for="f_type">نوع العقار</label>
-            <input type="text" id="f_type" value="شقة">
-          </div>
-
-          <div class="field">
-            <label for="f_rentType">نوع الإيجار</label>
-            <select id="f_rentType">
-              <option value="سنة كاملة">سنة كاملة</option>
-              <option value="سنة دراسية">سنة دراسية</option>
-              <option value="صيفية">صيفية</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label for="f_price">الإيجار السنوي (ريال) *</label>
-            <input type="number" id="f_price" required>
-          </div>
-
-          <div class="field">
-            <label for="f_floor">الدور</label>
-            <input type="text" id="f_floor">
-          </div>
-
-          <div class="field">
-            <label for="f_rooms">عدد الغرف</label>
-            <input type="text" id="f_rooms">
-          </div>
-
-          <div class="field">
-            <label for="f_baths">دورات المياه</label>
-            <input type="text" id="f_baths">
-          </div>
-
-          <div class="field">
-            <label for="f_hall">صالة</label>
-            <input type="text" id="f_hall">
-          </div>
-
-          <div class="field">
-            <label for="f_kitchen">مطبخ</label>
-            <input type="text" id="f_kitchen">
-          </div>
-
-          <div class="field">
-            <label for="f_store">مستودع</label>
-            <input type="text" id="f_store">
-          </div>
-
-          <div class="field">
-            <label for="f_elevator">مصعد</label>
-            <select id="f_elevator">
-              <option value="لا">لا</option>
-              <option value="نعم">نعم</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label for="f_furnished">مؤثثة</label>
-            <select id="f_furnished">
-              <option value="لا">لا</option>
-              <option value="نعم">نعم</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label for="f_fittedKitchen">مطبخ راكب</label>
-            <select id="f_fittedKitchen">
-              <option value="لا">لا</option>
-              <option value="نعم">نعم</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label for="f_entrance">المدخل</label>
-            <select id="f_entrance">
-              <option value="مشترك">مشترك</option>
-              <option value="مستقل">مستقل</option>
-            </select>
-          </div>
-
-          <div class="field wide">
-            <label for="f_location">رابط الموقع (خرائط جوجل)</label>
-            <input type="url" id="f_location" placeholder="https://maps.app.goo.gl/...">
-          </div>
-
-          <div class="field wide">
-            <label for="f_photos">رابط الصور (Google Drive)</label>
-            <input type="url" id="f_photos" placeholder="https://drive.google.com/...">
-          </div>
-
-          <div class="field wide">
-            <label for="f_notes">ملاحظات</label>
-            <textarea id="f_notes" rows="2"></textarea>
-          </div>
-
-        </div>
+        <div class="form-grid" id="formFields"></div>
 
         <div class="form-actions">
           <button type="submit" class="btn-save"><i class="fa-solid fa-floppy-disk"></i> <span id="saveBtnText">حفظ العرض</span></button>
@@ -385,22 +307,14 @@ button{ cursor:pointer; border:none; }
       <h2><i class="fa-solid fa-list"></i> العروض الحالية (<span id="listingsCount">0</span>)</h2>
 
       <div style="margin-bottom:16px;">
-        <button class="btn-import" onclick="importFromRentPage()"><i class="fa-solid fa-file-import"></i> استيراد العروض الحالية من الصفحة</button>
+        <button class="btn-import" onclick="importFromSourcePage()"><i class="fa-solid fa-file-import"></i> <span id="importBtnText">استيراد العروض الحالية من الصفحة</span></button>
         <span style="font-size:.78rem;color:var(--muted);margin-right:8px;">(مرة واحدة فقط لنقل العروض القديمة إلى قاعدة البيانات)</span>
       </div>
 
       <div style="overflow-x:auto;">
         <table class="listings-table">
           <thead>
-            <tr>
-              <th>رقم</th>
-              <th>النوع</th>
-              <th>السعر</th>
-              <th>نوع الإيجار</th>
-              <th>الدور</th>
-              <th>الغرف</th>
-              <th>إجراءات</th>
-            </tr>
+            <tr id="listingsTableHead"></tr>
           </thead>
           <tbody id="listingsTableBody"></tbody>
         </table>
@@ -417,7 +331,131 @@ if (!window.db || !window.auth) {
   document.getElementById("setupWarning").style.display = "block";
 }
 
+/* ============ إعدادات الفئات ============ */
+
+const CATEGORIES = {
+  rent: {
+    label: "شقق للإيجار",
+    collection: "listings",
+    sourcePage: "Rent.html",
+    tableSelector: "#productTable tbody tr",
+    whatsappNoun: "بالشقة",
+    importIndices: {type:1, location:2, floor:3, rooms:4, baths:5, hall:6, kitchen:7, store:8, elevator:9, furnished:10, fittedKitchen:11, entrance:12, notes:13, price:14, rentType:15, photos:16},
+    idIndex: 0,
+    locationIndex: 2,
+    photosIndex: 16,
+    fields: [
+      {key:"id", label:"رقم العرض", type:"number", required:true},
+      {key:"status", label:"الحالة", type:"select", options:["نشط","مؤرشف"]},
+      {key:"type", label:"نوع العقار", type:"text", value:"شقة"},
+      {key:"rentType", label:"نوع الإيجار", type:"select", options:["سنة كاملة","سنة دراسية","صيفية"]},
+      {key:"price", label:"الإيجار السنوي (ريال)", type:"number", required:true},
+      {key:"floor", label:"الدور", type:"text"},
+      {key:"rooms", label:"عدد الغرف", type:"text"},
+      {key:"baths", label:"دورات المياه", type:"text"},
+      {key:"hall", label:"صالة", type:"text"},
+      {key:"kitchen", label:"مطبخ", type:"text"},
+      {key:"store", label:"مستودع", type:"text"},
+      {key:"elevator", label:"مصعد", type:"select", options:["لا","نعم"]},
+      {key:"furnished", label:"مؤثثة", type:"select", options:["لا","نعم"]},
+      {key:"fittedKitchen", label:"مطبخ راكب", type:"select", options:["لا","نعم"]},
+      {key:"entrance", label:"المدخل", type:"select", options:["مشترك","مستقل"]},
+      {key:"location", label:"رابط الموقع (خرائط جوجل)", type:"url", wide:true},
+      {key:"photos", label:"رابط الصور (Google Drive)", type:"url", wide:true},
+      {key:"notes", label:"ملاحظات", type:"textarea", wide:true}
+    ],
+    listColumns: [
+      {key:"id", label:"رقم"},
+      {key:"status", label:"الحالة", statusBadge:true},
+      {key:"type", label:"النوع"},
+      {key:"price", label:"السعر", suffix:" ريال"},
+      {key:"rentType", label:"نوع الإيجار", badge:true},
+      {key:"floor", label:"الدور"},
+      {key:"rooms", label:"الغرف"}
+    ]
+  },
+  buildings: {
+    label: "عقارات للبيع",
+    collection: "buildings",
+    sourcePage: "AllBuildings.html",
+    tableSelector: "table.dataframe tbody tr",
+    whatsappNoun: "بالعقار",
+    importIndices: {type:1, floor:2, location:3, landArea:4, buildArea:5, facades:6, asking:7, price:8, photos:9, notes:10},
+    idIndex: 0,
+    locationIndex: 3,
+    photosIndex: 9,
+    fields: [
+      {key:"id", label:"رقم", type:"number", required:true},
+      {key:"status", label:"الحالة", type:"select", options:["نشط","مؤرشف"]},
+      {key:"type", label:"نوع العقار", type:"text"},
+      {key:"floor", label:"الدور", type:"text"},
+      {key:"landArea", label:"مساحة الأرض", type:"text"},
+      {key:"buildArea", label:"مسطح البناء", type:"text"},
+      {key:"facades", label:"الواجهات", type:"text"},
+      {key:"asking", label:"السوم", type:"text"},
+      {key:"price", label:"السعر", type:"number", required:true},
+      {key:"location", label:"رابط الموقع (خرائط جوجل)", type:"url", wide:true},
+      {key:"photos", label:"رابط الصور (Google Drive)", type:"url", wide:true},
+      {key:"notes", label:"تفاصيل اضافية", type:"textarea", wide:true}
+    ],
+    listColumns: [
+      {key:"id", label:"رقم"},
+      {key:"status", label:"الحالة", statusBadge:true},
+      {key:"type", label:"النوع"},
+      {key:"price", label:"السعر", suffix:" ريال"},
+      {key:"landArea", label:"مساحة الأرض"},
+      {key:"buildArea", label:"مسطح البناء"}
+    ]
+  },
+  lands: {
+    label: "أراضي للبيع",
+    collection: "lands",
+    sourcePage: "All_Lands.html",
+    tableSelector: "table.dataframe tbody tr",
+    whatsappNoun: "بالأرض",
+    importIndices: {plateNumber:0, type:2, offerType:3, location:4, planNumber:5, planName:6, length:7, width:8, area:9, specs:10, facades:11, asking:12, price:13, pricePerMeter:14, photos:15, notes:16},
+    idIndex: 1,
+    locationIndex: 4,
+    photosIndex: 15,
+    fields: [
+      {key:"id", label:"رقم", type:"number", required:true},
+      {key:"status", label:"الحالة", type:"select", options:["نشط","مؤرشف"]},
+      {key:"plateNumber", label:"رقم اللوحة", type:"text"},
+      {key:"type", label:"نوع العقار", type:"select", options:["أرض تجارية","أرض سكنية","أرض زراعية","أرض صناعية"]},
+      {key:"offerType", label:"نوع العرض", type:"text", value:"بيع"},
+      {key:"planNumber", label:"رقم المخطط", type:"text"},
+      {key:"planName", label:"اسم المخطط", type:"text"},
+      {key:"length", label:"طول", type:"text"},
+      {key:"width", label:"عرض", type:"text"},
+      {key:"area", label:"المساحة", type:"text"},
+      {key:"facades", label:"الواجهات", type:"text"},
+      {key:"asking", label:"السوم", type:"text"},
+      {key:"price", label:"السعر", type:"number", required:true},
+      {key:"pricePerMeter", label:"سعر المتر", type:"text"},
+      {key:"location", label:"رابط الموقع (خرائط جوجل)", type:"url", wide:true},
+      {key:"photos", label:"رابط الصور (Google Drive)", type:"url", wide:true},
+      {key:"specs", label:"مواصفات العقار", type:"textarea", wide:true},
+      {key:"notes", label:"الملاحظات", type:"textarea", wide:true}
+    ],
+    listColumns: [
+      {key:"id", label:"رقم"},
+      {key:"status", label:"الحالة", statusBadge:true},
+      {key:"type", label:"النوع"},
+      {key:"price", label:"السعر", suffix:" ريال"},
+      {key:"area", label:"المساحة"}
+    ]
+  }
+};
+
+let currentCategory = "rent";
 let editingDocId = null;
+let unsubscribeListener = null;
+let idBaselines = {};
+let lastAutoId = null;
+
+function cat(){ return CATEGORIES[currentCategory]; }
+
+/* ============ تسجيل الدخول ============ */
 
 function doLogin(){
   const email = document.getElementById("loginEmail").value.trim();
@@ -445,7 +483,8 @@ if (window.auth){
     if (user){
       document.getElementById("loginScreen").style.display = "none";
       document.getElementById("dashboardScreen").style.display = "block";
-      listenToListings();
+      renderTabs();
+      switchCategory("rent");
     } else {
       document.getElementById("loginScreen").style.display = "flex";
       document.getElementById("dashboardScreen").style.display = "none";
@@ -453,9 +492,107 @@ if (window.auth){
   });
 }
 
-function fieldIds(){
-  return ["id","type","rentType","price","floor","rooms","baths","hall","kitchen",
-          "store","elevator","furnished","fittedKitchen","entrance","location","photos","notes"];
+/* ============ التبويبات ============ */
+
+function renderTabs(){
+  const wrap = document.getElementById("categoryTabs");
+  wrap.innerHTML = "";
+  Object.keys(CATEGORIES).forEach(key => {
+    const btn = document.createElement("button");
+    btn.className = "tab-btn" + (key === currentCategory ? " active" : "");
+    btn.textContent = CATEGORIES[key].label;
+    btn.addEventListener("click", () => switchCategory(key));
+    wrap.appendChild(btn);
+  });
+}
+
+function switchCategory(key){
+  currentCategory = key;
+  renderTabs();
+  document.getElementById("viewPageLink").href = cat().sourcePage;
+  document.getElementById("importBtnText").textContent = "استيراد العروض الحالية من " + cat().sourcePage;
+  renderFormFields();
+  renderTableHead();
+  resetForm();
+  listenToListings();
+  loadStaticMaxId(key);
+}
+
+/* ============ اقتراح رقم العرض التالي تلقائيًا ============ */
+
+function updateIdBaseline(category, source, maxVal){
+  if (!idBaselines[category]) idBaselines[category] = { firestore: 0, static: 0 };
+  idBaselines[category][source] = maxVal;
+  if (category === currentCategory) suggestNextId();
+}
+
+function suggestNextId(){
+  if (editingDocId) return;
+  const idField = document.getElementById("f_id");
+  if (!idField) return;
+  const b = idBaselines[currentCategory] || { firestore: 0, static: 0 };
+  const nextId = Math.max(b.firestore, b.static) + 1;
+  if (idField.value === "" || idField.value === String(lastAutoId)){
+    idField.value = nextId;
+    lastAutoId = nextId;
+  }
+}
+
+async function loadStaticMaxId(category){
+  const c = CATEGORIES[category];
+  try{
+    const res = await fetch(c.sourcePage);
+    const html = await res.text();
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    const rows = [...doc.querySelectorAll(c.tableSelector), ...getCommentedRows(doc)];
+    let max = 0;
+    rows.forEach(row => {
+      const td = row.querySelectorAll("td");
+      const idVal = parseInt((td[c.idIndex]?.textContent || "").replace(/[^0-9]/g, ""), 10);
+      if (!isNaN(idVal)) max = Math.max(max, idVal);
+    });
+    updateIdBaseline(category, "static", max);
+  }catch(e){
+    console.warn("تعذر تحديد آخر رقم من الصفحة الثابتة", e);
+  }
+}
+
+/* ============ النموذج (ديناميكي حسب الفئة) ============ */
+
+function renderFormFields(){
+  const wrap = document.getElementById("formFields");
+  wrap.innerHTML = "";
+  cat().fields.forEach(f => {
+    const div = document.createElement("div");
+    div.className = "field" + (f.wide ? " wide" : "");
+
+    const label = document.createElement("label");
+    label.setAttribute("for", "f_" + f.key);
+    label.textContent = f.label + (f.required ? " *" : "");
+    div.appendChild(label);
+
+    let input;
+    if (f.type === "select"){
+      input = document.createElement("select");
+      f.options.forEach(opt => {
+        const o = document.createElement("option");
+        o.value = opt; o.textContent = opt;
+        input.appendChild(o);
+      });
+    } else if (f.type === "textarea"){
+      input = document.createElement("textarea");
+      input.rows = 2;
+    } else {
+      input = document.createElement("input");
+      input.type = f.type || "text";
+    }
+    input.id = "f_" + f.key;
+    if (f.required) input.required = true;
+    if (f.value) input.value = f.value;
+
+    div.appendChild(input);
+    wrap.appendChild(div);
+  });
 }
 
 function resetForm(){
@@ -464,8 +601,10 @@ function resetForm(){
   document.getElementById("formTitle").textContent = "إضافة عرض جديد";
   document.getElementById("saveBtnText").textContent = "حفظ العرض";
   document.getElementById("cancelEditBtn").style.display = "none";
-  document.getElementById("f_id").disabled = false;
+  const idField = document.getElementById("f_id");
+  if (idField) idField.disabled = false;
   document.getElementById("formStatus").textContent = "";
+  suggestNextId();
 }
 
 function saveListing(event){
@@ -482,12 +621,12 @@ function saveListing(event){
   }
 
   const data = {};
-  fieldIds().forEach(key => {
-    const el = document.getElementById("f_" + key);
-    data[key] = el.value.trim();
+  cat().fields.forEach(f => {
+    const el = document.getElementById("f_" + f.key);
+    data[f.key] = el.value.trim();
   });
 
-  db.collection("listings").doc(String(id)).set(data)
+  db.collection(cat().collection).doc(String(id)).set(data)
     .then(() => {
       statusEl.textContent = "تم الحفظ بنجاح ✔";
       statusEl.className = "status-msg ok";
@@ -504,9 +643,9 @@ function saveListing(event){
 
 function editListing(docId, data){
   editingDocId = docId;
-  fieldIds().forEach(key => {
-    const el = document.getElementById("f_" + key);
-    if (el) el.value = data[key] || "";
+  cat().fields.forEach(f => {
+    const el = document.getElementById("f_" + f.key);
+    if (el) el.value = data[f.key] || "";
   });
   document.getElementById("f_id").disabled = true;
   document.getElementById("formTitle").textContent = "تعديل عرض رقم " + docId;
@@ -517,20 +656,43 @@ function editListing(docId, data){
 
 function deleteListing(docId){
   if (!confirm("هل أنت متأكد من حذف العرض رقم " + docId + "؟")) return;
-  db.collection("listings").doc(docId).delete().catch(e => {
+  db.collection(cat().collection).doc(docId).delete().catch(e => {
     alert("حدث خطأ أثناء الحذف: " + e.message);
     console.error(e);
   });
 }
 
+/* ============ جدول العروض (ديناميكي حسب الفئة) ============ */
+
+function renderTableHead(){
+  const tr = document.getElementById("listingsTableHead");
+  tr.innerHTML = "";
+  cat().listColumns.forEach(col => {
+    const th = document.createElement("th");
+    th.textContent = col.label;
+    tr.appendChild(th);
+  });
+  const th = document.createElement("th");
+  th.textContent = "إجراءات";
+  tr.appendChild(th);
+}
+
 function listenToListings(){
-  db.collection("listings").onSnapshot(snap => {
+  if (unsubscribeListener) { unsubscribeListener(); unsubscribeListener = null; }
+  if (!window.db) return;
+
+  const subscribedCategory = currentCategory;
+
+  unsubscribeListener = db.collection(cat().collection).onSnapshot(snap => {
     const tbody = document.getElementById("listingsTableBody");
     const emptyState = document.getElementById("emptyState");
     tbody.innerHTML = "";
 
     const docs = snap.docs.sort((a,b) => (parseInt(a.id)||0) - (parseInt(b.id)||0));
     document.getElementById("listingsCount").textContent = docs.length;
+
+    const maxId = docs.length ? (parseInt(docs[docs.length-1].id, 10) || 0) : 0;
+    updateIdBaseline(subscribedCategory, "firestore", maxId);
 
     if (docs.length === 0){
       emptyState.style.display = "block";
@@ -541,13 +703,22 @@ function listenToListings(){
     docs.forEach(doc => {
       const d = doc.data();
       const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${doc.id}</td>
-        <td>${d.type || ""}</td>
-        <td>${d.price || ""} ريال</td>
-        <td><span class="badge-rent">${d.rentType || ""}</span></td>
-        <td>${d.floor || ""}</td>
-        <td>${d.rooms || ""}</td>
+
+      const cellsHTML = cat().listColumns.map(col => {
+        const val = d[col.key] || "";
+        let content;
+        if (col.statusBadge){
+          const isArchived = val === "مؤرشف";
+          content = `<span class="${isArchived ? 'badge-archived' : 'badge-active'}">${val || "نشط"}</span>`;
+        } else if (col.badge){
+          content = `<span class="badge-rent">${val}</span>`;
+        } else {
+          content = val + (col.suffix && val ? col.suffix : "");
+        }
+        return `<td>${content}</td>`;
+      }).join("");
+
+      tr.innerHTML = cellsHTML + `
         <td>
           <div class="row-actions">
             <button class="btn-edit" data-doc-id="${doc.id}"><i class="fa-solid fa-pen"></i></button>
@@ -564,51 +735,80 @@ function listenToListings(){
   });
 }
 
-async function importFromRentPage(){
-  if (!confirm("سيتم استيراد كل العروض الحالية من صفحة Rent.html إلى قاعدة البيانات. إذا كان العرض موجودًا مسبقًا (بنفس الرقم) سيتم تحديثه. متابعة؟")) return;
+/* ============ استيراد من الصفحة الحالية ============ */
+
+function stripHtml(s){
+  return (s || "").replace(/<[^>]*>?/gm, "").trim();
+}
+
+function extractRowData(row, c){
+  const td = row.querySelectorAll("td");
+  if (td.length < Object.keys(c.importIndices).length) return null;
+
+  const id = stripHtml(td[c.idIndex]?.innerHTML);
+  if (!id) return null;
+
+  const data = {};
+  Object.entries(c.importIndices).forEach(([key, idx]) => {
+    if (idx === c.locationIndex || idx === c.photosIndex){
+      data[key] = td[idx]?.querySelector("a")?.getAttribute("href") || "";
+    } else {
+      data[key] = stripHtml(td[idx]?.innerHTML);
+    }
+  });
+
+  return { id, data };
+}
+
+function getCommentedRows(doc){
+  const walker = document.createTreeWalker(doc.body, NodeFilter.SHOW_COMMENT);
+  const rows = [];
+  let node;
+  while ((node = walker.nextNode())){
+    if (!node.data.includes("<tr")) continue;
+    const frag = new DOMParser().parseFromString(
+      `<table><tbody>${node.data}</tbody></table>`, "text/html"
+    );
+    frag.querySelectorAll("tr").forEach(tr => rows.push(tr));
+  }
+  return rows;
+}
+
+async function importFromSourcePage(){
+  const c = cat();
+  if (!confirm(`سيتم استيراد كل العروض الحالية من صفحة ${c.sourcePage} إلى قاعدة البيانات (بما فيها العروض المعلّقة/القديمة كعروض مؤرشفة). إذا كان العرض موجودًا مسبقًا (بنفس الرقم) سيتم تحديثه. متابعة؟`)) return;
 
   try{
-    const res = await fetch("Rent.html");
+    const res = await fetch(c.sourcePage);
     const html = await res.text();
     const doc = new DOMParser().parseFromString(html, "text/html");
-    const rows = doc.querySelectorAll("#productTable tbody tr");
 
-    const strip = s => (s || "").replace(/<[^>]*>?/gm, "").trim();
+    const liveRows = doc.querySelectorAll(c.tableSelector);
+    const commentedRows = getCommentedRows(doc);
+
     let count = 0;
+    let archivedCount = 0;
     const batch = db.batch();
 
-    rows.forEach(row => {
-      const td = row.querySelectorAll("td");
-      if (td.length < 15) return;
-
-      const id = strip(td[0].innerHTML);
-      if (!id) return;
-
-      const data = {
-        type: strip(td[1].innerHTML),
-        location: td[2].querySelector("a")?.getAttribute("href") || "",
-        floor: strip(td[3].innerHTML),
-        rooms: strip(td[4].innerHTML),
-        baths: strip(td[5].innerHTML),
-        hall: strip(td[6].innerHTML),
-        kitchen: strip(td[7].innerHTML),
-        store: strip(td[8].innerHTML),
-        elevator: strip(td[9].innerHTML),
-        furnished: strip(td[10].innerHTML),
-        fittedKitchen: strip(td[11].innerHTML),
-        entrance: strip(td[12].innerHTML),
-        notes: strip(td[13].innerHTML),
-        price: strip(td[14].innerHTML),
-        rentType: td[15] ? strip(td[15].innerHTML) : "سنة كاملة",
-        photos: td[16]?.querySelector("a")?.getAttribute("href") || ""
-      };
-
-      batch.set(db.collection("listings").doc(id), data);
+    liveRows.forEach(row => {
+      const result = extractRowData(row, c);
+      if (!result) return;
+      result.data.status = "نشط";
+      batch.set(db.collection(c.collection).doc(result.id), result.data);
       count++;
     });
 
+    commentedRows.forEach(row => {
+      const result = extractRowData(row, c);
+      if (!result) return;
+      result.data.status = "مؤرشف";
+      batch.set(db.collection(c.collection).doc(result.id), result.data);
+      count++;
+      archivedCount++;
+    });
+
     await batch.commit();
-    alert("تم استيراد " + count + " عرضًا بنجاح");
+    alert(`تم استيراد ${count} عرضًا بنجاح (منها ${archivedCount} عرض مؤرشف)`);
   }catch(e){
     alert("حدث خطأ أثناء الاستيراد: " + e.message);
     console.error(e);

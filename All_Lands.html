@@ -1,599 +1,93 @@
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>قائمة الأراضي للبيع</title>
-    <link rel="icon" href="Logo.png" type="image/png">
-    <style>
-        body {
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="Logo.png" type="image/png">
+<title>قائمة الأراضي للبيع | تطوير ساس العقارية</title>
 
-                background: linear-gradient(to bottom, #dbd692 , #ffffff);
-                font-family: Tahoma, sans-serif;
-                padding: 30px;
-                text-align: center;
-                direction: rtl;
-            }
-        table {
-            width: 100%;
-            font-size: 14px;
-            border-collapse: collapse;
-        }
-        th, td {
-            text-align: center;
-            vertical-align: middle;
-            border: 1px solid #ccc;
-        }
-        th {
-            background-color: #f0f0f0;
-        }
-        tr:hover {
-            background-color: #f9f9f9;
-        }
-        a {
-            text-decoration: none;
-            color: white;
-        }
-    </style>
-    
-</head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer">
 
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
 
-
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+<header class="site-header">
+  <div class="top-container">
+    <a href="index.html" class="brand">
+      <img src="Logo.png" alt="شعار المكتب" class="logo">
+      <span class="brand-name">تطوير ساس العقارية<small>Sas Real Estate Development</small></span>
+    </a>
 
+    <div class="header-buttons">
+      <a href="tel:0534108666"><i class="fa-solid fa-phone"></i> اتصل الآن</a>
+      <a href="https://wa.me/966534108666" class="cta-whatsapp"><i class="fa-brands fa-whatsapp"></i> واتساب</a>
+      <a href="https://maps.app.goo.gl/2NUqCqLExX86fFG87"><i class="fa-solid fa-location-dot"></i> موقع المكتب</a>
+      <a href="index.html"><i class="fa-solid fa-house"></i> الرئيسية</a>
+    </div>
+  </div>
+</header>
 
-<div style="text-align: center; margin-bottom: 20px;">
-  <a href="index.html">
-<img alt="شعار المكتب" img src="Logo.png" style="height: 300px;"/><br/><br/>
-</a>
-<a href="tel:0534108666" style="margin:5px;padding:10px 15px;background-color:#25D366;border-radius:5px;">📞 اتصل الآن</a>
-<a href="https://wa.me/966534108666" style="margin:5px;padding:10px 15px;background-color:#25D366;border-radius:5px;">💬 واتساب</a>
-<br>
-<br>
-<br>
-<a href="https://maps.app.goo.gl/2NUqCqLExX86fFG87" style="margin:5px;padding:10px 15px;background-color:#25D366;border-radius:5px;">📍 موقع المكتب ، تقييمك يهمنا!</a>
-<br>
-<br>
-<br>
-<a href="index.html" style="margin:5px;padding:10px 15px;background-color:#25D366;border-radius:5px;">العودة للصفحة الرئيسية</a>
-<a href="Rent.html" style="margin:5px;padding:10px 15px;background-color:#25D366;border-radius:5px;">شقق للإيجار</a>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+<h2 class="page-title">قائمة الأراضي للبيع</h2>
+<p class="page-subtitle">تصفح كل الأراضي المتاحة للبيع وفلترها حسب احتياجك</p>
 
+<div class="filters-panel">
+  <div class="filters-wrapper">
 
+    <div class="filter-field">
+      <label for="filterType">نوع العقار</label>
+      <select id="filterType">
+        <option value="">الكل</option>
+        <option value="أرض تجارية">أرض تجارية</option>
+        <option value="أرض سكنية">أرض سكنية</option>
+        <option value="أرض زراعية">أرض زراعية</option>
+        <option value="أرض صناعية">أرض صناعية</option>
+      </select>
+    </div>
 
-<!-- jQuery + DataTables (إن لم تكن مضافة مسبقاً) -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <div class="filter-field">
+      <label for="sortSelect">ترتيب حسب</label>
+      <select id="sortSelect">
+        <option value="">— اختر —</option>
+        <option value="price-asc">السعر ↑</option>
+        <option value="price-desc">السعر ↓</option>
+        <option value="area-asc">المساحة ↑</option>
+        <option value="area-desc">المساحة ↓</option>
+      </select>
+    </div>
 
-<!-- Filters UI -->
-<div id="filters" style="margin:15px 0; display:flex; gap:40px; align-items:center; justify-content:center; flex-wrap:wrap;">
-  <div id="price-filter" style="display:flex; gap:8px; align-items:center;">
-    <strong>السعر:</strong>
-    <label>من
-      <input type="number" id="minPriceInput" placeholder="0" style="width:120px">
-    </label>
-    <label>إلى
-      <input type="number" id="maxPriceInput" placeholder="10000000" style="width:140px">
-    </label>
   </div>
 
-  <div id="area-filter" style="display:flex; gap:8px; align-items:center;">
-    <strong>المساحة:</strong>
-    <label>من
-      <input type="number" id="minAreaInput" placeholder="0" style="width:120px">
-    </label>
-    <label>إلى
-      <input type="number" id="maxAreaInput" placeholder="2000" style="width:120px">
-    </label>
+  <div class="price-range">
+    <label for="minPriceInput">السعر من:</label>
+    <input id="minPriceInput" placeholder="أقل سعر" type="number"/>
+    <label for="maxPriceInput">إلى:</label>
+    <input id="maxPriceInput" placeholder="أعلى سعر" type="number"/>
   </div>
 
-  <button id="clearAll" type="button">مسح</button>
-</div>
-
-
-
-
-<script>
-$(function () {
-  const $table = $('table.dataframe');
-  if (!$table.length) return;
-
-  // Ensure the table has an ID
-  if (!$table.attr('id')) $table.attr('id','landsTable');
-  const tableId = $table.attr('id');
-
-  // Destroy any existing DataTables instance before changing columns
-  if ($.fn.dataTable.isDataTable('#' + tableId)) {
-    $('#' + tableId).DataTable().destroy();
-  }
-
-  // Add "نسخ" header if missing
-  const $theadTr = $('#' + tableId + ' thead tr');
-  const hasCopyHeader = $theadTr.find('th').filter(function(){
-    return $(this).text().trim() === 'نسخ';
-  }).length > 0;
-  if (!hasCopyHeader) {
-    $theadTr.append('<th>نسخ</th>');
-  }
-
-  // Get index of the "نسخ" column
-  const copyIdx = $('#' + tableId + ' thead th').filter(function(){
-    return $(this).text().trim() === 'نسخ';
-  }).index();
-
-  // Make sure each <tr> has the same number of <td> as headers (after adding "نسخ")
-  const headerCount = $('#' + tableId + ' thead th').length;
-  $('#' + tableId + ' tbody tr').each(function(){
-    const diff = headerCount - $(this).children('td').length;
-    for (let i = 0; i < diff; i++) { $(this).append('<td></td>'); }
-  });
-
-  // Init DataTables and always inject a copy button into the "نسخ" column
-  const dt = $('#' + tableId).DataTable({
-    language: { url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/ar.json' },
-    pageLength: 100,
-    order: [],
-    columnDefs: [{
-      targets: copyIdx,                // target "نسخ" column by name
-      orderable: false,
-      searchable: false,
-      createdCell: function(td){       // inject the button into every cell
-        td.innerHTML = '<button type="button" class="copyRowBtn" style="padding:6px 10px;border:1px solid #ccc;border-radius:8px;background:#f7f7f7;cursor:pointer;">📋 نسخ</button>';
-      }
-    }]
-  });
-
-  // ===== Helpers (English comments) =====
-  function stripTags(html){ return String(html).replace(/<[^>]*>?/gm,'').trim(); }
-
-  // Extract all hrefs from a cell's HTML (first link, or multiple if present)
-  function extractHrefs(html){
-    const div = document.createElement('div');
-    div.innerHTML = String(html || '');
-    const anchors = Array.from(div.querySelectorAll('a[href]'));
-    return anchors.map(a => a.getAttribute('href')).filter(Boolean);
-  }
-
-  function copyToClipboard(text){
-    if (navigator.clipboard?.writeText) return navigator.clipboard.writeText(text);
-    return new Promise((res,rej)=>{
-      const ta=document.createElement('textarea');
-      ta.value=text; document.body.appendChild(ta);
-      ta.select(); ta.setSelectionRange(0,text.length);
-      try{ document.execCommand('copy'); res(); } catch(e){ rej(e); }
-      finally{ document.body.removeChild(ta); }
-    });
-  }
-
-  function showToast(msg='تم نسخ الصف'){
-    const el=document.createElement('div');
-    el.textContent=msg;
-    el.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 14px;border-radius:8px;opacity:.95;z-index:9999;font-size:14px';
-    document.body.appendChild(el);
-    setTimeout(()=>el.remove(),1300);
-  }
-
-  // Copy handler: include URLs from "الموقع" and "مرفقات"
-  $('#' + tableId + ' tbody').on('click', 'button.copyRowBtn', async function(){
-    const rowData = dt.row($(this).closest('tr')).data();      // HTML per cell
-    const headers = dt.columns().header().toArray().map(h => $(h).text().trim());
-
-    const lines = [];
-    for (let i = 0; i < headers.length; i++){
-      if (i === copyIdx) continue; // skip the "نسخ" column
-
-      const title = headers[i] || '';
-      let value;
-
-      // For these columns, extract the link(s) instead of plain text
-      if (title === 'الموقع' || title === 'مرفقات') {
-        const hrefs = extractHrefs(rowData[i]);
-        value = hrefs.length ? hrefs.join(' , ') : stripTags(rowData[i] ?? '');
-      } else {
-        // For all other columns, copy plain text without HTML
-        value = stripTags(rowData[i] ?? '');
-      }
-
-      if (title) lines.push(`${title}: ${value}`);
-    }
-
-    try { await copyToClipboard(lines.join('\n')); showToast(); }
-    catch { showToast('تعذّر النسخ'); }
-  });
-
-  // Keep price/area filters wired to the current DataTables instance
-  $('#minPriceInput, #maxPriceInput, #minAreaInput, #maxAreaInput')
-    .off('input').on('input', function(){ dt.draw(); });
-  $('#clearAll').off('click').on('click', function(){
-    $('#minPriceInput, #maxPriceInput, #minAreaInput, #maxAreaInput').val('');
-    dt.draw();
-  });
-});
-</script>
-<!-- UI: Property Type Filter -->
-<div id="type-filter" style="margin:10px 0; display:flex; align-items:center; gap:12px; justify-content:center; flex-wrap:wrap;">
-  <strong>نوع العقار:</strong>
-  <label><input type="checkbox" class="typeCheckbox" value="أرض تجارية"> أرض تجارية</label>
-  <label><input type="checkbox" class="typeCheckbox" value="أرض سكنية"> أرض سكنية</label>
-  <label><input type="checkbox" class="typeCheckbox" value="أرض زراعية"> أرض زراعية</label>
-  <label><input type="checkbox" class="typeCheckbox" value="أرض صناعية"> أرض صناعية</label>
-</div>
-
-<script>
-$(function(){
-  // Ensure we target the same table used elsewhere
-  const $t = $('table.dataframe').last();
-  if (!$t.length) return;
-  if (!$t.attr('id')) $t.attr('id','landsTable');
-  const tableId = $t.attr('id');
-
-  // Helper: get column index by exact header text
-  function getColIndexByHeaderText(txt) {
-    return $('#' + tableId + ' thead th').filter(function(){
-      return $(this).text().trim() === txt;
-    }).index();
-  }
-
-  // Locate "نوع العقار" column
-  const typeIdx = getColIndexByHeaderText('نوع العقار');
-
-  // Push a dedicated filter for "نوع العقار" (only for this table)
-  if (typeIdx >= 0) {
-    $.fn.dataTable.ext.search.push(function(settings, data){
-      // Apply only to our table instance
-      if (settings.nTable !== $('#' + tableId)[0]) return true;
-
-      // Read selected types from checkboxes
-      const selected = $('.typeCheckbox:checked').map(function(){ return $(this).val(); }).get();
-      if (!selected.length) return true; // no selection => don't filter
-
-      // Plain text of the cell (strip HTML if any)
-      const cell = String(data[typeIdx] || '').replace(/<[^>]*>?/gm,'').trim();
-
-      // Keep row only if cell matches one of selected values
-      return selected.includes(cell);
-    });
-  } else {
-    // If the header isn't found, do nothing (avoid errors)
-    console.warn('Column "نوع العقار" not found.');
-  }
-
-  // Redraw on checkbox change
-  $(document).on('change', '.typeCheckbox', function(){
-    const dt = $('#' + tableId).DataTable();
-    dt.draw();
-  });
-
-  // Integrate with an existing "Clear All" button if present
-  if ($('#clearAll').length) {
-    $('#clearAll').off('click.type').on('click.type', function(){
-      $('.typeCheckbox').prop('checked', false);
-      const dt = $('#' + tableId).DataTable();
-      dt.draw();
-    });
-  }
-});
-</script>
-
-
-
-
-<!-- ➕ Add Row button -->
-<div style="margin:15px 0; text-align:center;">
-  <button id="openAddForm" style="padding:10px 20px; background:#198754; color:#fff; border:none; border-radius:8px; cursor:pointer;">
-    ➕ إضافة صف جديد
-  </button>
-</div>
-
-<!-- Modal form (all fields visible together) -->
-<style>
-  .modal-overlay{
-    position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999;
-  }
-  .modal-card{
-    background:#fff; border-radius:12px; padding:18px; width:min(900px,96vw); max-height:90vh; overflow:auto; direction:rtl; text-align:right;
-    box-shadow:0 10px 30px rgba(0,0,0,.2); font-family:Tahoma, sans-serif;
-  }
-  .form-grid{
-    display:grid; grid-template-columns: repeat(2, minmax(220px, 1fr)); gap:12px;
-  }
-  .form-grid label{ font-weight:600; font-size:14px; }
-  .form-grid input, .form-grid select, .form-grid textarea{
-    width:100%; padding:8px; border:1px solid #ccc; border-radius:8px; font-size:14px;
-  }
-  .modal-actions{ display:flex; gap:10px; justify-content:flex-start; margin-top:14px; }
-  .btn{
-    padding:10px 16px; border:none; border-radius:8px; cursor:pointer; font-size:14px;
-  }
-  .btn-primary{ background:#0d6efd; color:#fff; }
-  .btn-secondary{ background:#6c757d; color:#fff; }
-  .hint{ font-size:12px; color:#666; }
-</style>
-
-<div id="addRowModal" class="modal-overlay" aria-hidden="true">
-  <div class="modal-card">
-    <h3 style="margin-top:0;">إضافة صف جديد</h3>
-    <p class="hint">املأ ما تحتاجه فقط. يمكن ترك أي خانة فارغة. الحقول <strong>الموقع</strong> و<strong>مرفقات</strong> تقبل روابط.</p>
-
-    <form id="addRowForm">
-      <div class="form-grid">
-
-        <div>
-          <label>رقم اللوحة</label>
-          <input name="رقم اللوحة" type="text" />
-        </div>
-
-        <div>
-          <label>رقم</label>
-          <input name="رقم" type="number" step="1" min="0" placeholder="يُمكن تركه فارغًا وسيُملأ تلقائيًا" />
-        </div>
-
-        <div>
-          <label>نوع العقار</label>
-          <select name="نوع العقار">
-            <option value=""></option>
-            <option>أرض تجارية</option>
-            <option>أرض سكنية</option>
-            <option>أرض زراعية</option>
-            <option>أرض صناعية</option>
-          </select>
-        </div>
-
-        <div>
-          <label>نوع العرض</label>
-          <select name="نوع العرض">
-            <option value=""></option>
-            <option>بيع</option>
-            <option>إيجار</option>
-          </select>
-        </div>
-
-        <div>
-          <label>الموقع <span class="hint">(رابط خرائط)</span></label>
-          <input name="الموقع" type="url" placeholder="https://maps.app..." />
-        </div>
-
-        <div>
-          <label>رقم المخطط</label>
-          <input name="رقم المخطط" type="text" />
-        </div>
-
-        <div>
-          <label>اسم المخطط</label>
-          <input name="اسم المخطط" type="text" />
-        </div>
-
-        <div>
-          <label>طول</label>
-          <input name="طول" type="number" step="0.1" />
-        </div>
-
-        <div>
-          <label>عرض</label>
-          <input name="عرض" type="number" step="0.1" />
-        </div>
-
-        <div>
-          <label>المساحة</label>
-          <input name="المساحة" type="number" step="0.1" />
-        </div>
-
-        <div>
-          <label>مواصفات العقار</label>
-          <input name="مواصفات العقار" type="text" />
-        </div>
-
-        <div>
-          <label>الواجهات</label>
-          <input name="الواجهات" type="text" />
-        </div>
-
-        <div>
-          <label>السوم</label>
-          <input name="السوم" type="text" />
-        </div>
-
-        <div>
-          <label>السعر</label>
-          <input name="السعر" type="text" />
-        </div>
-
-        <div>
-          <label>سعر المتر</label>
-          <input name="سعر المتر" type="text" />
-        </div>
-
-        <div>
-          <label>مرفقات <span class="hint">(رابط صور/Drive)</span></label>
-          <input name="مرفقات" type="url" placeholder="https://drive.google.com/..." />
-        </div>
-
-        <div style="grid-column: 1 / -1;">
-          <label>الملاحظات</label>
-          <textarea name="الملاحظات" rows="2"></textarea>
-        </div>
-
-      </div>
-
-      <div class="modal-actions">
-        <button type="submit" class="btn btn-primary">حفظ</button>
-        <button type="button" id="cancelAdd" class="btn btn-secondary">إلغاء</button>
-      </div>
-    </form>
+  <div class="price-range">
+    <label for="minAreaInput">المساحة من:</label>
+    <input id="minAreaInput" placeholder="أقل مساحة" type="number"/>
+    <label for="maxAreaInput">إلى:</label>
+    <input id="maxAreaInput" placeholder="أعلى مساحة" type="number"/>
   </div>
 </div>
 
-<script>
-$(function(){
-  // Ensure table has an id DataTables already uses
-  const $t = $('table.dataframe');
-  if (!$t.length) return;
-  if (!$t.attr('id')) $t.attr('id','landsTable');
-  const tableId = $t.attr('id');
+<div class="cards" id="cards"></div>
 
-  const dt = $('#' + tableId).DataTable();
-
-  // build header map (so we place values in the right columns)
-  const headers = $('#' + tableId + ' thead th').map(function(){return $(this).text().trim();}).get();
-
-  // small helper to convert URL inputs for الموقع/مرفقات into the same styled buttons you already use
-  function linkButton(colTitle, url){
-    if (!url || !String(url).trim()) return '';
-    const common = 'target="_blank" style="padding:5px 10px;background-color:#0d6efd;color:white;border-radius:5px;text-decoration:none;"';
-    if (colTitle === 'الموقع')  return `<a href="${url}" ${common}>📍 الموقع</a>`;
-    if (colTitle === 'مرفقات')  return `<a href="${url}" ${common}>📷 صور</a>`;
-    return url;
-  }
-
-  // Modal controls
-  const $modal = $('#addRowModal');
-  $('#openAddForm').on('click', function(){
-    // clear form each time
-    $('#addRowForm')[0].reset();
-
-    // if "رقم" left blank, we’ll auto-suggest next number visually (placeholder)
-    const nextNum = (function(){
-      // find index of "رقم"
-      const numIdx = headers.indexOf('رقم');
-      if (numIdx === -1) return '';
-      // scan current numbers to find the max
-      let max = 0;
-      dt.column(numIdx).data().each(function(v){
-        const n = parseInt(String(v).replace(/[^\d]/g,''), 10);
-        if (!isNaN(n)) max = Math.max(max, n);
-      });
-      return max + 1;
-    })();
-    $('input[name="رقم"]').attr('placeholder', nextNum ? `مثال: ${nextNum}` : '');
-
-    $modal.css('display','flex').attr('aria-hidden','false');
-  });
-
-  $('#cancelAdd').on('click', function(){
-    $modal.hide().attr('aria-hidden','true');
-  });
-
-  // Submit the form: build row in the exact header order (including "نسخ")
-  $('#addRowForm').on('submit', function(e){
-    e.preventDefault();
-
-    // gather values from form by name (names exactly match headers except "نسخ")
-    const formData = {};
-    $(this).serializeArray().forEach(({name, value}) => { formData[name] = value; });
-
-    // auto-fill "رقم" if empty with next max+1
-    if (!formData['رقم']) {
-      const numIdx = headers.indexOf('رقم');
-      if (numIdx > -1) {
-        let max = 0;
-        dt.column(numIdx).data().each(function(v){
-          const n = parseInt(String(v).replace(/[^\d]/g,''), 10);
-          if (!isNaN(n)) max = Math.max(max, n);
-        });
-        formData['رقم'] = max ? String(max + 1) : '1';
-      }
-    }
-
-    // convert links
-    if (formData['الموقع'])   formData['الموقع']   = linkButton('الموقع', formData['الموقع'].trim());
-    if (formData['مرفقات'])  formData['مرفقات']  = linkButton('مرفقات', formData['مرفقات'].trim());
-
-    // create new row array aligned with headers
-    const newRow = headers.map(h => {
-      if (h === 'نسخ') return ''; // DataTables will fill the copy button
-      return (formData[h] ?? '').toString();
-    });
-
-    dt.row.add(newRow).draw(false);
-
-    // close modal
-    $modal.hide().attr('aria-hidden','true');
-
-    // small toast
-    const el=document.createElement('div');
-    el.textContent='تمت إضافة الصف';
-    el.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 14px;border-radius:8px;opacity:.95;z-index:99999;font-size:14px';
-    document.body.appendChild(el);
-    setTimeout(()=>el.remove(),1300);
-  });
-});
-</script>
-
-<script>
-$(function(){
-  const $t = $('table.dataframe');
-  if (!$t.length) return;
-  if (!$t.attr('id')) $t.attr('id','landsTable');
-  const tableId = $t.attr('id');
-  const dt = $('#' + tableId).DataTable();
-
-  // helper: get index of a header by its exact Arabic text
-  function colIdx(title){
-    return $('#' + tableId + ' thead th').filter(function(){
-      return $(this).text().trim() === title;
-    }).index();
-  }
-
-  const priceIdx = colIdx('السعر');      // filter targets this column
-  const areaIdx  = colIdx('المساحة');    // area filter targets this column
-
-  // parse numbers like "1,800,000" → 1800000 (ignore non-digits)
-  function toNumber(x){
-    if (x == null) return NaN;
-    const n = String(x).replace(/[^\d.]/g,'');  // keep digits & dot
-    return n ? Number(n) : NaN;
-  }
-
-  // Register one global DataTables filter just for THIS table
-  $.fn.dataTable.ext.search.push(function(settings, data){
-    if (settings.nTable !== $('#' + tableId)[0]) return true;
-
-    // read inputs
-    const minP = toNumber($('#minPriceInput').val());
-    const maxP = toNumber($('#maxPriceInput').val());
-    const minA = toNumber($('#minAreaInput').val());
-    const maxA = toNumber($('#maxAreaInput').val());
-
-    // current row values
-    const priceVal = priceIdx >= 0 ? toNumber(data[priceIdx]) : NaN;
-    const areaVal  = areaIdx  >= 0 ? toNumber(data[areaIdx])  : NaN;
-
-    // price passes if not constrained OR within bounds
-    const pricePass =
-      (isNaN(minP) || (!isNaN(priceVal) && priceVal >= minP)) &&
-      (isNaN(maxP) || (!isNaN(priceVal) && priceVal <= maxP));
-
-    // area passes if not constrained OR within bounds
-    const areaPass =
-      (isNaN(minA) || (!isNaN(areaVal) && areaVal >= minA)) &&
-      (isNaN(maxA) || (!isNaN(areaVal) && areaVal <= maxA));
-
-    return pricePass && areaPass;
-  });
-
-  // (you already have these, but keep them to redraw)
-  $('#minPriceInput, #maxPriceInput, #minAreaInput, #maxAreaInput').off('input').on('input', function(){
-    dt.draw();
-  });
-  $('#clearAll').off('click.filter').on('click.filter', function(){
-    $('#minPriceInput, #maxPriceInput, #minAreaInput, #maxAreaInput').val('');
-    dt.draw();
-  });
-});
-</script>
-
-
-
-
-
-
-</div>
-
-    <h2 style="text-align: center;">قائمة الأراضي للبيع</h2>
     <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -1968,7 +1462,7 @@ $(function(){
 
 
 <h2 style="text-align:center;">خريطة المواقع</h2>
-<div id="LandsMap" style="height: 500px; width: 300%; margin-bottom: 30px; border-radius: 10px;"></div>
+<div id="LandsMap" style="height: 500px; width: 100%; max-width: 1400px; margin: 0 auto 30px; border-radius: 10px;"></div>
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
 
@@ -2120,20 +1614,179 @@ $(function(){
     L.marker([18.278374256788116, 42.4808291959891]).addTo(LandsMap)
     .bindPopup('<a href="https://maps.app.goo.gl/cwtFB3W159c5Rvvn7" target="_blank">زراعية 46 </a>');     
 </script>
-<script src="script.js" defer></script>
-<!-- Firebase Auth check -->
-<!-- <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="script.js"></script>
-<script>
-  // Auth redirect logic
-  firebase.auth().onAuthStateChanged(function(user) {
-    if (!user) {
-      window.location.href = "All_Lands.html";
-    }
-  });
-</script> -->
 
+<script>
+function strip(html){
+  return (html || "").replace(/<[^>]*>?/gm,'').trim();
+}
+
+function getStaticListings(){
+  return Array.from(document.querySelectorAll("table.dataframe tbody tr")).map(row=>{
+    const td = row.querySelectorAll("td");
+    if(td.length < 17) return null;
+    return {
+      plateNumber: strip(td[0].innerHTML),
+      id: strip(td[1].innerHTML),
+      type: strip(td[2].innerHTML),
+      offerType: strip(td[3].innerHTML),
+      location: td[4].querySelector("a")?.href || "#",
+      planNumber: strip(td[5].innerHTML),
+      planName: strip(td[6].innerHTML),
+      length: strip(td[7].innerHTML),
+      width: strip(td[8].innerHTML),
+      area: strip(td[9].innerHTML),
+      specs: strip(td[10].innerHTML),
+      facades: strip(td[11].innerHTML),
+      asking: strip(td[12].innerHTML),
+      price: strip(td[13].innerHTML),
+      pricePerMeter: strip(td[14].innerHTML),
+      photos: td[15]?.querySelector("a")?.href || "#",
+      notes: strip(td[16].innerHTML)
+    };
+  }).filter(Boolean);
+}
+
+async function getListings(){
+  if(window.db){
+    try{
+      const snap = await window.db.collection("lands").get();
+      if(!snap.empty) return snap.docs.map(doc => ({docId: doc.id, ...doc.data()})).filter(item => item.status !== "مؤرشف");
+    }catch(e){
+      console.warn("تعذر تحميل العروض من قاعدة البيانات، سيتم استخدام النسخة الثابتة", e);
+    }
+  }
+  return getStaticListings();
+}
+
+function renderCardHTML(item){
+  const {id, plateNumber, type, offerType, location, planNumber, planName,
+         length, width, area, specs, facades, asking, price, pricePerMeter, photos, notes} = item;
+  return `
+<div class="card"
+  data-type="${type}"
+  data-price="${price}"
+  data-area="${area}">
+
+  <div class="card-header">${type} – رقم ${id}</div>
+
+  <div class="card-body">
+
+    <div class="price-row">
+      <span class="price">${price ? Number(price).toLocaleString() : "-"} ريال</span>
+      ${pricePerMeter ? `<span class="monthly">(${Number(pricePerMeter).toLocaleString()} / م)</span>` : ``}
+    </div>
+    ${offerType ? `<span class="rent-type-badge">${offerType}</span>` : ``}
+
+    <div class="features">
+      <div><i class="fa-solid fa-vector-square"></i> المساحة: ${area || "-"}</div>
+      <div><i class="fa-solid fa-ruler"></i> طول: ${length || "-"}</div>
+      <div><i class="fa-solid fa-ruler"></i> عرض: ${width || "-"}</div>
+      <div><i class="fa-solid fa-border-all"></i> الواجهات: ${facades || "-"}</div>
+      <div><i class="fa-solid fa-map"></i> المخطط: ${planName || "-"}</div>
+      <div><i class="fa-solid fa-hashtag"></i> رقم اللوحة: ${plateNumber || "-"}</div>
+    </div>
+
+    ${specs ? `<div class="notes">📝 ${specs}</div>` : ``}
+    ${notes ? `<div class="notes">📝 ${notes}</div>` : ``}
+  </div>
+
+  <div class="card-actions">
+    <a class="btn-location" href="${location}" target="_blank"><i class="fa-solid fa-location-dot"></i> الموقع</a>
+    <a class="btn-photos" href="${photos}" target="_blank"><i class="fa-solid fa-images"></i> الصور</a>
+    <a class="btn-whatsapp" href="https://wa.me/966534108666?text=السلام عليكم , انا مهتم%20بالأرض%20رقم%20${id}" target="_blank"><i class="fa-brands fa-whatsapp"></i> واتساب</a>
+    <a href="#" onclick="
+      const text = \`رقم: ${id}
+رقم اللوحة: ${plateNumber}
+نوع العقار: ${type}
+نوع العرض: ${offerType}
+رقم المخطط: ${planNumber}
+اسم المخطط: ${planName}
+طول: ${length}
+عرض: ${width}
+المساحة: ${area}
+مواصفات العقار: ${specs}
+الواجهات: ${facades}
+السوم: ${asking}
+السعر: ${price} ريال
+سعر المتر: ${pricePerMeter}
+الملاحظات: ${notes}
+الموقع: ${location}
+الصور: ${photos}\`;
+      navigator.clipboard.writeText(text);
+      this.innerHTML='<i class=\'fa-solid fa-check\'></i> تم النسخ';
+      setTimeout(()=>this.innerHTML='<i class=\'fa-solid fa-copy\'></i> نسخ',1500);
+      return false;" class="btn-copy"><i class="fa-solid fa-copy"></i> نسخ</a>
+  </div>
+</div>
+`;
+}
+
+async function buildCards(){
+  const cards = document.getElementById("cards");
+  cards.innerHTML = "";
+  const listings = await getListings();
+  cards.innerHTML = listings.map(renderCardHTML).join("");
+  applyFilters();
+}
+
+function applyFilters(){
+  const type = document.getElementById("filterType")?.value || "";
+  const minPrice = parseInt(document.getElementById("minPriceInput")?.value || 0);
+  const maxPrice = parseInt(document.getElementById("maxPriceInput")?.value || 9999999999);
+  const minArea = parseInt(document.getElementById("minAreaInput")?.value || 0);
+  const maxArea = parseInt(document.getElementById("maxAreaInput")?.value || 9999999999);
+
+  document.querySelectorAll(".card").forEach(card=>{
+    let show = true;
+    const cardType = card.dataset.type;
+    const cardPrice = parseInt((card.dataset.price || "0").replace(/[^0-9]/g,"")) || 0;
+    const cardArea = parseInt((card.dataset.area || "0").replace(/[^0-9]/g,"")) || 0;
+
+    if(type && cardType !== type) show = false;
+    if(cardPrice < minPrice || cardPrice > maxPrice) show = false;
+    if(cardArea < minArea || cardArea > maxArea) show = false;
+
+    card.style.display = show ? "" : "none";
+  });
+}
+
+["filterType","minPriceInput","maxPriceInput","minAreaInput","maxAreaInput"]
+  .forEach(id => {
+    document.getElementById(id)?.addEventListener("change", applyFilters);
+    document.getElementById(id)?.addEventListener("input", applyFilters);
+  });
+
+document.getElementById("sortSelect")?.addEventListener("change", function(){
+  const container = document.querySelector(".cards");
+  const cards = Array.from(container.children);
+  const value = this.value;
+  if(!value) return;
+  let key = "", dir = 1;
+  if(value.includes("price")) key = "price";
+  if(value.includes("area")) key = "area";
+  if(value.endsWith("desc")) dir = -1;
+  cards.sort((a,b)=>{
+    const aVal = parseInt((a.dataset[key]||"0").replace(/[^0-9]/g,"")) || 0;
+    const bVal = parseInt((b.dataset[key]||"0").replace(/[^0-9]/g,"")) || 0;
+    return (aVal - bVal) * dir;
+  });
+  cards.forEach(card => container.appendChild(card));
+});
+
+window.addEventListener("load", buildCards);
+</script>
+
+<footer class="site-footer">
+  <a href="index.html"><img src="Logo.png" alt="شعار المكتب" class="footer-logo"></a>
+  <div class="footer-links">
+    <a href="tel:0534108666"><i class="fa-solid fa-phone"></i> 0534108666</a>
+    <a href="https://wa.me/966534108666"><i class="fa-brands fa-whatsapp"></i> واتساب</a>
+    <a href="https://maps.app.goo.gl/2NUqCqLExX86fFG87"><i class="fa-solid fa-location-dot"></i> موقع المكتب</a>
+  </div>
+  <small>© <span id="footerYear"></span> تطوير ساس العقارية - جميع الحقوق محفوظة</small>
+</footer>
+
+<script>document.getElementById("footerYear").textContent = new Date().getFullYear();</script>
 
 </body>
 </html>
