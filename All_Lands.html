@@ -1725,6 +1725,7 @@ async function buildCards(){
   const cards = document.getElementById("cards");
   cards.innerHTML = "";
   const listings = await getListings();
+  listings.sort((a,b) => (parseInt(a.id)||0) - (parseInt(b.id)||0));
   cards.innerHTML = listings.map(renderCardHTML).join("");
   applyFilters();
 }
