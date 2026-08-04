@@ -221,6 +221,51 @@ button{ cursor:pointer; border:none; }
 .status-filter button:hover{ background:var(--cream); }
 .status-filter button.active{ background:var(--olive); color:#fff; border-color:var(--olive); }
 
+/* ===== Owners ===== */
+
+.owner-property-row{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  margin-bottom:8px;
+  flex-wrap:wrap;
+}
+.owner-property-row select{ flex:1; min-width:150px; }
+.owner-property-row input{ flex:1; min-width:100px; }
+.owner-property-row .btn-remove-property{
+  background:var(--danger); color:#fff; padding:9px 12px; border-radius:8px; flex:none;
+}
+.owner-property-row .btn-remove-property:hover{ background:var(--danger-dark); }
+
+.btn-add-property{
+  background:var(--cream); border:1px dashed var(--line); color:var(--olive-dark);
+  padding:8px 16px; border-radius:8px; font-size:.85rem; font-weight:700;
+}
+.btn-add-property:hover{ background:var(--gold-light); }
+
+.owner-card{
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:16px 18px;
+  margin-bottom:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:14px;
+  flex-wrap:wrap;
+}
+
+.owner-card .owner-info h3{ margin:0 0 4px; font-size:1rem; color:var(--olive-dark); }
+.owner-card .owner-info .owner-phone{ font-size:.85rem; color:var(--muted); margin-bottom:8px; }
+.owner-card .owner-info .owner-phone a{ color:var(--blue,#2f6690); font-weight:700; }
+.owner-card .owner-notes{ font-size:.8rem; color:var(--muted); margin-top:6px; }
+
+.property-chips{ display:flex; flex-wrap:wrap; gap:6px; }
+.property-chip{
+  background:var(--gold-light); color:#5a4713; border:1px solid #e6d18f;
+  padding:3px 12px; border-radius:999px; font-size:.78rem; font-weight:700;
+}
+
 .row-actions{ display:flex; gap:6px; justify-content:center; }
 .row-actions button{ padding:6px 10px; border-radius:6px; font-size:.8rem; }
 .btn-edit{ background:#2f6690; color:#fff; }
@@ -298,42 +343,96 @@ button{ cursor:pointer; border:none; }
 
   <div class="admin-body">
 
-    <div class="tabs" id="categoryTabs"></div>
+    <div class="tabs" id="modeTabs"></div>
 
-    <div class="panel">
-      <h2><i class="fa-solid fa-plus"></i> <span id="formTitle">إضافة عرض جديد</span></h2>
+    <div id="listingsSection">
 
-      <form id="listingForm" onsubmit="return saveListing(event)">
-        <div class="form-grid" id="formFields"></div>
+      <div class="tabs" id="categoryTabs"></div>
 
-        <div class="form-actions">
-          <button type="submit" class="btn-save"><i class="fa-solid fa-floppy-disk"></i> <span id="saveBtnText">حفظ العرض</span></button>
-          <button type="button" class="btn-cancel" id="cancelEditBtn" style="display:none;" onclick="resetForm()">إلغاء التعديل</button>
+      <div class="panel">
+        <h2><i class="fa-solid fa-plus"></i> <span id="formTitle">إضافة عرض جديد</span></h2>
+
+        <form id="listingForm" onsubmit="return saveListing(event)">
+          <div class="form-grid" id="formFields"></div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-save"><i class="fa-solid fa-floppy-disk"></i> <span id="saveBtnText">حفظ العرض</span></button>
+            <button type="button" class="btn-cancel" id="cancelEditBtn" style="display:none;" onclick="resetForm()">إلغاء التعديل</button>
+          </div>
+
+          <div id="formStatus" class="status-msg"></div>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h2><i class="fa-solid fa-list"></i> العروض الحالية (<span id="listingsCount">0</span>)</h2>
+
+        <div style="margin-bottom:16px;">
+          <button class="btn-import" onclick="importFromSourcePage()"><i class="fa-solid fa-file-import"></i> <span id="importBtnText">استيراد العروض الحالية من الصفحة</span></button>
+          <span style="font-size:.78rem;color:var(--muted);margin-right:8px;">(مرة واحدة فقط لنقل العروض القديمة إلى قاعدة البيانات)</span>
         </div>
 
-        <div id="formStatus" class="status-msg"></div>
-      </form>
+        <div class="status-filter" id="statusFilter"></div>
+
+        <div style="overflow-x:auto;">
+          <table class="listings-table">
+            <thead>
+              <tr id="listingsTableHead"></tr>
+            </thead>
+            <tbody id="listingsTableBody"></tbody>
+          </table>
+          <div id="emptyState" class="empty-state" style="display:none;">لا توجد عروض بعد. أضف عرضًا جديدًا أو استورد العروض الحالية.</div>
+        </div>
+      </div>
+
     </div>
 
-    <div class="panel">
-      <h2><i class="fa-solid fa-list"></i> العروض الحالية (<span id="listingsCount">0</span>)</h2>
+    <div id="ownersSection" style="display:none;">
 
-      <div style="margin-bottom:16px;">
-        <button class="btn-import" onclick="importFromSourcePage()"><i class="fa-solid fa-file-import"></i> <span id="importBtnText">استيراد العروض الحالية من الصفحة</span></button>
-        <span style="font-size:.78rem;color:var(--muted);margin-right:8px;">(مرة واحدة فقط لنقل العروض القديمة إلى قاعدة البيانات)</span>
+      <div class="panel">
+        <h2><i class="fa-solid fa-user-plus"></i> <span id="ownerFormTitle">إضافة مالك جديد</span></h2>
+
+        <form id="ownerForm" onsubmit="return saveOwner(event)">
+          <div class="form-grid">
+            <div class="field wide">
+              <label for="o_name">اسم المالك *</label>
+              <input type="text" id="o_name" required>
+            </div>
+            <div class="field">
+              <label for="o_phone">رقم الجوال</label>
+              <input type="tel" id="o_phone" placeholder="05xxxxxxxx">
+            </div>
+          </div>
+
+          <div style="margin-top:18px;">
+            <label style="display:block; font-size:.85rem; font-weight:700; color:var(--olive-dark); margin-bottom:8px;">العقارات المملوكة</label>
+            <div id="ownerPropertiesList"></div>
+            <button type="button" class="btn-add-property" onclick="addOwnerPropertyRow()"><i class="fa-solid fa-plus"></i> إضافة عقار</button>
+          </div>
+
+          <div class="field wide" style="margin-top:14px;">
+            <label for="o_notes">ملاحظات</label>
+            <textarea id="o_notes" rows="2"></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-save"><i class="fa-solid fa-floppy-disk"></i> <span id="ownerSaveBtnText">حفظ المالك</span></button>
+            <button type="button" class="btn-cancel" id="ownerCancelEditBtn" style="display:none;" onclick="resetOwnerForm()">إلغاء التعديل</button>
+          </div>
+
+          <div id="ownerFormStatus" class="status-msg"></div>
+        </form>
       </div>
 
-      <div class="status-filter" id="statusFilter"></div>
+      <div class="panel">
+        <h2><i class="fa-solid fa-users"></i> الملاك (<span id="ownersCount">0</span>)</h2>
 
-      <div style="overflow-x:auto;">
-        <table class="listings-table">
-          <thead>
-            <tr id="listingsTableHead"></tr>
-          </thead>
-          <tbody id="listingsTableBody"></tbody>
-        </table>
-        <div id="emptyState" class="empty-state" style="display:none;">لا توجد عروض بعد. أضف عرضًا جديدًا أو استورد العروض الحالية.</div>
+        <input type="text" id="ownerSearchInput" placeholder="ابحث بالاسم، الجوال، أو رقم العرض (مثال: 8)" style="margin-bottom:16px;">
+
+        <div id="ownersList"></div>
+        <div id="ownersEmptyState" class="empty-state" style="display:none;">لا يوجد ملاك بعد.</div>
       </div>
+
     </div>
 
   </div>
@@ -468,6 +567,10 @@ let idBaselines = {};
 let lastAutoId = null;
 let currentStatusFilter = "all";
 let lastDocs = [];
+let currentMode = "listings";
+let editingOwnerId = null;
+let unsubscribeOwners = null;
+let lastOwnerDocs = [];
 
 function cat(){ return CATEGORIES[currentCategory]; }
 
@@ -499,6 +602,7 @@ if (window.auth){
     if (user){
       document.getElementById("loginScreen").style.display = "none";
       document.getElementById("dashboardScreen").style.display = "block";
+      renderModeTabs();
       renderTabs();
       switchCategory("rent");
     } else {
@@ -509,6 +613,33 @@ if (window.auth){
 }
 
 /* ============ التبويبات ============ */
+
+function renderModeTabs(){
+  const wrap = document.getElementById("modeTabs");
+  wrap.innerHTML = "";
+  const modes = [
+    {key:"listings", label:"العروض", icon:"fa-building"},
+    {key:"owners", label:"الملاك", icon:"fa-users"}
+  ];
+  modes.forEach(m => {
+    const btn = document.createElement("button");
+    btn.className = "tab-btn" + (m.key === currentMode ? " active" : "");
+    btn.innerHTML = `<i class="fa-solid ${m.icon}"></i> ${m.label}`;
+    btn.addEventListener("click", () => switchMode(m.key));
+    wrap.appendChild(btn);
+  });
+}
+
+function switchMode(mode){
+  currentMode = mode;
+  renderModeTabs();
+  document.getElementById("listingsSection").style.display = mode === "listings" ? "block" : "none";
+  document.getElementById("ownersSection").style.display = mode === "owners" ? "block" : "none";
+  if (mode === "owners"){
+    resetOwnerForm();
+    listenToOwners();
+  }
+}
 
 function renderTabs(){
   const wrap = document.getElementById("categoryTabs");
@@ -887,6 +1018,172 @@ async function importFromSourcePage(){
     console.error(e);
   }
 }
+
+/* ============ الملاك ============ */
+
+function ownerCategoryOptionsHTML(selected){
+  return Object.entries(CATEGORIES).map(([key, c]) =>
+    `<option value="${key}" ${key === selected ? "selected" : ""}>${c.label}</option>`
+  ).join("");
+}
+
+function addOwnerPropertyRow(category, number){
+  const wrap = document.getElementById("ownerPropertiesList");
+  const row = document.createElement("div");
+  row.className = "owner-property-row";
+  row.innerHTML = `
+    <select class="owner-prop-category">${ownerCategoryOptionsHTML(category || "rent")}</select>
+    <input type="text" class="owner-prop-number" placeholder="رقم العرض" value="${number || ""}">
+    <button type="button" class="btn-remove-property"><i class="fa-solid fa-xmark"></i></button>
+  `;
+  row.querySelector(".btn-remove-property").addEventListener("click", () => row.remove());
+  wrap.appendChild(row);
+}
+
+function resetOwnerForm(){
+  editingOwnerId = null;
+  document.getElementById("ownerForm").reset();
+  document.getElementById("ownerPropertiesList").innerHTML = "";
+  addOwnerPropertyRow();
+  document.getElementById("ownerFormTitle").textContent = "إضافة مالك جديد";
+  document.getElementById("ownerSaveBtnText").textContent = "حفظ المالك";
+  document.getElementById("ownerCancelEditBtn").style.display = "none";
+  document.getElementById("ownerFormStatus").textContent = "";
+}
+
+function saveOwner(event){
+  event.preventDefault();
+  const statusEl = document.getElementById("ownerFormStatus");
+  statusEl.className = "status-msg";
+  statusEl.textContent = "";
+
+  const name = document.getElementById("o_name").value.trim();
+  if (!name){
+    statusEl.textContent = "اسم المالك مطلوب";
+    statusEl.className = "status-msg err";
+    return false;
+  }
+
+  const properties = Array.from(document.querySelectorAll("#ownerPropertiesList .owner-property-row"))
+    .map(row => ({
+      category: row.querySelector(".owner-prop-category").value,
+      number: row.querySelector(".owner-prop-number").value.trim()
+    }))
+    .filter(p => p.number);
+
+  const data = {
+    name,
+    phone: document.getElementById("o_phone").value.trim(),
+    notes: document.getElementById("o_notes").value.trim(),
+    properties
+  };
+
+  const ref = editingOwnerId ? db.collection("owners").doc(editingOwnerId) : db.collection("owners").doc();
+
+  ref.set(data)
+    .then(() => {
+      statusEl.textContent = "تم الحفظ بنجاح ✔";
+      statusEl.className = "status-msg ok";
+      resetOwnerForm();
+    })
+    .catch(e => {
+      statusEl.textContent = "حدث خطأ أثناء الحفظ: " + e.message;
+      statusEl.className = "status-msg err";
+      console.error(e);
+    });
+
+  return false;
+}
+
+function editOwner(docId, data){
+  editingOwnerId = docId;
+  document.getElementById("o_name").value = data.name || "";
+  document.getElementById("o_phone").value = data.phone || "";
+  document.getElementById("o_notes").value = data.notes || "";
+
+  document.getElementById("ownerPropertiesList").innerHTML = "";
+  (data.properties || []).forEach(p => addOwnerPropertyRow(p.category, p.number));
+  if (!(data.properties || []).length) addOwnerPropertyRow();
+
+  document.getElementById("ownerFormTitle").textContent = "تعديل بيانات " + docId;
+  document.getElementById("ownerSaveBtnText").textContent = "حفظ التعديلات";
+  document.getElementById("ownerCancelEditBtn").style.display = "inline-block";
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function deleteOwner(docId){
+  if (!confirm("هل أنت متأكد من حذف هذا المالك؟")) return;
+  db.collection("owners").doc(docId).delete().catch(e => {
+    alert("حدث خطأ أثناء الحذف: " + e.message);
+    console.error(e);
+  });
+}
+
+function listenToOwners(){
+  if (unsubscribeOwners) { unsubscribeOwners(); unsubscribeOwners = null; }
+  if (!window.db) return;
+
+  unsubscribeOwners = db.collection("owners").onSnapshot(snap => {
+    lastOwnerDocs = snap.docs;
+    renderOwnersList(lastOwnerDocs);
+  }, err => {
+    console.error("خطأ في تحميل الملاك", err);
+  });
+}
+
+function renderOwnersList(docs){
+  const query = (document.getElementById("ownerSearchInput")?.value || "").trim().toLowerCase();
+
+  const filtered = docs.filter(doc => {
+    if (!query) return true;
+    const d = doc.data();
+    if ((d.name || "").toLowerCase().includes(query)) return true;
+    if ((d.phone || "").toLowerCase().includes(query)) return true;
+    return (d.properties || []).some(p => String(p.number).toLowerCase() === query);
+  });
+
+  document.getElementById("ownersCount").textContent = filtered.length;
+
+  const listWrap = document.getElementById("ownersList");
+  const emptyState = document.getElementById("ownersEmptyState");
+  listWrap.innerHTML = "";
+
+  if (filtered.length === 0){
+    emptyState.textContent = query ? "لا نتائج مطابقة." : "لا يوجد ملاك بعد.";
+    emptyState.style.display = "block";
+    return;
+  }
+  emptyState.style.display = "none";
+
+  filtered.forEach(doc => {
+    const d = doc.data();
+    const card = document.createElement("div");
+    card.className = "owner-card";
+
+    const chips = (d.properties || []).map(p => {
+      const label = CATEGORIES[p.category]?.label || p.category;
+      return `<span class="property-chip">${label} - رقم ${p.number}</span>`;
+    }).join("") || `<span style="color:var(--muted); font-size:.82rem;">لا توجد عقارات مرتبطة</span>`;
+
+    card.innerHTML = `
+      <div class="owner-info">
+        <h3>${d.name || ""}</h3>
+        ${d.phone ? `<div class="owner-phone"><a href="https://wa.me/966${d.phone.replace(/^0/,"")}" target="_blank"><i class="fa-brands fa-whatsapp"></i> ${d.phone}</a></div>` : ``}
+        <div class="property-chips">${chips}</div>
+        ${d.notes ? `<div class="owner-notes">📝 ${d.notes}</div>` : ``}
+      </div>
+      <div class="row-actions">
+        <button class="btn-edit" data-action="edit"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn-delete" data-action="delete"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    `;
+    card.querySelector('[data-action="edit"]').addEventListener("click", () => editOwner(doc.id, d));
+    card.querySelector('[data-action="delete"]').addEventListener("click", () => deleteOwner(doc.id));
+    listWrap.appendChild(card);
+  });
+}
+
+document.getElementById("ownerSearchInput")?.addEventListener("input", () => renderOwnersList(lastOwnerDocs));
 
 </script>
 
