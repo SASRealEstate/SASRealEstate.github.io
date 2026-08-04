@@ -213,12 +213,24 @@ button{ cursor:pointer; border:none; }
 .badge-active{ background:var(--green); color:#fff; padding:3px 10px; border-radius:999px; font-size:.72rem; font-weight:700; }
 .badge-archived{ background:#8a8d73; color:#fff; padding:3px 10px; border-radius:999px; font-size:.72rem; font-weight:700; }
 
+.status-filter{ display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+.status-filter button{
+  background:#fff; border:1px solid var(--line); color:var(--olive-dark);
+  padding:7px 16px; border-radius:999px; font-size:.82rem; font-weight:700;
+}
+.status-filter button:hover{ background:var(--cream); }
+.status-filter button.active{ background:var(--olive); color:#fff; border-color:var(--olive); }
+
 .row-actions{ display:flex; gap:6px; justify-content:center; }
 .row-actions button{ padding:6px 10px; border-radius:6px; font-size:.8rem; }
 .btn-edit{ background:#2f6690; color:#fff; }
 .btn-edit:hover{ background:#234d6c; }
 .btn-delete{ background:var(--danger); color:#fff; }
 .btn-delete:hover{ background:var(--danger-dark); }
+.btn-archive{ background:#8a8d73; color:#fff; }
+.btn-archive:hover{ background:#6f7260; }
+.btn-unarchive{ background:var(--green); color:#fff; }
+.btn-unarchive:hover{ background:#158a41; }
 
 .empty-state{ text-align:center; color:var(--muted); padding:30px; font-size:.95rem; }
 
@@ -310,6 +322,8 @@ button{ cursor:pointer; border:none; }
         <button class="btn-import" onclick="importFromSourcePage()"><i class="fa-solid fa-file-import"></i> <span id="importBtnText">استيراد العروض الحالية من الصفحة</span></button>
         <span style="font-size:.78rem;color:var(--muted);margin-right:8px;">(مرة واحدة فقط لنقل العروض القديمة إلى قاعدة البيانات)</span>
       </div>
+
+      <div class="status-filter" id="statusFilter"></div>
 
       <div style="overflow-x:auto;">
         <table class="listings-table">
@@ -452,6 +466,8 @@ let editingDocId = null;
 let unsubscribeListener = null;
 let idBaselines = {};
 let lastAutoId = null;
+let currentStatusFilter = "all";
+let lastDocs = [];
 
 function cat(){ return CATEGORIES[currentCategory]; }
 
@@ -508,14 +524,38 @@ function renderTabs(){
 
 function switchCategory(key){
   currentCategory = key;
+  currentStatusFilter = "all";
   renderTabs();
   document.getElementById("viewPageLink").href = cat().sourcePage;
   document.getElementById("importBtnText").textContent = "استيراد العروض الحالية من " + cat().sourcePage;
   renderFormFields();
   renderTableHead();
+  renderStatusFilter();
   resetForm();
   listenToListings();
   loadStaticMaxId(key);
+}
+
+function renderStatusFilter(){
+  const wrap = document.getElementById("statusFilter");
+  const options = [
+    {key:"all", label:"الكل"},
+    {key:"نشط", label:"نشط"},
+    {key:"مؤرشف", label:"مؤرشف"}
+  ];
+  wrap.innerHTML = "";
+  options.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = opt.label;
+    btn.className = currentStatusFilter === opt.key ? "active" : "";
+    btn.addEventListener("click", () => {
+      currentStatusFilter = opt.key;
+      renderStatusFilter();
+      renderListingsTable(lastDocs);
+    });
+    wrap.appendChild(btn);
+  });
 }
 
 /* ============ اقتراح رقم العرض التالي تلقائيًا ============ */
@@ -654,8 +694,23 @@ function editListing(docId, data){
   window.scrollTo({top:0, behavior:"smooth"});
 }
 
-function deleteListing(docId){
-  if (!confirm("هل أنت متأكد من حذف العرض رقم " + docId + "؟")) return;
+function archiveListing(docId){
+  if (!confirm("هل تريد أرشفة العرض رقم " + docId + "؟ سيختفي من الصفحة العامة ويمكنك استعادته لاحقًا من تبويب \"مؤرشف\".")) return;
+  db.collection(cat().collection).doc(docId).update({status: "مؤرشف"}).catch(e => {
+    alert("حدث خطأ أثناء الأرشفة: " + e.message);
+    console.error(e);
+  });
+}
+
+function unarchiveListing(docId){
+  db.collection(cat().collection).doc(docId).update({status: "نشط"}).catch(e => {
+    alert("حدث خطأ أثناء الاستعادة: " + e.message);
+    console.error(e);
+  });
+}
+
+function permanentlyDeleteListing(docId){
+  if (!confirm("سيتم حذف العرض رقم " + docId + " نهائيًا ولا يمكن التراجع عن ذلك. متابعة؟")) return;
   db.collection(cat().collection).doc(docId).delete().catch(e => {
     alert("حدث خطأ أثناء الحذف: " + e.message);
     console.error(e);
@@ -677,6 +732,62 @@ function renderTableHead(){
   tr.appendChild(th);
 }
 
+function renderListingsTable(docs){
+  const tbody = document.getElementById("listingsTableBody");
+  const emptyState = document.getElementById("emptyState");
+  tbody.innerHTML = "";
+
+  const filtered = docs.filter(doc => {
+    if (currentStatusFilter === "all") return true;
+    const status = doc.data().status || "نشط";
+    return status === currentStatusFilter;
+  });
+
+  document.getElementById("listingsCount").textContent = filtered.length;
+
+  if (filtered.length === 0){
+    emptyState.textContent = currentStatusFilter === "all"
+      ? "لا توجد عروض بعد. أضف عرضًا جديدًا أو استورد العروض الحالية."
+      : (currentStatusFilter === "مؤرشف" ? "لا توجد عروض مؤرشفة." : "لا توجد عروض نشطة.");
+    emptyState.style.display = "block";
+    return;
+  }
+  emptyState.style.display = "none";
+
+  filtered.forEach(doc => {
+    const d = doc.data();
+    const isArchived = d.status === "مؤرشف";
+    const tr = document.createElement("tr");
+
+    const cellsHTML = cat().listColumns.map(col => {
+      const val = d[col.key] || "";
+      let content;
+      if (col.statusBadge){
+        content = `<span class="${isArchived ? 'badge-archived' : 'badge-active'}">${val || "نشط"}</span>`;
+      } else if (col.badge){
+        content = `<span class="badge-rent">${val}</span>`;
+      } else {
+        content = val + (col.suffix && val ? col.suffix : "");
+      }
+      return `<td>${content}</td>`;
+    }).join("");
+
+    const actionsHTML = isArchived
+      ? `<button class="btn-edit" data-action="edit"><i class="fa-solid fa-pen"></i></button>
+         <button class="btn-unarchive" data-action="unarchive"><i class="fa-solid fa-rotate-left"></i></button>
+         <button class="btn-delete" data-action="delete"><i class="fa-solid fa-trash"></i></button>`
+      : `<button class="btn-edit" data-action="edit"><i class="fa-solid fa-pen"></i></button>
+         <button class="btn-archive" data-action="archive"><i class="fa-solid fa-box-archive"></i></button>`;
+
+    tr.innerHTML = cellsHTML + `<td><div class="row-actions">${actionsHTML}</div></td>`;
+    tr.querySelector('[data-action="edit"]').addEventListener("click", () => editListing(doc.id, d));
+    tr.querySelector('[data-action="archive"]')?.addEventListener("click", () => archiveListing(doc.id));
+    tr.querySelector('[data-action="unarchive"]')?.addEventListener("click", () => unarchiveListing(doc.id));
+    tr.querySelector('[data-action="delete"]')?.addEventListener("click", () => permanentlyDeleteListing(doc.id));
+    tbody.appendChild(tr);
+  });
+}
+
 function listenToListings(){
   if (unsubscribeListener) { unsubscribeListener(); unsubscribeListener = null; }
   if (!window.db) return;
@@ -684,52 +795,13 @@ function listenToListings(){
   const subscribedCategory = currentCategory;
 
   unsubscribeListener = db.collection(cat().collection).onSnapshot(snap => {
-    const tbody = document.getElementById("listingsTableBody");
-    const emptyState = document.getElementById("emptyState");
-    tbody.innerHTML = "";
-
     const docs = snap.docs.sort((a,b) => (parseInt(a.id)||0) - (parseInt(b.id)||0));
-    document.getElementById("listingsCount").textContent = docs.length;
+    lastDocs = docs;
 
     const maxId = docs.length ? (parseInt(docs[docs.length-1].id, 10) || 0) : 0;
     updateIdBaseline(subscribedCategory, "firestore", maxId);
 
-    if (docs.length === 0){
-      emptyState.style.display = "block";
-      return;
-    }
-    emptyState.style.display = "none";
-
-    docs.forEach(doc => {
-      const d = doc.data();
-      const tr = document.createElement("tr");
-
-      const cellsHTML = cat().listColumns.map(col => {
-        const val = d[col.key] || "";
-        let content;
-        if (col.statusBadge){
-          const isArchived = val === "مؤرشف";
-          content = `<span class="${isArchived ? 'badge-archived' : 'badge-active'}">${val || "نشط"}</span>`;
-        } else if (col.badge){
-          content = `<span class="badge-rent">${val}</span>`;
-        } else {
-          content = val + (col.suffix && val ? col.suffix : "");
-        }
-        return `<td>${content}</td>`;
-      }).join("");
-
-      tr.innerHTML = cellsHTML + `
-        <td>
-          <div class="row-actions">
-            <button class="btn-edit" data-doc-id="${doc.id}"><i class="fa-solid fa-pen"></i></button>
-            <button class="btn-delete" data-doc-id="${doc.id}"><i class="fa-solid fa-trash"></i></button>
-          </div>
-        </td>
-      `;
-      tr.querySelector(".btn-edit").addEventListener("click", () => editListing(doc.id, d));
-      tr.querySelector(".btn-delete").addEventListener("click", () => deleteListing(doc.id));
-      tbody.appendChild(tr);
-    });
+    renderListingsTable(docs);
   }, err => {
     console.error("خطأ في تحميل العروض", err);
   });
