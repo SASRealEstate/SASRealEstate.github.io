@@ -1,523 +1,736 @@
-
 <!DOCTYPE html>
-
 <html dir="rtl" lang="ar">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <link rel="icon" href="Logo.png" type="image/png">
-<title>قائمة شقق الإيجار</title>
+<title>قائمة شقق الإيجار | تطوير ساس العقارية</title>
+<meta name="description" content="قائمة شقق للإيجار محدثة من مكتب تطوير ساس العقارية - سنوي، دراسي، صيفي">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
 <link href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" rel="stylesheet"/>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css" rel="stylesheet"/>
-</head>
-<style>
-
-
-html{
-  font-size:25px;
-}
-
-body{
-  background: linear-gradient(to bottom, #dbd692 , #ffffff);
-  font-family: Tahoma, sans-serif;
-  direction:rtl;
-}
-
-a{
-  text-decoration:none;
-  color:white;
-}
-
-label,
-select,
-input{
-  font-size:1.1rem;
-}
-
-select,
-input{
-  padding:6px 10px;
-}
-
-
-.logo{
-  height:300px;
-  display:block;
-  margin:0 auto;
-}
-
-.page-title{
-  text-align:center;
-  margin:20px 0;
-  font-size:32px;
-}
-
-
-.filters-wrapper{
-  display:flex;
-  flex-wrap:wrap;
-  gap:15px;
-  justify-content:center;
-  align-items:center;
-  margin-bottom:20px;
-}
-
-.filters-wrapper label{
-  font-size:18px;
-}
-
-.filters-wrapper select{
-  font-size:17px;
-}
-
-
-.header-buttons{
-  display:flex;
-  flex-wrap:wrap;
-  gap:15px;
-  justify-content:center;
-  align-items:center;
-  margin-bottom:20px;
-}
-
-.header-buttons label{
-  font-size:18px;
-}
-
-.header-buttons select{
-  font-size:17px;
-}
-
-
-.notice{
-  background:#fff7d1;
-  padding:14px 18px;
-  border:1px solid #e6d79a;
-  border-radius:8px;
-  margin:20px auto;
-  width:95%;
-  font-size:26px;
-  font-weight:bold;
-  text-align:center;
-  line-height:1.7;
-}
-
-
-.cards{
-  display:grid;
-  grid-template-columns:repeat(5, minmax(320px, 1fr));
-  gap:20px;
-  padding:20px;
-  max-width:1800px;
-  margin:0 auto;
-}
-
-@media (max-width:1400px){
-  .cards{ grid-template-columns:repeat(4,1fr); }
-}
-
-@media (max-width:1100px){
-  .cards{ grid-template-columns:repeat(2,1fr); }
-}
-
-@media (max-width:700px) {
-  .cards {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(350px, 1fr));
-    gap: 12px;
-  }
-}
-
-
-.card{
-  background:#fff;
-  border-radius:12px;
-  box-shadow:0 4px 12px rgba(0,0,0,.15);
-  transition:.3s;
-  display:flex;
-  flex-direction:column;
-}
-
-.card:hover{
-  transform:translateY(-5px);
-}
-
-.card-header{
-  background:#4a4e0b;
-  color:#fff;
-  padding:10px;
-  font-weight:bold;
-  text-align:center;
-  font-size:18px;
-}
-
-.card-body{
-  padding:15px;
-  font-size:20px;
-}
-
-.price{
-  font-size:30px;
-  color:#4a4e0b;
-  font-weight:bold;
-  margin:10px 0;
-}
-
-.features{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:5px;
-}
-
-.features div{
-  font-size:24px;
-  line-height:1.6;
-}
-
-.card-body div[style*="📝"]{
-  font-size:15px;
-}
-
-.card-actions{
-  display:flex;
-  gap:6px;
-  padding:10px;
-  margin-top:auto;
-}
-
-.card-actions a{
-  flex:1;
-  background:#0d6efd;
-  color:#fff;
-  text-align:center;
-  padding:10px 8px;
-  border-radius:8px;
-  font-size:15px;
-  font-weight:bold;
-}
-
-
-#productTable{ display:none; }
-
-.card-image{
-  width:100%;
-  height:180px;
-  object-fit:cover;
-  background:#eee;
-}
-
-
-.yes{
-  color:#1e8e3e;
-  font-weight:bold;
-}
-
-.no{
-  color:#d93025;
-  font-weight:bold;
-}
-
-
-.header-buttons a,
-.header-buttons button{
-  background:#4a4e0b;
-  color:#fff;
-  padding:12px 18px;
-  border-radius:8px;
-  font-size:18px;
-  font-weight:bold;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:6px;
-}
-
-.header-buttons a:hover{
-  background:#5c6110;
-}
-
-
-@media (max-width:700px){
-
-  html{ font-size:22px; }
-  body{ padding:8px; margin:0; text-align:center !important; }
-
-  .logo{ margin:0 auto 15px; }
-
-  .header-buttons{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:10px;
-    width:100%;
-  }
-
-  .header-buttons a{
-    width:90%;
-    max-width:420px;
-    text-align:center;
-    font-size:1.1rem;
-    padding:12px;
-    background:#4a4e0b;
-    border-radius:8px;
-    display:block !important;
-    margin:6px auto !important;
-  }
-
-  .filters-wrapper{
-    width:100%;
-    text-align:center;
-    display:block !important;
-    margin:0 auto !important;
-    
-  }
-
-  .filters-wrapper label,
-  .filters-wrapper select,
-  .filters-wrapper input{
-    width:100% !important;
-    max-width:300px;
-  }
-
-  .notice{
-    margin: 20px auto !important;
-    width:95% !important;
-  }
-
-  .page-title,
-  h2{
-    text-align:center !important;
-    width:100% !important;
-    margin:10px auto !important;
-  }
-
-  .top-container{
-    width:100% !important;
-    max-width:100% !important;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    padding-top:5px;
-  }
-
-  .sticky-header .top-container{
-    flex-direction:column !important;
-    justify-content:center !important;
-    align-items:center !important;
-    width:100% !important;
-  }
-
-  .logo{
-    max-width:80vw !important;
-    height:auto !important;
-    margin-top:0 !important;
-    padding-top:0 !important;
-  }
-
-  .features div{ font-size:1.2rem; }
-  .price{ font-size:1.6rem; }
-  .card-actions a{ font-size:1.2rem; }
-
-}
-
-</style>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-</style>
-
-
 <link rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
       integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
       crossorigin="anonymous"
       referrerpolicy="no-referrer">
 
+<style>
 
+:root{
+  --olive:#4a4e0b;
+  --olive-dark:#2f3207;
+  --olive-light:#767b17;
+  --gold:#b8922e;
+  --gold-light:#f4e9c8;
+  --cream:#fbf9f0;
+  --ink:#26290f;
+  --muted:#6c7057;
+  --line:#e7e2cd;
+  --green:#25d366;
+  --green-dark:#1cab52;
+  --blue:#2f6690;
+  --blue-dark:#234d6c;
+  --danger:#d93025;
+  --radius:14px;
+  --shadow:0 8px 24px rgba(38,41,15,.10);
+  --shadow-hover:0 14px 32px rgba(38,41,15,.16);
+}
 
+*{ box-sizing:border-box; }
 
+html{ font-size:20px; scroll-behavior:smooth; overflow-x:hidden; }
+
+body{
+  margin:0;
+  overflow-x:hidden;
+  background:
+    radial-gradient(1200px 500px at 50% -10%, var(--gold-light), transparent),
+    linear-gradient(to bottom, var(--cream), #ffffff 400px);
+  font-family:"Tajawal", Tahoma, sans-serif;
+  color:var(--ink);
+  direction:rtl;
+}
+
+a{ text-decoration:none; color:inherit; }
+
+label, select, input{ font-family:inherit; font-size:1rem; }
+
+select, input{
+  padding:8px 12px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:#fff;
+  color:var(--ink);
+}
+
+select:focus, input:focus{
+  outline:none;
+  border-color:var(--olive);
+  box-shadow:0 0 0 3px rgba(74,78,11,.12);
+}
+
+/* ===== Header ===== */
+
+.site-header{
+  position:sticky;
+  top:0;
+  z-index:1000;
+  background:linear-gradient(135deg, var(--olive-dark), var(--olive));
+  box-shadow:0 4px 16px rgba(0,0,0,.18);
+}
+
+.top-container{
+  max-width:1500px;
+  margin:0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:16px;
+  padding:10px 24px;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.logo{
+  height:56px;
+  width:auto;
+  display:block;
+  border-radius:8px;
+  background:#fff;
+  padding:3px;
+}
+
+.brand-name{
+  color:#fff;
+  font-weight:700;
+  font-size:1.15rem;
+  line-height:1.3;
+}
+
+.brand-name small{
+  display:block;
+  font-weight:400;
+  font-size:.65em;
+  color:var(--gold-light);
+}
+
+.header-buttons{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  align-items:center;
+}
+
+.header-buttons a,
+.header-buttons button{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  background:rgba(255,255,255,.12);
+  color:#fff;
+  border:1px solid rgba(255,255,255,.25);
+  padding:9px 14px;
+  border-radius:999px;
+  font-size:.82rem;
+  font-weight:500;
+  font-family:inherit;
+  cursor:pointer;
+  transition:.2s;
+  white-space:nowrap;
+}
+
+.header-buttons a:hover,
+.header-buttons button:hover{
+  background:#fff;
+  color:var(--olive-dark);
+  border-color:#fff;
+  transform:translateY(-1px);
+}
+
+.header-buttons a.cta-whatsapp{
+  background:var(--green);
+  border-color:var(--green);
+}
+.header-buttons a.cta-whatsapp:hover{
+  background:var(--green-dark);
+  color:#fff;
+  border-color:var(--green-dark);
+}
+
+.toolbar-row{
+  background:rgba(0,0,0,.15);
+  border-top:1px solid rgba(255,255,255,.12);
+}
+
+.toolbar-row .top-container{
+  padding:8px 24px;
+  justify-content:center;
+}
+
+.toolbar-row button{
+  background:transparent;
+  border:1px dashed rgba(255,255,255,.35);
+  font-size:.78rem;
+}
+
+.toolbar-row button:hover{
+  background:var(--gold);
+  border-color:var(--gold);
+  color:#fff;
+}
+
+/* ===== Page title ===== */
+
+.page-title{
+  text-align:center;
+  margin:34px 0 6px;
+  font-size:2rem;
+  font-weight:900;
+  color:var(--olive-dark);
+}
+
+.page-subtitle{
+  text-align:center;
+  color:var(--muted);
+  margin:0 0 26px;
+  font-size:.95rem;
+}
+
+/* ===== Filters panel ===== */
+
+.filters-panel{
+  max-width:1400px;
+  margin:0 auto 24px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:22px 26px;
+}
+
+.filters-wrapper{
+  display:flex;
+  flex-wrap:wrap;
+  gap:18px 24px;
+  justify-content:center;
+  align-items:end;
+}
+
+.filter-field{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  font-size:.85rem;
+  font-weight:700;
+  color:var(--olive-dark);
+}
+
+.filter-field select,
+.filter-field input{
+  font-weight:400;
+  min-width:170px;
+}
+
+.floor-field{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  font-size:.85rem;
+  font-weight:700;
+  color:var(--olive-dark);
+}
+
+.floor-field .floor-options{
+  display:flex;
+  gap:14px;
+  background:var(--cream);
+  border:1px solid var(--line);
+  border-radius:9px;
+  padding:9px 14px;
+}
+
+.floor-field label{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  font-weight:400;
+  color:var(--ink);
+}
+
+.price-range{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  margin-top:18px;
+  padding-top:18px;
+  border-top:1px dashed var(--line);
+}
+
+.price-range label{
+  font-weight:700;
+  color:var(--olive-dark);
+  font-size:.85rem;
+}
+
+.price-range input{ width:140px; }
+
+/* ===== Notices ===== */
+
+.notice{
+  background:var(--gold-light);
+  padding:14px 20px;
+  border:1px solid #e6d18f;
+  border-right:5px solid var(--gold);
+  border-radius:10px;
+  margin:14px auto;
+  max-width:1400px;
+  font-size:.95rem;
+  font-weight:700;
+  text-align:center;
+  line-height:1.8;
+  color:#5a4713;
+}
+
+.notices-wrap{ padding:0 20px; }
+
+/* ===== Cards ===== */
+
+#productTable{ display:none; }
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(5, minmax(300px, 1fr));
+  gap:22px;
+  padding:30px 24px 60px;
+  max-width:1800px;
+  margin:0 auto;
+}
+
+@media (max-width:1400px){ .cards{ grid-template-columns:repeat(4,1fr); } }
+@media (max-width:1100px){ .cards{ grid-template-columns:repeat(2,1fr); } }
+@media (max-width:700px){ .cards{ grid-template-columns:repeat(2,1fr); gap:12px; padding:18px 10px 30px; } }
+@media (max-width:340px){ .cards{ grid-template-columns:repeat(1,1fr); } }
+
+.card{
+  background:#fff;
+  border-radius:var(--radius);
+  border:1px solid var(--line);
+  box-shadow:var(--shadow);
+  transition:.25s;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+.card:hover{
+  transform:translateY(-6px);
+  box-shadow:var(--shadow-hover);
+}
+
+.card-header{
+  background:linear-gradient(135deg, var(--olive-dark), var(--olive));
+  color:#fff;
+  padding:14px 16px;
+  font-weight:700;
+  text-align:center;
+  font-size:1rem;
+}
+
+.card-body{
+  padding:18px 18px 6px;
+  font-size:.95rem;
+}
+
+.price-row{
+  display:flex;
+  align-items:baseline;
+  justify-content:center;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:10px;
+}
+
+.price{
+  font-size:1.5rem;
+  color:var(--olive-dark);
+  font-weight:900;
+}
+
+.price .monthly{
+  font-size:.72rem;
+  font-weight:500;
+  color:var(--muted);
+}
+
+.rent-type-badge{
+  display:block;
+  width:fit-content;
+  margin:0 auto 14px;
+  background:var(--gold);
+  color:#fff;
+  padding:4px 16px;
+  border-radius:999px;
+  font-size:.78rem;
+  font-weight:700;
+  letter-spacing:.2px;
+}
+
+.features{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px 6px;
+  border-top:1px solid var(--line);
+  padding-top:12px;
+}
+
+.features div{
+  font-size:.82rem;
+  line-height:1.6;
+  color:var(--ink);
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.features i{
+  color:var(--olive);
+  width:16px;
+  text-align:center;
+  flex:none;
+}
+
+.card-body .notes{
+  margin-top:12px;
+  padding-top:12px;
+  border-top:1px dashed var(--line);
+  color:var(--muted);
+  font-size:.82rem;
+}
+
+.icon-yes{
+  color:var(--green-dark);
+  font-weight:900;
+}
+
+.icon-no{
+  color:var(--danger);
+  font-weight:900;
+}
+
+.card-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  padding:16px;
+  margin-top:auto;
+}
+
+.card-actions a{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  color:#fff;
+  text-align:center;
+  padding:9px 6px;
+  border-radius:9px;
+  font-size:.78rem;
+  font-weight:700;
+  transition:.2s;
+}
+
+.card-actions a:hover{ filter:brightness(1.1); transform:translateY(-1px); }
+
+.card-actions a.btn-location{ background:var(--blue); }
+.card-actions a.btn-photos{ background:var(--olive); }
+.card-actions a.btn-whatsapp{ background:var(--green); }
+.card-actions a.btn-copy{ background:#5b5f45; }
+
+/* ===== Footer ===== */
+
+.site-footer{
+  margin-top:20px;
+  background:linear-gradient(135deg, var(--olive-dark), var(--olive));
+  color:#f2f1e6;
+  padding:34px 20px 22px;
+  text-align:center;
+}
+
+.site-footer .footer-logo{
+  height:44px;
+  border-radius:8px;
+  background:#fff;
+  padding:3px;
+  margin-bottom:12px;
+}
+
+.site-footer .footer-links{
+  display:flex;
+  flex-wrap:wrap;
+  gap:18px;
+  justify-content:center;
+  margin-bottom:16px;
+  font-size:.88rem;
+}
+
+.site-footer .footer-links a:hover{ color:var(--gold-light); }
+
+.site-footer small{
+  display:block;
+  color:#c7c9ad;
+  font-size:.75rem;
+  border-top:1px solid rgba(255,255,255,.15);
+  padding-top:14px;
+  margin-top:10px;
+}
+
+/* ===== Tablet ===== */
+
+@media (max-width:900px){
+  .card-actions{ grid-template-columns:1fr 1fr; }
+}
+
+/* ===== Mobile ===== */
+
+@media (max-width:700px){
+  html{ font-size:17px; }
+
+  body{ overflow-x:hidden; }
+
+  .top-container{ justify-content:center; text-align:center; padding:10px 14px; }
+  .brand{ flex-direction:column; gap:6px; }
+  .logo{ height:52px; }
+  .brand-name{ font-size:1rem; }
+  .brand-name small{ display:none; }
+
+  .header-buttons{ justify-content:center; gap:6px; }
+  .header-buttons a, .header-buttons button{
+    font-size:.76rem;
+    padding:10px 12px;
+    min-height:40px;
+  }
+
+  .toolbar-row .top-container{ padding:8px 14px; gap:6px; }
+  .toolbar-row button{ font-size:.72rem; padding:8px 10px; }
+
+  .page-title{ font-size:1.4rem; margin:24px 14px 4px; }
+  .page-subtitle{ font-size:.82rem; padding:0 14px; }
+
+  .notices-wrap{ padding:0 14px; }
+  .notice{ margin:12px 0; font-size:.85rem; padding:12px 14px; }
+
+  .filters-panel{ margin:0 14px 20px; padding:16px; }
+
+  .filters-wrapper{
+    flex-direction:column;
+    align-items:stretch;
+    gap:14px;
+  }
+
+  .filter-field{ width:100%; }
+  .filter-field select, .filter-field input{ min-width:0; width:100%; }
+
+  .floor-field .floor-options{ justify-content:space-around; }
+
+  .price-range{
+    flex-direction:column;
+    align-items:stretch;
+    gap:6px;
+  }
+  .price-range label{ margin-top:6px; }
+  .price-range input{ width:100%; }
+
+  .card-header{ font-size:.82rem; padding:10px 8px; }
+  .card-body{ padding:12px 10px 4px; font-size:.8rem; }
+
+  .price-row{ flex-direction:column; gap:0; margin-bottom:6px; }
+  .price{ font-size:1.05rem; }
+  .price .monthly{ font-size:.65rem; }
+
+  .rent-type-badge{ font-size:.65rem; padding:3px 10px; margin:0 auto 10px; }
+
+  .features{ grid-template-columns:1fr; gap:6px; border-top:1px solid var(--line); padding-top:8px; }
+  .features div{ font-size:.72rem; gap:5px; }
+  .features i{ width:14px; font-size:.85em; }
+
+  .card-body .notes{ font-size:.68rem; margin-top:8px; padding-top:8px; }
+
+  .card-actions{
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+    padding:10px;
+  }
+  .card-actions a{
+    font-size:.68rem;
+    padding:9px 4px;
+    min-height:36px;
+    gap:3px;
+  }
+
+  .site-footer .footer-links{ gap:14px 20px; font-size:.85rem; }
+}
+
+@media (max-width:340px){
+  .header-buttons a, .header-buttons button{ font-size:.7rem; padding:9px 10px; }
+
+  .card-body{ font-size:.9rem; }
+  .price{ font-size:1.3rem; }
+  .features{ grid-template-columns:1fr 1fr; }
+  .features div{ font-size:.82rem; }
+  .card-actions{ grid-template-columns:1fr 1fr; }
+  .card-actions a{ font-size:.78rem; padding:10px 6px; min-height:40px; }
+}
+
+</style>
 
 </head>
 <body>
 
+<header class="site-header">
   <div class="top-container">
-
-    <a href="index.html">
+    <a href="index.html" class="brand">
       <img src="Logo.png" alt="شعار المكتب" class="logo">
+      <span class="brand-name">تطوير ساس العقارية<small>Sas Real Estate Development</small></span>
     </a>
 
     <div class="header-buttons">
-      <a href="tel:0534108666">📞 اتصل الآن</a>
-      <a href="https://wa.me/966534108666">💬 واتساب</a>
-      <a href="https://maps.app.goo.gl/2NUqCqLExX86fFG87">📍 موقع المكتب ، تقييمك يهمنا!</a>
-      <a href="index.html">العودة للصفحة الرئيسية</a>
+      <a href="tel:0534108666"><i class="fa-solid fa-phone"></i> اتصل الآن</a>
+      <a href="https://wa.me/966534108666" class="cta-whatsapp"><i class="fa-brands fa-whatsapp"></i> واتساب</a>
+      <a href="https://maps.app.goo.gl/2NUqCqLExX86fFG87"><i class="fa-solid fa-location-dot"></i> موقع المكتب</a>
+      <a href="index.html"><i class="fa-solid fa-house"></i> الرئيسية</a>
+    </div>
+  </div>
 
-      <button onclick="copyByRentType('سنة كاملة')">نسخ كل سنة كاملة</button>
-      <button onclick="copyByRentType('سنة دراسية')">نسخ كل سنة دراسية</button>
-      <button onclick="copyByRentType('صيفية')">نسخ كل صيفية</button>
+  <div class="toolbar-row">
+    <div class="top-container">
+      <button onclick="copyByRentType('سنة كاملة')"><i class="fa-solid fa-copy"></i> نسخ كل سنة كاملة</button>
+      <button onclick="copyByRentType('سنة دراسية')"><i class="fa-solid fa-copy"></i> نسخ كل سنة دراسية</button>
+      <button onclick="copyByRentType('صيفية')"><i class="fa-solid fa-copy"></i> نسخ كل صيفية</button>
+    </div>
+  </div>
+</header>
+
+<h2 class="page-title">قائمة الشقق للإيجار</h2>
+<p class="page-subtitle">تصفح كل الشقق المتاحة للإيجار وفلترها حسب احتياجك</p>
+
+<div class="notices-wrap">
+
+<div class="notice">
+📌 ملاحظة: الأسعار والمعلومات يتم تحديثها بشكل دوري - للتأكد من توفر العقار يرجى التواصل معنا على واتساب الرقم اعلى الصفحه.
+</div>
+
+<div class="notice">
+رسوم المكتب 2.5% من إجمالي الإيجار السنوي<br>
+مثال: الإيجار 20 الف سنويا , رسوم المكتب: 20000/40 = 500 ريال
+</div>
+
+<div class="notice">
+كتابه العقود<br>
+200 ريال للعقد السكني — 500 ريال للعقد التجاري
+</div>
+
+</div>
+
+<div class="filters-panel">
+  <div class="filters-wrapper">
+
+    <div class="filter-field">
+      <label for="filterRentType">نوع الإيجار</label>
+      <select id="filterRentType">
+        <option value="">الكل</option>
+        <option value="سنة كاملة">سنة كاملة</option>
+        <option value="سنة دراسية">سنة دراسية</option>
+        <option value="صيفية">صيفية</option>
+      </select>
+    </div>
+
+    <div class="filter-field">
+      <label for="filterElevator">مصعد</label>
+      <select id="filterElevator">
+        <option value="">الكل</option>
+        <option value="نعم">نعم</option>
+        <option value="لا">لا</option>
+      </select>
+    </div>
+
+    <div class="filter-field">
+      <label for="sortSelect">ترتيب حسب</label>
+      <select id="sortSelect">
+        <option value="">— اختر —</option>
+        <option value="floor-asc">الدور ↑</option>
+        <option value="floor-desc">الدور ↓</option>
+        <option value="price-asc">السعر ↑</option>
+        <option value="price-desc">السعر ↓</option>
+        <option value="rooms-asc">عدد الغرف ↑</option>
+        <option value="rooms-desc">عدد الغرف ↓</option>
+      </select>
+    </div>
+
+    <div class="filter-field">
+      <label for="filterEntrance">المدخل</label>
+      <select id="filterEntrance">
+        <option value="">الكل</option>
+        <option value="مستقل">مستقل</option>
+        <option value="مشترك">مشترك</option>
+      </select>
+    </div>
+
+    <div class="filter-field">
+      <label for="filterFurnished">مؤثثة</label>
+      <select id="filterFurnished">
+        <option value="">الكل</option>
+        <option value="نعم">نعم</option>
+        <option value="لا">لا</option>
+      </select>
+    </div>
+
+    <div class="filter-field">
+      <label for="filterRooms">عدد الغرف ≥</label>
+      <select id="filterRooms">
+        <option value="">الكل</option>
+        <option value="1">1+</option>
+        <option value="2">2+</option>
+        <option value="3">3+</option>
+        <option value="4">4+</option>
+        <option value="5">5+</option>
+        <option value="6">6+</option>
+      </select>
+    </div>
+
+    <div class="floor-field">
+      <span>الدور</span>
+      <div class="floor-options">
+        <label><input class="floorCheckbox" type="checkbox" value="1"/> 1</label>
+        <label><input class="floorCheckbox" type="checkbox" value="2"/> 2</label>
+        <label><input class="floorCheckbox" type="checkbox" value="3"/> 3</label>
+      </div>
     </div>
 
   </div>
 
-
-<h2 class="page-title">قائمة الشقق للإيجار</h2>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css" rel="stylesheet"/>
-<div style="margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;">
-
-  <div class="filters-wrapper">
-
-<br>
-<br>
-
-<label>نوع الإيجار:
-  <select id="filterRentType">
-    <option value="">الكل</option>
-    <option value="سنة كاملة">سنة كاملة</option>
-    <option value="سنة دراسية">سنة دراسية</option>
-    <option value="صيفية">صيفية</option>
-  </select>
-</label>
-
-<label>مصعد:
-  <select id="filterElevator">
-    <option value="">الكل</option>
-    <option value="نعم">نعم</option>
-    <option value="لا">لا</option>
-  </select>
-</label>
-
-<label>
-    ترتيب حسب
-    <select id="sortSelect">
-      <option value="">— اختر —</option>
-      <option value="floor-asc">الدور ↑</option>
-      <option value="floor-desc">الدور ↓</option>
-      <option value="price-asc">السعر ↑</option>
-      <option value="price-desc">السعر ↓</option>
-      <option value="rooms-asc">عدد الغرف ↑</option>
-      <option value="rooms-desc">عدد الغرف ↓</option>
-    </select>
-  </label>
-
-<br>
-<br>
-
-<label>المدخل:
-  <select id="filterEntrance">
-    <option value="">الكل</option>
-    <option value="مستقل">مستقل</option>
-    <option value="مشترك">مشترك</option>
-  </select>
-</label>
-
-<br>
-<br>
-
-<label>مؤثثة:
-        <select id="filterFurnished">
-<option value="">الكل</option>
-<option value="نعم">نعم</option>
-<option value="لا">لا</option>
-</select>
-</label>
-
-<br>
-<br>
-
-  <label>
-    عدد الغرف ≥
-    <select id="filterRooms">
-      <option value="">الكل</option>
-      <option value="1">1+</option>
-      <option value="2">2+</option>
-      <option value="3">3+</option>
-      <option value="4">4+</option>
-      <option value="5">5+</option>
-      <option value="6">6+</option>
-    </select>
-  </label>
-
-<div>
-<div style="margin-bottom: 5px;">الدور:</div>
-<label style="margin-left: 10px;"><input class="floorCheckbox" type="checkbox" value="1"/> 1</label><label style="margin-left: 10px;"><input class="floorCheckbox" type="checkbox" value="2"/> 2</label><label style="margin-left: 10px;"><input class="floorCheckbox" type="checkbox" value="3"/> 3</label>
+  <div class="price-range">
+    <label for="minPriceInput">من:</label>
+    <input id="minPriceInput" placeholder="الحد الأدنى (السنوي)" type="number"/>
+    <label for="maxPriceInput">إلى:</label>
+    <input id="maxPriceInput" placeholder="الحد الأعلى (السنوي)" type="number"/>
+  </div>
 </div>
-</div>
-<div style="margin-bottom: 20px; text-align: center;">
-<label for="minPriceInput" style="font-weight: bold;">من:</label>
-<input id="minPriceInput" placeholder="الحد الأدنى (السنوي)" style="margin: 5px; padding: 5px; width: 120px;" type="number"/>
-<label for="maxPriceInput" style="font-weight: bold;">إلى:</label>
-<input id="maxPriceInput" placeholder="الحد الأعلى (السنوي)" style="margin: 5px; padding: 5px; width: 120px;" type="number"/>
-</div>
-
-</div>
-
-
-<div style="
-    background:#fff7d1;
-    padding:14px 18px;
-    border:1px solid #e6d79a;
-    border-radius:8px;
-    margin:20px auto;
-    width:95%;
-    font-size:26px;
-    font-weight:bold;
-    text-align:center;
-">
-📌 ملاحظة: الأسعار والمعلومات يتم تحديثها بشكل دوري - للتأكد من توفر العقار يرجى التواصل معنا على واتساب الرقم اعلى الصفحه. 
-</div>
-
-<div style="
-    background:#fff7d1;
-    padding:14px 18px;
-    border:1px solid #e6d79a;
-    border-radius:8px;
-    margin:20px auto;
-    width:95%;
-    font-size:26px;
-    font-weight:bold;
-    text-align:center;
-">
-.رسوم المكتب 2.5% من إجمالي الإيجار السنوي
-مثال : الإيجار 20 الف سنويا , رسوم المكتب: 20000/40 = 500 ريال
-</div>
-
-
-<div style="
-    background:#fff7d1;
-    padding:14px 18px;
-    border:1px solid #e6d79a;
-    border-radius:8px;
-    margin:20px auto;
-    width:95%;
-    font-size:26px;
-    font-weight:bold;
-    text-align:center;
-">
-كتابه العقود
-200 ريال للعقد السكني
-500 ريال للعقد التجاري
-</div>
-
-</div>
-
-
-
 
 <div class="cards" id="cards"></div>
+
 
 <table class="dataframe display" id="productTable">
 
@@ -3015,7 +3228,7 @@ window.addEventListener('load', function() {
 </script>
 
 <h2 style="text-align:center;">خريطة المواقع</h2>
-<div id="RentMap" style="height: 500px; width: 200%; margin: 0 auto; border-radius: 10px;"></div>
+<div id="RentMap" style="height: 500px; width: 100%; max-width: 1400px; margin: 0 auto; border-radius: 10px;"></div>
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
 
@@ -3523,16 +3736,11 @@ cards.innerHTML += `
 
   <div class="card-body">
 
-<div class="price">
-  ${price} ريال /
-  <span style="font-size:22px;color:#666;">
-    ${monthlyPrice.toLocaleString()} شهريًا
-  </span>
+<div class="price-row">
+  <span class="price">${price} ريال</span>
+  <span class="monthly">(${monthlyPrice.toLocaleString()} شهريًا)</span>
 </div>
-<div style="font-size:30px;margin-bottom:8px;">
-  <span style="background:#4a4e0b;color:#fff;padding:2px 10px;border-radius:12px;">${rentType}</span>
-</div>
-
+<span class="rent-type-badge">${rentType}</span>
 
     <div class="features">
       <div><i class="fa-solid fa-stairs"></i> الدور: ${floor}</div>
@@ -3574,12 +3782,12 @@ cards.innerHTML += `
     </div>
     <!-- ⬆️ انتهى اللصق هنا ⬆️ -->
 
-    ${notes ? `<div style="margin-top:8px;color:#555">📝 ${notes}</div>` : ``}
+    ${notes ? `<div class="notes">📝 ${notes}</div>` : ``}
   </div>
 <div class="card-actions">
-  <a href="${location}" target="_blank">📍 الموقع</a>
-  <a href="${photos}" target="_blank">📷 الصور</a>
-  <a href="https://wa.me/966534108666?text=السلام عليكم , انا مهتم%20بالشقة%20رقم%20${id}" target="_blank">💬 واتساب</a>
+  <a class="btn-location" href="${location}" target="_blank"><i class="fa-solid fa-location-dot"></i> الموقع</a>
+  <a class="btn-photos" href="${photos}" target="_blank"><i class="fa-solid fa-images"></i> الصور</a>
+  <a class="btn-whatsapp" href="https://wa.me/966534108666?text=السلام عليكم , انا مهتم%20بالشقة%20رقم%20${id}" target="_blank"><i class="fa-brands fa-whatsapp"></i> واتساب</a>
 <a href="#" onclick="
   const text = \`رقم: ${id}
 نوع العقار: ${type}
@@ -3600,9 +3808,9 @@ cards.innerHTML += `
 الموقع: ${location}
 الصور: ${photos}\`;
   navigator.clipboard.writeText(text);
-  this.textContent='✔ تم النسخ';
-  setTimeout(()=>this.textContent='📋 نسخ',1500);
-  return false;">📋 نسخ</a>
+  this.innerHTML='<i class=\'fa-solid fa-check\'></i> تم النسخ';
+  setTimeout(()=>this.innerHTML='<i class=\'fa-solid fa-copy\'></i> نسخ',1500);
+  return false;" class="btn-copy"><i class="fa-solid fa-copy"></i> نسخ</a>
 </div>
 
 </div>
@@ -3752,15 +3960,17 @@ document.getElementById("sortSelect").addEventListener("change", function () {
 });
 </script>
 
+<footer class="site-footer">
+  <a href="index.html"><img src="Logo.png" alt="شعار المكتب" class="footer-logo"></a>
+  <div class="footer-links">
+    <a href="tel:0534108666"><i class="fa-solid fa-phone"></i> 0534108666</a>
+    <a href="https://wa.me/966534108666"><i class="fa-brands fa-whatsapp"></i> واتساب</a>
+    <a href="https://maps.app.goo.gl/2NUqCqLExX86fFG87"><i class="fa-solid fa-location-dot"></i> موقع المكتب</a>
+  </div>
+  <small>© <span id="footerYear"></span> تطوير ساس العقارية - جميع الحقوق محفوظة</small>
+</footer>
 
-
-
-
-
-
+<script>document.getElementById("footerYear").textContent = new Date().getFullYear();</script>
 
 </body>
-</html>
-
-
 </html>
