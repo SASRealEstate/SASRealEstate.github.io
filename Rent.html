@@ -44,11 +44,18 @@
 
 *{ box-sizing:border-box; }
 
+<<<<<<< HEAD
+html{ font-size:20px; scroll-behavior:smooth; }
+
+body{
+  margin:0;
+=======
 html{ font-size:20px; scroll-behavior:smooth; overflow-x:hidden; }
 
 body{
   margin:0;
   overflow-x:hidden;
+>>>>>>> 820a17a0bd50b99fa9d223cc18cf81b993e37d59
   background:
     radial-gradient(1200px 500px at 50% -10%, var(--gold-light), transparent),
     linear-gradient(to bottom, var(--cream), #ffffff 400px);
@@ -321,8 +328,12 @@ select:focus, input:focus{
 
 @media (max-width:1400px){ .cards{ grid-template-columns:repeat(4,1fr); } }
 @media (max-width:1100px){ .cards{ grid-template-columns:repeat(2,1fr); } }
+<<<<<<< HEAD
+@media (max-width:700px){ .cards{ grid-template-columns:repeat(1,1fr); gap:16px; padding:20px 14px 40px; } }
+=======
 @media (max-width:700px){ .cards{ grid-template-columns:repeat(2,1fr); gap:12px; padding:18px 10px 30px; } }
 @media (max-width:340px){ .cards{ grid-template-columns:repeat(1,1fr); } }
+>>>>>>> 820a17a0bd50b99fa9d223cc18cf81b993e37d59
 
 .card{
   background:#fff;
@@ -497,6 +508,28 @@ select:focus, input:focus{
   margin-top:10px;
 }
 
+<<<<<<< HEAD
+/* ===== Mobile ===== */
+
+@media (max-width:700px){
+  html{ font-size:18px; }
+
+  .top-container{ justify-content:center; text-align:center; }
+  .brand{ flex-direction:column; }
+  .logo{ height:64px; }
+
+  .header-buttons{ justify-content:center; }
+  .header-buttons a, .header-buttons button{ font-size:.78rem; padding:9px 12px; }
+
+  .filters-panel{ margin:0 12px 20px; padding:18px; }
+  .filters-wrapper{ justify-content:center; }
+  .filter-field select, .filter-field input{ min-width:0; width:100%; }
+
+  .notice{ margin:12px; font-size:.85rem; }
+  .notices-wrap{ padding:0; }
+
+  .page-title{ font-size:1.5rem; }
+=======
 /* ===== Tablet ===== */
 
 @media (max-width:900px){
@@ -592,6 +625,7 @@ select:focus, input:focus{
   .features div{ font-size:.82rem; }
   .card-actions{ grid-template-columns:1fr 1fr; }
   .card-actions a{ font-size:.78rem; padding:10px 6px; min-height:40px; }
+>>>>>>> 820a17a0bd50b99fa9d223cc18cf81b993e37d59
 }
 
 </style>
