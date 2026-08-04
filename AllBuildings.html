@@ -1623,7 +1623,7 @@ async function getListings(){
   if(window.db){
     try{
       const snap = await window.db.collection("buildings").get();
-      if(!snap.empty) return snap.docs.map(doc => ({docId: doc.id, ...doc.data()})).filter(item => item.status !== "مؤرشف");
+      if(!snap.empty) return snap.docs.map(doc => ({docId: doc.id, ...doc.data(), id: doc.data().id || doc.id})).filter(item => item.status !== "مؤرشف");
     }catch(e){
       console.warn("تعذر تحميل العروض من قاعدة البيانات، سيتم استخدام النسخة الثابتة", e);
     }

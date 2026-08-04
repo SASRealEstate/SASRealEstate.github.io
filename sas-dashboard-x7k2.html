@@ -685,7 +685,8 @@ function editListing(docId, data){
   editingDocId = docId;
   cat().fields.forEach(f => {
     const el = document.getElementById("f_" + f.key);
-    if (el) el.value = data[f.key] || "";
+    if (!el) return;
+    el.value = f.key === "id" ? (data.id || docId) : (data[f.key] || "");
   });
   document.getElementById("f_id").disabled = true;
   document.getElementById("formTitle").textContent = "تعديل عرض رقم " + docId;
@@ -820,7 +821,7 @@ function extractRowData(row, c){
   const id = stripHtml(td[c.idIndex]?.innerHTML);
   if (!id) return null;
 
-  const data = {};
+  const data = { id };
   Object.entries(c.importIndices).forEach(([key, idx]) => {
     if (idx === c.locationIndex || idx === c.photosIndex){
       data[key] = td[idx]?.querySelector("a")?.getAttribute("href") || "";
