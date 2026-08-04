@@ -367,9 +367,26 @@ button{ cursor:pointer; border:none; }
       <div class="panel">
         <h2><i class="fa-solid fa-list"></i> العروض الحالية (<span id="listingsCount">0</span>)</h2>
 
-        <div style="margin-bottom:16px;">
+        <div id="importFreshWrap" style="margin-bottom:16px; display:none;">
           <button class="btn-import" onclick="importFromSourcePage()"><i class="fa-solid fa-file-import"></i> <span id="importBtnText">استيراد العروض الحالية من الصفحة</span></button>
           <span style="font-size:.78rem;color:var(--muted);margin-right:8px;">(مرة واحدة فقط لنقل العروض القديمة إلى قاعدة البيانات)</span>
+        </div>
+
+        <div id="importLockedWrap" style="margin-bottom:16px; display:none;">
+          <button type="button" class="btn-import" onclick="toggleImportUnlock()">
+            <i class="fa-solid fa-lock"></i> استيراد متقدم (مقفل)
+          </button>
+          <span style="font-size:.78rem;color:var(--muted);margin-right:8px;">يوجد بيانات محفوظة بالفعل — الاستيراد سيستبدلها بالنسخة القديمة من الصفحة</span>
+
+          <div id="importUnlockBox" style="display:none; margin-top:12px; padding:14px 16px; background:#fff3cd; border:1px solid #ffe08a; border-radius:10px;">
+            <label style="display:flex; align-items:center; gap:8px; font-size:.85rem; font-weight:700; color:#7a5b00; cursor:pointer;">
+              <input type="checkbox" id="importConfirmCheckbox" style="width:auto;" onchange="document.getElementById('importConfirmedBtn').disabled = !this.checked;">
+              أعلم أن هذا سيستبدل أي تعديلات قمت بها من لوحة التحكم بالنسخة الموجودة في الصفحة الثابتة
+            </label>
+            <button type="button" id="importConfirmedBtn" class="btn-import" style="margin-top:10px; opacity:.5;" disabled onclick="importFromSourcePage()">
+              <i class="fa-solid fa-triangle-exclamation"></i> متابعة الاستيراد الآن
+            </button>
+          </div>
         </div>
 
         <div class="status-filter" id="statusFilter"></div>
@@ -663,6 +680,9 @@ function switchCategory(key){
   renderTableHead();
   renderStatusFilter();
   resetForm();
+  document.getElementById("importUnlockBox").style.display = "none";
+  document.getElementById("importConfirmCheckbox").checked = false;
+  document.getElementById("importConfirmedBtn").disabled = true;
   listenToListings();
   loadStaticMaxId(key);
 }
@@ -864,7 +884,19 @@ function renderTableHead(){
   tr.appendChild(th);
 }
 
+function updateImportButtonVisibility(hasData){
+  document.getElementById("importFreshWrap").style.display = hasData ? "none" : "block";
+  document.getElementById("importLockedWrap").style.display = hasData ? "block" : "none";
+}
+
+function toggleImportUnlock(){
+  const box = document.getElementById("importUnlockBox");
+  box.style.display = box.style.display === "none" ? "block" : "none";
+}
+
 function renderListingsTable(docs){
+  updateImportButtonVisibility(docs.length > 0);
+
   const tbody = document.getElementById("listingsTableBody");
   const emptyState = document.getElementById("emptyState");
   tbody.innerHTML = "";
