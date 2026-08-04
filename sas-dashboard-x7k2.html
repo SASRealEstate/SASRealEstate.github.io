@@ -276,6 +276,8 @@ button{ cursor:pointer; border:none; }
 .btn-archive:hover{ background:#6f7260; }
 .btn-unarchive{ background:var(--green); color:#fff; }
 .btn-unarchive:hover{ background:#158a41; }
+.btn-copy{ background:#5b5f45; color:#fff; }
+.btn-copy:hover{ background:#454832; }
 
 .empty-state{ text-align:center; color:var(--muted); padding:30px; font-size:.95rem; }
 
@@ -502,7 +504,30 @@ const CATEGORIES = {
       {key:"rentType", label:"نوع الإيجار", badge:true},
       {key:"floor", label:"الدور"},
       {key:"rooms", label:"الغرف"}
-    ]
+    ],
+    copyText: (id, d) => {
+      const divisorMap = {"سنة كاملة":12, "سنة دراسية":10, "صيفية":2};
+      const divisor = divisorMap[d.rentType] || 12;
+      const monthlyPrice = Math.round(parseInt(d.price) / divisor) || 0;
+      return `رقم: ${id}
+نوع العقار: ${d.type || ""}
+الدور: ${d.floor || ""}
+الغرف: ${d.rooms || ""}
+دورات المياه: ${d.baths || ""}
+صالة: ${d.hall || ""}
+مطبخ: ${d.kitchen || ""}
+مستودع: ${d.store || ""}
+مصعد: ${d.elevator || ""}
+مؤثثة: ${d.furnished || ""}
+مطبخ راكب: ${d.fittedKitchen || ""}
+مستقل: ${d.entrance || ""}
+ملاحظات: ${d.notes || ""}
+السعر: ${d.price || ""} ريال
+الشهري: ${monthlyPrice.toLocaleString()} ريال شهرياً
+نوع الإيجار: ${d.rentType || ""}
+الموقع: ${d.location || ""}
+الصور: ${d.photos || ""}`;
+    }
   },
   buildings: {
     label: "عقارات للبيع",
@@ -535,7 +560,18 @@ const CATEGORIES = {
       {key:"price", label:"السعر", suffix:" ريال"},
       {key:"landArea", label:"مساحة الأرض"},
       {key:"buildArea", label:"مسطح البناء"}
-    ]
+    ],
+    copyText: (id, d) => `رقم: ${id}
+نوع العقار: ${d.type || ""}
+الدور: ${d.floor || ""}
+مساحة الأرض: ${d.landArea || ""}
+مسطح البناء: ${d.buildArea || ""}
+الواجهات: ${d.facades || ""}
+السوم: ${d.asking || ""}
+السعر: ${d.price || ""} ريال
+ملاحظات: ${d.notes || ""}
+الموقع: ${d.location || ""}
+الصور: ${d.photos || ""}`
   },
   lands: {
     label: "أراضي للبيع",
@@ -573,7 +609,24 @@ const CATEGORIES = {
       {key:"type", label:"النوع"},
       {key:"price", label:"السعر", suffix:" ريال"},
       {key:"area", label:"المساحة"}
-    ]
+    ],
+    copyText: (id, d) => `رقم: ${id}
+رقم اللوحة: ${d.plateNumber || ""}
+نوع العقار: ${d.type || ""}
+نوع العرض: ${d.offerType || ""}
+رقم المخطط: ${d.planNumber || ""}
+اسم المخطط: ${d.planName || ""}
+طول: ${d.length || ""}
+عرض: ${d.width || ""}
+المساحة: ${d.area || ""}
+مواصفات العقار: ${d.specs || ""}
+الواجهات: ${d.facades || ""}
+السوم: ${d.asking || ""}
+السعر: ${d.price || ""} ريال
+سعر المتر: ${d.pricePerMeter || ""}
+الملاحظات: ${d.notes || ""}
+الموقع: ${d.location || ""}
+الصور: ${d.photos || ""}`
   }
 };
 
@@ -884,6 +937,21 @@ function renderTableHead(){
   tr.appendChild(th);
 }
 
+function copyListingText(docId, d, btnEl){
+  const c = cat();
+  if (!c.copyText) return;
+  const text = c.copyText(d.id || docId, d);
+  navigator.clipboard.writeText(text).then(() => {
+    if (!btnEl) return;
+    const original = btnEl.innerHTML;
+    btnEl.innerHTML = '<i class="fa-solid fa-check"></i>';
+    setTimeout(() => { btnEl.innerHTML = original; }, 1200);
+  }).catch(e => {
+    alert("تعذر النسخ: " + e.message);
+    console.error(e);
+  });
+}
+
 function updateImportButtonVisibility(hasData){
   document.getElementById("importFreshWrap").style.display = hasData ? "none" : "block";
   document.getElementById("importLockedWrap").style.display = hasData ? "block" : "none";
@@ -936,18 +1004,23 @@ function renderListingsTable(docs){
       return `<td>${content}</td>`;
     }).join("");
 
-    const actionsHTML = isArchived
+    const copyBtnHTML = cat().copyText
+      ? `<button class="btn-copy" data-action="copy" title="نسخ بيانات العرض"><i class="fa-solid fa-copy"></i></button>`
+      : ``;
+
+    const actionsHTML = copyBtnHTML + (isArchived
       ? `<button class="btn-edit" data-action="edit"><i class="fa-solid fa-pen"></i></button>
          <button class="btn-unarchive" data-action="unarchive"><i class="fa-solid fa-rotate-left"></i></button>
          <button class="btn-delete" data-action="delete"><i class="fa-solid fa-trash"></i></button>`
       : `<button class="btn-edit" data-action="edit"><i class="fa-solid fa-pen"></i></button>
-         <button class="btn-archive" data-action="archive"><i class="fa-solid fa-box-archive"></i></button>`;
+         <button class="btn-archive" data-action="archive"><i class="fa-solid fa-box-archive"></i></button>`);
 
     tr.innerHTML = cellsHTML + `<td><div class="row-actions">${actionsHTML}</div></td>`;
     tr.querySelector('[data-action="edit"]').addEventListener("click", () => editListing(doc.id, d));
     tr.querySelector('[data-action="archive"]')?.addEventListener("click", () => archiveListing(doc.id));
     tr.querySelector('[data-action="unarchive"]')?.addEventListener("click", () => unarchiveListing(doc.id));
     tr.querySelector('[data-action="delete"]')?.addEventListener("click", () => permanentlyDeleteListing(doc.id));
+    tr.querySelector('[data-action="copy"]')?.addEventListener("click", (e) => copyListingText(doc.id, d, e.currentTarget));
     tbody.appendChild(tr);
   });
 }
