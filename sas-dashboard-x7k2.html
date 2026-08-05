@@ -256,8 +256,10 @@ button{ cursor:pointer; border:none; }
 }
 
 .owner-card .owner-info h3{ margin:0 0 4px; font-size:1rem; color:var(--olive-dark); }
-.owner-card .owner-info .owner-phone{ font-size:.85rem; color:var(--muted); margin-bottom:8px; }
+.owner-card .owner-info .owner-phone{ font-size:.85rem; color:var(--muted); margin-bottom:6px; }
 .owner-card .owner-info .owner-phone a{ color:var(--blue,#2f6690); font-weight:700; }
+.owner-card .owner-info .owner-broker-line{ font-size:.82rem; color:var(--muted); margin-bottom:8px; }
+.owner-card .broker-tag{ background:var(--gold); color:#fff; font-size:.68rem; font-weight:700; padding:2px 9px; border-radius:999px; vertical-align:middle; }
 .owner-card .owner-notes{ font-size:.8rem; color:var(--muted); margin-top:6px; }
 
 .property-chips{ display:flex; flex-wrap:wrap; gap:6px; }
@@ -416,13 +418,24 @@ button{ cursor:pointer; border:none; }
 
         <form id="ownerForm" onsubmit="return saveOwner(event)">
           <div class="form-grid">
-            <div class="field wide">
-              <label for="o_name">اسم المالك *</label>
-              <input type="text" id="o_name" required>
+            <div class="field">
+              <label for="o_name">اسم المالك</label>
+              <input type="text" id="o_name" placeholder="اتركه فارغًا إذا كان غير معروف">
             </div>
             <div class="field">
-              <label for="o_phone">رقم الجوال</label>
+              <label for="o_phone">جوال المالك</label>
               <input type="tel" id="o_phone" placeholder="05xxxxxxxx">
+            </div>
+          </div>
+
+          <div class="form-grid" style="margin-top:14px; padding-top:14px; border-top:1px dashed var(--line);">
+            <div class="field">
+              <label for="o_brokerName">اسم الوسيط</label>
+              <input type="text" id="o_brokerName" placeholder="إذا جاء الإعلان عن طريق وسيط">
+            </div>
+            <div class="field">
+              <label for="o_brokerPhone">جوال الوسيط</label>
+              <input type="tel" id="o_brokerPhone" placeholder="05xxxxxxxx">
             </div>
           </div>
 
@@ -1170,8 +1183,9 @@ function saveOwner(event){
   statusEl.textContent = "";
 
   const name = document.getElementById("o_name").value.trim();
-  if (!name){
-    statusEl.textContent = "اسم المالك مطلوب";
+  const brokerName = document.getElementById("o_brokerName").value.trim();
+  if (!name && !brokerName){
+    statusEl.textContent = "أدخل اسم المالك أو اسم الوسيط على الأقل";
     statusEl.className = "status-msg err";
     return false;
   }
@@ -1186,6 +1200,8 @@ function saveOwner(event){
   const data = {
     name,
     phone: document.getElementById("o_phone").value.trim(),
+    brokerName,
+    brokerPhone: document.getElementById("o_brokerPhone").value.trim(),
     notes: document.getElementById("o_notes").value.trim(),
     properties
   };
@@ -1211,6 +1227,8 @@ function editOwner(docId, data){
   editingOwnerId = docId;
   document.getElementById("o_name").value = data.name || "";
   document.getElementById("o_phone").value = data.phone || "";
+  document.getElementById("o_brokerName").value = data.brokerName || "";
+  document.getElementById("o_brokerPhone").value = data.brokerPhone || "";
   document.getElementById("o_notes").value = data.notes || "";
 
   document.getElementById("ownerPropertiesList").innerHTML = "";
@@ -1285,6 +1303,8 @@ function renderOwnersList(docs){
 
     if ((d.name || "").toLowerCase().includes(rawQuery)) return true;
     if ((d.phone || "").toLowerCase().includes(rawQuery)) return true;
+    if ((d.brokerName || "").toLowerCase().includes(rawQuery)) return true;
+    if ((d.brokerPhone || "").toLowerCase().includes(rawQuery)) return true;
     return properties.some(p => matchesOwnerProperty(p, rawQuery, false));
   });
 
@@ -1315,10 +1335,14 @@ function renderOwnersList(docs){
       return `<span class="property-chip chip-${p.category}">${label} - رقم ${p.number}</span>`;
     }).join("") || `<span style="color:var(--muted); font-size:.82rem;">لا توجد عقارات مرتبطة</span>`;
 
+    const heading = d.name || (d.brokerName ? `عبر وسيط: ${d.brokerName}` : "مالك غير معروف");
+
     card.innerHTML = `
       <div class="owner-info">
-        <h3>${d.name || ""}</h3>
-        ${d.phone ? `<div class="owner-phone"><a href="https://wa.me/966${d.phone.replace(/^0/,"")}" target="_blank"><i class="fa-brands fa-whatsapp"></i> ${d.phone}</a></div>` : ``}
+        <h3>${heading}${!d.name && d.brokerName ? ` <span class="broker-tag">وسيط</span>` : ``}</h3>
+        ${d.phone ? `<div class="owner-phone"><a href="https://wa.me/966${d.phone.replace(/^0/,"")}" target="_blank"><i class="fa-brands fa-whatsapp"></i> المالك: ${d.phone}</a></div>` : ``}
+        ${d.name && d.brokerName ? `<div class="owner-broker-line"><i class="fa-solid fa-handshake"></i> الوسيط: ${d.brokerName}${d.brokerPhone ? " - " + d.brokerPhone : ""}</div>` : ``}
+        ${!d.name && d.brokerPhone ? `<div class="owner-phone"><a href="https://wa.me/966${d.brokerPhone.replace(/^0/,"")}" target="_blank"><i class="fa-brands fa-whatsapp"></i> الوسيط: ${d.brokerPhone}</a></div>` : ``}
         <div class="property-chips">${chips}</div>
         ${d.notes ? `<div class="owner-notes">📝 ${d.notes}</div>` : ``}
       </div>
