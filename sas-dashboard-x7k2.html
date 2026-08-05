@@ -361,6 +361,8 @@ button{ cursor:pointer; border:none; }
 
         <form id="listingForm" onsubmit="return saveListing(event)">
           <div class="form-grid" id="formFields"></div>
+          <datalist id="ownerOptionsList"></datalist>
+          <datalist id="brokerOptionsList"></datalist>
 
           <div class="form-actions">
             <button type="submit" class="btn-save"><i class="fa-solid fa-floppy-disk"></i> <span id="saveBtnText">حفظ العرض</span></button>
@@ -944,27 +946,19 @@ function renderFormFields(){
         input.appendChild(o);
       });
     } else if (f.type === "owner-select"){
-      input = document.createElement("select");
-      const noneOpt = document.createElement("option");
-      noneOpt.value = ""; noneOpt.textContent = "بدون مالك محدد";
-      input.appendChild(noneOpt);
-      allOwners.forEach(o => {
-        const opt = document.createElement("option");
-        opt.value = o.number;
-        opt.textContent = ownerLabel(o);
-        input.appendChild(opt);
-      });
+      input = document.createElement("input");
+      input.type = "text";
+      input.setAttribute("list", "ownerOptionsList");
+      input.placeholder = "اكتب رقم أو اسم المالك للبحث...";
+      input.autocomplete = "off";
+      refreshOwnerDatalist();
     } else if (f.type === "broker-select"){
-      input = document.createElement("select");
-      const noneOpt = document.createElement("option");
-      noneOpt.value = ""; noneOpt.textContent = "بدون وسيط";
-      input.appendChild(noneOpt);
-      allBrokers.forEach(b => {
-        const opt = document.createElement("option");
-        opt.value = b.number;
-        opt.textContent = brokerLabel(b);
-        input.appendChild(opt);
-      });
+      input = document.createElement("input");
+      input.type = "text";
+      input.setAttribute("list", "brokerOptionsList");
+      input.placeholder = "اكتب رقم أو اسم الوسيط للبحث...";
+      input.autocomplete = "off";
+      refreshBrokerDatalist();
     } else if (f.type === "textarea"){
       input = document.createElement("textarea");
       input.rows = 2;
@@ -1041,7 +1035,12 @@ function saveListing(event){
   const data = {};
   cat().fields.forEach(f => {
     const el = document.getElementById("f_" + f.key);
-    data[f.key] = el.value.trim();
+    let value = el.value.trim();
+    if (f.type === "owner-select" || f.type === "broker-select"){
+      const match = value.match(/^#(\d+)/);
+      value = match ? match[1] : "";
+    }
+    data[f.key] = value;
   });
 
   db.collection(cat().collection).doc(String(id)).set(data)
@@ -1064,7 +1063,10 @@ function editListing(docId, data){
   cat().fields.forEach(f => {
     const el = document.getElementById("f_" + f.key);
     if (!el) return;
-    el.value = f.key === "id" ? (data.id || docId) : (data[f.key] || "");
+    if (f.key === "id"){ el.value = data.id || docId; return; }
+    if (f.type === "owner-select"){ el.value = data.ownerNumber ? getOwnerLabelByNumber(data.ownerNumber) : ""; return; }
+    if (f.type === "broker-select"){ el.value = data.brokerNumber ? getBrokerLabelByNumber(data.brokerNumber) : ""; return; }
+    el.value = data[f.key] || "";
   });
   document.getElementById("f_id").disabled = true;
   recalcPricePerMeter();
@@ -1335,9 +1337,16 @@ async function loadAllOwners(){
     allOwners = snap.docs.map(doc => ({ number: doc.id, ...doc.data() }))
       .sort((a,b) => (parseInt(a.number)||0) - (parseInt(b.number)||0));
     ownerNumberBaseline = allOwners.reduce((max,o) => Math.max(max, parseInt(o.number)||0), 0);
+    refreshOwnerDatalist();
   }catch(e){
     console.warn("تعذر تحميل قائمة الملاك", e);
   }
+}
+
+function refreshOwnerDatalist(){
+  const dl = document.getElementById("ownerOptionsList");
+  if (!dl) return;
+  dl.innerHTML = allOwners.map(o => `<option value="${ownerLabel(o)}">`).join("");
 }
 
 function ownerLabel(o){
@@ -1359,9 +1368,16 @@ async function loadAllBrokers(){
     allBrokers = snap.docs.map(doc => ({ number: doc.id, ...doc.data() }))
       .sort((a,b) => (parseInt(a.number)||0) - (parseInt(b.number)||0));
     brokerNumberBaseline = allBrokers.reduce((max,b) => Math.max(max, parseInt(b.number)||0), 0);
+    refreshBrokerDatalist();
   }catch(e){
     console.warn("تعذر تحميل قائمة الوسطاء", e);
   }
+}
+
+function refreshBrokerDatalist(){
+  const dl = document.getElementById("brokerOptionsList");
+  if (!dl) return;
+  dl.innerHTML = allBrokers.map(b => `<option value="${brokerLabel(b)}">`).join("");
 }
 
 function brokerLabel(b){
