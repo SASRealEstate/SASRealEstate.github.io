@@ -1659,7 +1659,7 @@ async function getListings(){
 }
 
 function renderCardHTML(item){
-  const {id, plateNumber, type, offerType, location, planNumber, planName,
+  const {id, plateNumber, type, offerType, location, planNumber, planName, parcelNumber,
          length, width, area, specs, facades, asking, price, pricePerMeter, photos, notes} = item;
 
   const askingNum = parseFloat(asking);
@@ -1690,6 +1690,7 @@ function renderCardHTML(item){
       <div><i class="fa-solid fa-border-all"></i> الواجهات: ${facades || "-"}</div>
       <div><i class="fa-solid fa-map"></i> المخطط: ${planName || "-"}</div>
       <div><i class="fa-solid fa-hashtag"></i> رقم اللوحة: ${plateNumber || "-"}</div>
+      <div><i class="fa-solid fa-hashtag"></i> رقم القطعة: ${parcelNumber || "-"}</div>
     </div>
 
     ${specs ? `<div class="notes">📝 ${specs}</div>` : ``}
@@ -1707,6 +1708,7 @@ function renderCardHTML(item){
 نوع العرض: ${offerType}
 رقم المخطط: ${planNumber}
 اسم المخطط: ${planName}
+رقم القطعة: ${parcelNumber}
 طول: ${length}
 عرض: ${width}
 المساحة: ${area}
