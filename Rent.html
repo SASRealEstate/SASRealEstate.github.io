@@ -3108,6 +3108,37 @@ function strip(html){
   return html.replace(/<[^>]*>?/gm,'').trim();
 }
 
+function fallbackCopy(text, onSuccess){
+  try{
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    if(onSuccess) onSuccess();
+  }catch(e){
+    alert('تعذر النسخ التلقائي، يرجى النسخ يدويًا');
+  }
+}
+
+function copyTextToClipboard(text, btnEl){
+  const showSuccess = () => {
+    if(!btnEl) return;
+    const original = btnEl.innerHTML;
+    btnEl.innerHTML = '<i class="fa-solid fa-check"></i> تم النسخ';
+    setTimeout(() => { btnEl.innerHTML = original; }, 1500);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(showSuccess).catch(() => fallbackCopy(text, showSuccess));
+  } else {
+    fallbackCopy(text, showSuccess);
+  }
+}
+
 function getStaticListings(){
   return Array.from(document.querySelectorAll("#productTable tbody tr")).map(row=>{
     const td=row.querySelectorAll("td");
@@ -3223,7 +3254,7 @@ function renderCardHTML(item){
   <a class="btn-location" href="${location}" target="_blank"><i class="fa-solid fa-location-dot"></i> الموقع</a>
   <a class="btn-photos" href="${photos}" target="_blank"><i class="fa-solid fa-images"></i> الصور</a>
   <a class="btn-whatsapp" href="https://wa.me/966534108666?text=السلام عليكم , انا مهتم%20بالشقة%20رقم%20${id}" target="_blank"><i class="fa-brands fa-whatsapp"></i> واتساب</a>
-<a href="#" onclick="
+<button type="button" class="btn-copy" onclick="
   const text = \`رقم: ${id}
 نوع العقار: ${type}
 الدور: ${floor}
@@ -3237,15 +3268,13 @@ function renderCardHTML(item){
 مطبخ راكب: ${fittedKitchen}
 مستقل: ${entrance}
 ملاحظات: ${notes}
-السعر: ${price} ريال 
+السعر: ${price} ريال
 الشهري: ${monthlyPrice.toLocaleString()} ريال شهرياً
 نوع الإيجار: ${rentType}
 الموقع: ${location}
 الصور: ${photos}\`;
-  navigator.clipboard.writeText(text);
-  this.innerHTML='<i class=\'fa-solid fa-check\'></i> تم النسخ';
-  setTimeout(()=>this.innerHTML='<i class=\'fa-solid fa-copy\'></i> نسخ',1500);
-  return false;" class="btn-copy"><i class="fa-solid fa-copy"></i> نسخ</a>
+  copyTextToClipboard(text, this);
+"><i class="fa-solid fa-copy"></i> نسخ</button>
 </div>
 
 </div>

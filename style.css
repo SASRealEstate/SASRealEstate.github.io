@@ -426,7 +426,8 @@ select:focus, input:focus{
   margin-top:auto;
 }
 
-.card-actions a{
+.card-actions a,
+.card-actions button{
   display:flex;
   align-items:center;
   justify-content:center;
@@ -438,14 +439,19 @@ select:focus, input:focus{
   font-size:.78rem;
   font-weight:700;
   transition:.2s;
+  border:none;
+  font-family:inherit;
+  cursor:pointer;
+  width:100%;
 }
 
-.card-actions a:hover{ filter:brightness(1.1); transform:translateY(-1px); }
+.card-actions a:hover,
+.card-actions button:hover{ filter:brightness(1.1); transform:translateY(-1px); }
 
-.card-actions a.btn-location{ background:var(--blue); }
-.card-actions a.btn-photos{ background:var(--olive); }
-.card-actions a.btn-whatsapp{ background:var(--green); }
-.card-actions a.btn-copy{ background:#5b5f45; }
+.card-actions .btn-location{ background:var(--blue); }
+.card-actions .btn-photos{ background:var(--olive); }
+.card-actions .btn-whatsapp{ background:var(--green); }
+.card-actions .btn-copy{ background:#5b5f45; }
 
 /* ===== Footer ===== */
 
@@ -560,7 +566,8 @@ select:focus, input:focus{
     gap:6px;
     padding:10px;
   }
-  .card-actions a{
+  .card-actions a,
+  .card-actions button{
     font-size:.68rem;
     padding:9px 4px;
     min-height:36px;
@@ -578,5 +585,6 @@ select:focus, input:focus{
   .features{ grid-template-columns:1fr 1fr; }
   .features div{ font-size:.82rem; }
   .card-actions{ grid-template-columns:1fr 1fr; }
-  .card-actions a{ font-size:.78rem; padding:10px 6px; min-height:40px; }
+  .card-actions a,
+  .card-actions button{ font-size:.78rem; padding:10px 6px; min-height:40px; }
 }
