@@ -79,12 +79,12 @@ select:focus, input:focus{
 }
 
 .logo{
-  height:56px;
+  height:78px;
   width:auto;
   display:block;
   border-radius:8px;
   background:#fff;
-  padding:3px;
+  padding:4px;
 }
 
 .brand-name{
@@ -345,10 +345,22 @@ select:focus, input:focus{
   font-weight:900;
 }
 
-.price .monthly{
+.monthly{
   font-size:.72rem;
   font-weight:500;
   color:var(--muted);
+}
+
+.asking-line{
+  text-align:center;
+  font-size:.85rem;
+  color:var(--muted);
+  margin:-6px 0 10px;
+}
+
+.asking-line strong{
+  color:var(--olive-dark);
+  font-weight:700;
 }
 
 .rent-type-badge{
@@ -446,10 +458,10 @@ select:focus, input:focus{
 }
 
 .site-footer .footer-logo{
-  height:44px;
+  height:60px;
   border-radius:8px;
   background:#fff;
-  padding:3px;
+  padding:4px;
   margin-bottom:12px;
 }
 
@@ -486,7 +498,7 @@ select:focus, input:focus{
 
   .top-container{ justify-content:center; text-align:center; padding:10px 14px; }
   .brand{ flex-direction:column; gap:6px; }
-  .logo{ height:52px; }
+  .logo{ height:68px; }
   .brand-name{ font-size:1rem; }
   .brand-name small{ display:none; }
 
@@ -532,7 +544,8 @@ select:focus, input:focus{
 
   .price-row{ flex-direction:column; gap:0; margin-bottom:6px; }
   .price{ font-size:1.05rem; }
-  .price .monthly{ font-size:.65rem; }
+  .monthly{ font-size:.65rem; }
+  .asking-line{ font-size:.75rem; }
 
   .rent-type-badge{ font-size:.65rem; padding:3px 10px; margin:0 auto 10px; }
 

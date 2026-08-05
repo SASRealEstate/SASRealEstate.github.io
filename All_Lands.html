@@ -1661,6 +1661,11 @@ async function getListings(){
 function renderCardHTML(item){
   const {id, plateNumber, type, offerType, location, planNumber, planName,
          length, width, area, specs, facades, asking, price, pricePerMeter, photos, notes} = item;
+
+  const askingNum = parseFloat(asking);
+  const areaNum = parseFloat(area);
+  const askingPerMeter = (askingNum > 0 && areaNum > 0) ? Math.round(askingNum / areaNum) : null;
+
   return `
 <div class="card"
   data-type="${type}"
@@ -1675,6 +1680,7 @@ function renderCardHTML(item){
       <span class="price">${price ? Number(price).toLocaleString() : "-"} ريال</span>
       ${pricePerMeter ? `<span class="monthly">(${Number(pricePerMeter).toLocaleString()} / م)</span>` : ``}
     </div>
+    ${asking ? `<div class="asking-line">السوم: <strong>${askingNum.toLocaleString()} ريال</strong>${askingPerMeter ? ` <span class="monthly">(${askingPerMeter.toLocaleString()} / م)</span>` : ``}</div>` : ``}
     ${offerType ? `<span class="rent-type-badge">${offerType}</span>` : ``}
 
     <div class="features">
