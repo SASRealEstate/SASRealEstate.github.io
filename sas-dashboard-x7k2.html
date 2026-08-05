@@ -615,7 +615,7 @@ const CATEGORIES = {
       {key:"facades", label:"الواجهات", type:"text"},
       {key:"asking", label:"السوم", type:"text"},
       {key:"price", label:"السعر", type:"number", required:true},
-      {key:"pricePerMeter", label:"سعر المتر", type:"text"},
+      {key:"pricePerMeter", label:"سعر المتر", type:"text", computed:true},
       {key:"location", label:"رابط الموقع (خرائط جوجل)", type:"url", wide:true},
       {key:"photos", label:"رابط الصور (Google Drive)", type:"url", wide:true},
       {key:"specs", label:"مواصفات العقار", type:"textarea", wide:true},
@@ -832,7 +832,7 @@ function renderFormFields(){
 
     const label = document.createElement("label");
     label.setAttribute("for", "f_" + f.key);
-    label.textContent = f.label + (f.required ? " *" : "");
+    label.textContent = f.label + (f.required ? " *" : "") + (f.computed ? " (يُحسب تلقائيًا)" : "");
     div.appendChild(label);
 
     let input;
@@ -853,10 +853,37 @@ function renderFormFields(){
     input.id = "f_" + f.key;
     if (f.required) input.required = true;
     if (f.value) input.value = f.value;
+    if (f.computed){
+      input.readOnly = true;
+      input.style.background = "var(--cream)";
+      input.style.color = "var(--muted)";
+    }
 
     div.appendChild(input);
     wrap.appendChild(div);
   });
+
+  wireComputedFields();
+}
+
+function wireComputedFields(){
+  if (currentCategory === "lands"){
+    const priceEl = document.getElementById("f_price");
+    const areaEl = document.getElementById("f_area");
+    const perMeterEl = document.getElementById("f_pricePerMeter");
+    if (!priceEl || !areaEl || !perMeterEl) return;
+
+    const recalc = () => {
+      const price = parseFloat(priceEl.value);
+      const area = parseFloat(areaEl.value);
+      if (price > 0 && area > 0){
+        perMeterEl.value = Math.round(price / area);
+      }
+    };
+    priceEl.addEventListener("input", recalc);
+    areaEl.addEventListener("input", recalc);
+    recalc();
+  }
 }
 
 function resetForm(){
