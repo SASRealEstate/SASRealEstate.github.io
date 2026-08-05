@@ -191,6 +191,18 @@ button{ cursor:pointer; border:none; }
 .form-grid .field label{ display:block; font-size:.8rem; font-weight:700; margin-bottom:6px; color:var(--olive-dark); }
 .form-grid .field.wide{ grid-column:1 / -1; }
 
+.clearable-input-row{ display:flex; gap:6px; }
+.btn-clear-select{
+  flex:none;
+  background:#eee;
+  color:var(--muted);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:0 12px;
+  font-size:.85rem;
+}
+.btn-clear-select:hover{ background:#f4d7d3; color:var(--danger); border-color:#e6b3ac; }
+
 .form-actions{ margin-top:18px; display:flex; gap:10px; flex-wrap:wrap; }
 
 .btn-save{ background:var(--olive); color:#fff; padding:11px 26px; border-radius:8px; font-weight:700; }
@@ -975,7 +987,25 @@ function renderFormFields(){
       input.style.color = "var(--muted)";
     }
 
-    div.appendChild(input);
+    if (f.type === "owner-select" || f.type === "broker-select"){
+      const row = document.createElement("div");
+      row.className = "clearable-input-row";
+      input.style.flex = "1";
+      row.appendChild(input);
+
+      const clearBtn = document.createElement("button");
+      clearBtn.type = "button";
+      clearBtn.className = "btn-clear-select";
+      clearBtn.title = f.type === "owner-select" ? "بدون مالك" : "بدون وسيط";
+      clearBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+      clearBtn.addEventListener("click", () => { input.value = ""; input.focus(); });
+      row.appendChild(clearBtn);
+
+      div.appendChild(row);
+    } else {
+      div.appendChild(input);
+    }
+
     wrap.appendChild(div);
   });
 
