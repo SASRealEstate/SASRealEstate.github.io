@@ -1688,9 +1688,10 @@ function renderCardHTML(item){
       <div><i class="fa-solid fa-ruler"></i> طول: ${length || "-"}</div>
       <div><i class="fa-solid fa-ruler"></i> عرض: ${width || "-"}</div>
       <div><i class="fa-solid fa-border-all"></i> الواجهات: ${facades || "-"}</div>
+      <div><i class="fa-solid fa-hashtag"></i> رقم القطعة: ${parcelNumber || "-"}</div>
+      <div><i class="fa-solid fa-hashtag"></i> رقم المخطط: ${planNumber || "-"}</div>
       <div><i class="fa-solid fa-map"></i> المخطط: ${planName || "-"}</div>
       <div><i class="fa-solid fa-hashtag"></i> رقم اللوحة: ${plateNumber || "-"}</div>
-      <div><i class="fa-solid fa-hashtag"></i> رقم القطعة: ${parcelNumber || "-"}</div>
     </div>
 
     ${specs ? `<div class="notes">📝 ${specs}</div>` : ``}
@@ -1706,9 +1707,9 @@ function renderCardHTML(item){
 رقم اللوحة: ${plateNumber}
 نوع العقار: ${type}
 نوع العرض: ${offerType}
+رقم القطعة: ${parcelNumber}
 رقم المخطط: ${planNumber}
 اسم المخطط: ${planName}
-رقم القطعة: ${parcelNumber}
 طول: ${length}
 عرض: ${width}
 المساحة: ${area}
