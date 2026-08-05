@@ -470,12 +470,70 @@ button{ cursor:pointer; border:none; }
           <button type="button" class="btn-import" style="margin-inline-start:8px;" onclick="migrateOwnerIds()"><i class="fa-solid fa-arrows-rotate"></i> إصلاح الأرقام تلقائيًا</button>
         </div>
 
+        <div id="legacyLinksWarning" style="display:none; margin-bottom:14px; padding:12px 16px; background:#fff3cd; border:1px solid #ffe08a; border-radius:10px; font-size:.85rem; color:#7a5b00;">
+          ⚠️ يوجد <span id="legacyLinksCount">0</span> مالك لديه عقارات مرتبطة بالطريقة القديمة.
+          <button type="button" class="btn-import" style="margin-inline-start:8px;" onclick="migrateOwnerPropertyLinks()"><i class="fa-solid fa-link"></i> ربط العقارات تلقائيًا</button>
+        </div>
+
         <input type="text" id="ownerSearchInput" placeholder="ابحث بالاسم، الجوال، أو رقم العرض (رقم دقيق - مثال: 8)" style="margin-bottom:12px;">
 
         <div class="status-filter" id="ownerCategoryFilter"></div>
 
         <div id="ownersList"></div>
         <div id="ownersEmptyState" class="empty-state" style="display:none;">لا يوجد ملاك بعد.</div>
+      </div>
+
+    </div>
+
+    <div id="brokersSection" style="display:none;">
+
+      <div class="panel">
+        <h2><i class="fa-solid fa-user-plus"></i> <span id="brokerFormTitle">إضافة وسيط جديد</span></h2>
+
+        <form id="brokerForm" onsubmit="return saveBroker(event)">
+          <div class="form-grid">
+            <div class="field">
+              <label for="b_number">رقم الوسيط *</label>
+              <input type="number" id="b_number" required>
+            </div>
+            <div class="field">
+              <label for="b_name">اسم الوسيط *</label>
+              <input type="text" id="b_name" placeholder="اسم الوسيط" required>
+            </div>
+            <div class="field">
+              <label for="b_phone">جوال الوسيط</label>
+              <input type="tel" id="b_phone" placeholder="05xxxxxxxx">
+            </div>
+          </div>
+
+          <div style="margin-top:18px;">
+            <label style="display:block; font-size:.85rem; font-weight:700; color:var(--olive-dark); margin-bottom:8px;">العقارات المرتبطة (تُحسب تلقائيًا من العروض)</label>
+            <div id="brokerPropertiesPreview" class="property-chips"></div>
+          </div>
+
+          <div class="field wide" style="margin-top:14px;">
+            <label for="b_notes">ملاحظات</label>
+            <textarea id="b_notes" rows="2"></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-save"><i class="fa-solid fa-floppy-disk"></i> <span id="brokerSaveBtnText">حفظ الوسيط</span></button>
+            <button type="button" class="btn-cancel" id="brokerCancelEditBtn" style="display:none;" onclick="resetBrokerForm()">إلغاء التعديل</button>
+          </div>
+
+          <div id="brokerFormStatus" class="status-msg"></div>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h2><i class="fa-solid fa-handshake"></i> الوسطاء (<span id="brokersCount">0</span>)</h2>
+
+        <input type="text" id="brokerSearchInput" placeholder="ابحث بالاسم، الجوال، أو رقم العرض (رقم دقيق - مثال: 8)" style="margin-bottom:12px;">
+
+        <div class="status-filter" id="brokerCategoryFilter"></div>
+
+        <div id="brokersList"></div>
+        <div id="brokersEmptyState" class="empty-state" style="display:none;">لا يوجد وسطاء بعد.</div>
       </div>
 
     </div>
@@ -506,6 +564,7 @@ const CATEGORIES = {
       {key:"id", label:"رقم العرض", type:"number", required:true},
       {key:"status", label:"الحالة", type:"select", options:["نشط","مؤرشف"]},
       {key:"ownerNumber", label:"المالك", type:"owner-select"},
+      {key:"brokerNumber", label:"الوسيط", type:"broker-select"},
       {key:"type", label:"نوع العقار", type:"text", value:"شقة"},
       {key:"rentType", label:"نوع الإيجار", type:"select", options:["سنة كاملة","سنة دراسية","صيفية"]},
       {key:"price", label:"الإيجار السنوي (ريال)", type:"number"},
@@ -531,7 +590,8 @@ const CATEGORIES = {
       {key:"rentType", label:"نوع الإيجار", badge:true},
       {key:"floor", label:"الدور"},
       {key:"rooms", label:"الغرف"},
-      {key:"ownerNumber", label:"المالك", ownerLookup:true}
+      {key:"ownerNumber", label:"المالك", ownerLookup:true},
+      {key:"brokerNumber", label:"الوسيط", brokerLookup:true}
     ],
     copyText: (id, d) => {
       const divisorMap = {"سنة كاملة":12, "سنة دراسية":10, "صيفية":2};
@@ -571,6 +631,7 @@ const CATEGORIES = {
       {key:"id", label:"رقم", type:"number", required:true},
       {key:"status", label:"الحالة", type:"select", options:["نشط","مؤرشف"]},
       {key:"ownerNumber", label:"المالك", type:"owner-select"},
+      {key:"brokerNumber", label:"الوسيط", type:"broker-select"},
       {key:"type", label:"نوع العقار", type:"text"},
       {key:"floor", label:"الدور", type:"text"},
       {key:"landArea", label:"مساحة الأرض", type:"text"},
@@ -589,7 +650,8 @@ const CATEGORIES = {
       {key:"price", label:"السعر", suffix:" ريال"},
       {key:"landArea", label:"مساحة الأرض"},
       {key:"buildArea", label:"مسطح البناء"},
-      {key:"ownerNumber", label:"المالك", ownerLookup:true}
+      {key:"ownerNumber", label:"المالك", ownerLookup:true},
+      {key:"brokerNumber", label:"الوسيط", brokerLookup:true}
     ],
     copyText: (id, d) => `رقم: ${id}
 نوع العقار: ${d.type || ""}
@@ -617,6 +679,7 @@ const CATEGORIES = {
       {key:"id", label:"رقم", type:"number", required:true},
       {key:"status", label:"الحالة", type:"select", options:["نشط","مؤرشف"]},
       {key:"ownerNumber", label:"المالك", type:"owner-select"},
+      {key:"brokerNumber", label:"الوسيط", type:"broker-select"},
       {key:"plateNumber", label:"رقم اللوحة", type:"text"},
       {key:"type", label:"نوع العقار", type:"select", options:["أرض تجارية","أرض سكنية","أرض زراعية","أرض صناعية"]},
       {key:"offerType", label:"نوع العرض", type:"select", options:["بيع","إيجار"]},
@@ -641,7 +704,8 @@ const CATEGORIES = {
       {key:"type", label:"النوع"},
       {key:"price", label:"السعر", suffix:" ريال"},
       {key:"area", label:"المساحة"},
-      {key:"ownerNumber", label:"المالك", ownerLookup:true}
+      {key:"ownerNumber", label:"المالك", ownerLookup:true},
+      {key:"brokerNumber", label:"الوسيط", brokerLookup:true}
     ],
     copyText: (id, d) => `رقم: ${id}
 رقم اللوحة: ${d.plateNumber || ""}
@@ -679,6 +743,13 @@ let ownerCategoryFilter = "all";
 let allOwners = [];
 let ownerNumberBaseline = 0;
 let ownerPropertiesIndex = {};
+let editingBrokerId = null;
+let unsubscribeBrokers = null;
+let lastBrokerDocs = [];
+let brokerCategoryFilter = "all";
+let allBrokers = [];
+let brokerNumberBaseline = 0;
+let brokerPropertiesIndex = {};
 
 function cat(){ return CATEGORIES[currentCategory]; }
 
@@ -727,7 +798,8 @@ function renderModeTabs(){
   wrap.innerHTML = "";
   const modes = [
     {key:"listings", label:"العروض", icon:"fa-building"},
-    {key:"owners", label:"الملاك", icon:"fa-users"}
+    {key:"owners", label:"الملاك", icon:"fa-users"},
+    {key:"brokers", label:"الوسطاء", icon:"fa-handshake"}
   ];
   modes.forEach(m => {
     const btn = document.createElement("button");
@@ -743,11 +815,18 @@ async function switchMode(mode){
   renderModeTabs();
   document.getElementById("listingsSection").style.display = mode === "listings" ? "block" : "none";
   document.getElementById("ownersSection").style.display = mode === "owners" ? "block" : "none";
+  document.getElementById("brokersSection").style.display = mode === "brokers" ? "block" : "none";
   if (mode === "owners"){
     renderOwnerCategoryFilter();
-    await Promise.all([loadAllOwners(), loadOwnerPropertiesIndex()]);
+    await Promise.all([loadAllOwners(), loadLinkIndexes()]);
     resetOwnerForm();
     listenToOwners();
+  }
+  if (mode === "brokers"){
+    renderBrokerCategoryFilter();
+    await Promise.all([loadAllBrokers(), loadLinkIndexes()]);
+    resetBrokerForm();
+    listenToBrokers();
   }
 }
 
@@ -769,7 +848,7 @@ async function switchCategory(key){
   renderTabs();
   document.getElementById("viewPageLink").href = cat().sourcePage;
   document.getElementById("importBtnText").textContent = "استيراد العروض الحالية من " + cat().sourcePage;
-  await loadAllOwners();
+  await Promise.all([loadAllOwners(), loadAllBrokers()]);
   renderFormFields();
   renderTableHead();
   renderStatusFilter();
@@ -873,6 +952,17 @@ function renderFormFields(){
         const opt = document.createElement("option");
         opt.value = o.number;
         opt.textContent = ownerLabel(o);
+        input.appendChild(opt);
+      });
+    } else if (f.type === "broker-select"){
+      input = document.createElement("select");
+      const noneOpt = document.createElement("option");
+      noneOpt.value = ""; noneOpt.textContent = "بدون وسيط";
+      input.appendChild(noneOpt);
+      allBrokers.forEach(b => {
+        const opt = document.createElement("option");
+        opt.value = b.number;
+        opt.textContent = brokerLabel(b);
         input.appendChild(opt);
       });
     } else if (f.type === "textarea"){
@@ -1106,6 +1196,8 @@ function renderListingsTable(docs){
         content = `<span class="badge-rent">${val}</span>`;
       } else if (col.ownerLookup){
         content = val ? getOwnerLabelByNumber(val) : `<span style="color:var(--muted);">-</span>`;
+      } else if (col.brokerLookup){
+        content = val ? getBrokerLabelByNumber(val) : `<span style="color:var(--muted);">-</span>`;
       } else {
         content = val + (col.suffix && val ? col.suffix : "");
       }
@@ -1258,22 +1350,53 @@ function getOwnerLabelByNumber(number){
   return o ? ownerLabel(o) : `#${number}`;
 }
 
+/* ---- كاش الوسطاء (للربط من نموذج العروض) ---- */
+
+async function loadAllBrokers(){
+  if (!window.db) return;
+  try{
+    const snap = await db.collection("brokers").get();
+    allBrokers = snap.docs.map(doc => ({ number: doc.id, ...doc.data() }))
+      .sort((a,b) => (parseInt(a.number)||0) - (parseInt(b.number)||0));
+    brokerNumberBaseline = allBrokers.reduce((max,b) => Math.max(max, parseInt(b.number)||0), 0);
+  }catch(e){
+    console.warn("تعذر تحميل قائمة الوسطاء", e);
+  }
+}
+
+function brokerLabel(b){
+  return `#${b.number} - ${b.name || "وسيط غير معروف"}`;
+}
+
+function getBrokerLabelByNumber(number){
+  if (!number) return "-";
+  const b = allBrokers.find(b => String(b.number) === String(number));
+  return b ? brokerLabel(b) : `#${number}`;
+}
+
 /* ---- فهرس العقارات لكل مالك (يُحسب من العروض مباشرة) ---- */
 
-async function loadOwnerPropertiesIndex(){
+async function loadLinkIndexes(){
   if (!window.db) return;
   ownerPropertiesIndex = {};
+  brokerPropertiesIndex = {};
   await Promise.all(Object.entries(CATEGORIES).map(async ([catKey, c]) => {
     try{
       const snap = await db.collection(c.collection).get();
       snap.docs.forEach(doc => {
         const d = doc.data();
-        if (!d.ownerNumber) return;
-        if (!ownerPropertiesIndex[d.ownerNumber]) ownerPropertiesIndex[d.ownerNumber] = [];
-        ownerPropertiesIndex[d.ownerNumber].push({ category: catKey, number: d.id || doc.id, type: d.type || "" });
+        const entry = { category: catKey, number: d.id || doc.id, type: d.type || "" };
+        if (d.ownerNumber){
+          if (!ownerPropertiesIndex[d.ownerNumber]) ownerPropertiesIndex[d.ownerNumber] = [];
+          ownerPropertiesIndex[d.ownerNumber].push(entry);
+        }
+        if (d.brokerNumber){
+          if (!brokerPropertiesIndex[d.brokerNumber]) brokerPropertiesIndex[d.brokerNumber] = [];
+          brokerPropertiesIndex[d.brokerNumber].push(entry);
+        }
       });
     }catch(e){
-      console.warn("تعذر تحميل عروض " + catKey + " لفهرسة الملاك", e);
+      console.warn("تعذر تحميل عروض " + catKey + " لفهرسة الملاك والوسطاء", e);
     }
   }));
 }
@@ -1286,6 +1409,72 @@ function checkLegacyOwners(docs){
   if (!warn) return;
   document.getElementById("legacyOwnerCount").textContent = legacyCount;
   warn.style.display = legacyCount > 0 ? "block" : "none";
+}
+
+function checkLegacyPropertyLinks(docs){
+  const legacyCount = docs.filter(d => Array.isArray(d.data().properties) && d.data().properties.length > 0).length;
+  const warn = document.getElementById("legacyLinksWarning");
+  if (!warn) return;
+  document.getElementById("legacyLinksCount").textContent = legacyCount;
+  warn.style.display = legacyCount > 0 ? "block" : "none";
+}
+
+async function migrateOwnerPropertyLinks(){
+  if (!confirm("سيتم استخدام روابط العقارات القديمة المحفوظة لدى كل مالك لربط العروض تلقائيًا (فقط للعروض التي لا يوجد لها مالك محدد حاليًا)، ثم حذف البيانات القديمة من ملف المالك. متابعة؟")) return;
+
+  try{
+    const snap = await db.collection("owners").get();
+    const ownersWithLinks = snap.docs.filter(d => Array.isArray(d.data().properties) && d.data().properties.length > 0);
+
+    if (!ownersWithLinks.length){
+      alert("لا توجد روابط قديمة لترحيلها.");
+      return;
+    }
+
+    let linkedCount = 0;
+    let skippedCount = 0;
+    let notFoundCount = 0;
+
+    for (const ownerDoc of ownersWithLinks){
+      const ownerId = ownerDoc.id;
+      const properties = ownerDoc.data().properties || [];
+
+      for (const p of properties){
+        const c = CATEGORIES[p.category];
+        if (!c || !p.number) { notFoundCount++; continue; }
+
+        const listingRef = db.collection(c.collection).doc(String(p.number));
+        const listingSnap = await listingRef.get();
+
+        if (!listingSnap.exists){
+          notFoundCount++;
+          continue;
+        }
+
+        const listingData = listingSnap.data();
+        if (listingData.ownerNumber){
+          skippedCount++;
+          continue;
+        }
+
+        await listingRef.update({ ownerNumber: ownerId });
+        linkedCount++;
+      }
+
+      await db.collection("owners").doc(ownerId).update({
+        properties: firebase.firestore.FieldValue.delete()
+      });
+    }
+
+    alert(`تم ربط ${linkedCount} عرض بنجاح.\nتم تخطي ${skippedCount} عرض له مالك محدد بالفعل.\nتعذر إيجاد ${notFoundCount} عرض (ربما تم حذفه أو تغيير رقمه).`);
+
+    await loadAllOwners();
+    await loadLinkIndexes();
+    listenToOwners();
+  }catch(e){
+    alert("حدث خطأ أثناء الربط: " + e.message);
+    console.error(e);
+  }
 }
 
 async function migrateOwnerIds(){
@@ -1325,7 +1514,7 @@ async function migrateOwnerIds(){
     alert(`تم إصلاح ${legacyDocs.length} مالك، وتحديث ${updatedListingsCount} عرض مرتبط بهم.`);
 
     await loadAllOwners();
-    await loadOwnerPropertiesIndex();
+    await loadLinkIndexes();
     listenToOwners();
   }catch(e){
     alert("حدث خطأ أثناء الإصلاح: " + e.message);
@@ -1477,6 +1666,7 @@ function matchesOwnerProperty(p, query, isNumericQuery){
 
 function renderOwnersList(docs){
   checkLegacyOwners(docs);
+  checkLegacyPropertyLinks(docs);
 
   const rawQuery = (document.getElementById("ownerSearchInput")?.value || "").trim().toLowerCase();
   const isNumericQuery = /^\d+$/.test(rawQuery);
@@ -1554,6 +1744,209 @@ function renderOwnersList(docs){
 }
 
 document.getElementById("ownerSearchInput")?.addEventListener("input", () => renderOwnersList(lastOwnerDocs));
+
+/* ---- نموذج الوسيط ---- */
+
+function suggestNextBrokerNumber(){
+  const numField = document.getElementById("b_number");
+  if (!numField) return;
+  numField.value = brokerNumberBaseline + 1;
+}
+
+function renderBrokerPropertiesPreview(brokerNumber){
+  const wrap = document.getElementById("brokerPropertiesPreview");
+  const props = brokerPropertiesIndex[brokerNumber] || [];
+  wrap.innerHTML = props.map(p => {
+    const label = CATEGORIES[p.category]?.label || p.category;
+    return `<span class="property-chip chip-${p.category}">${label} - رقم ${p.number}</span>`;
+  }).join("") || `<span style="color:var(--muted); font-size:.82rem;">لا توجد عقارات مرتبطة بعد</span>`;
+}
+
+function resetBrokerForm(){
+  editingBrokerId = null;
+  document.getElementById("brokerForm").reset();
+  document.getElementById("b_number").disabled = false;
+  document.getElementById("brokerPropertiesPreview").innerHTML = "";
+  suggestNextBrokerNumber();
+  document.getElementById("brokerFormTitle").textContent = "إضافة وسيط جديد";
+  document.getElementById("brokerSaveBtnText").textContent = "حفظ الوسيط";
+  document.getElementById("brokerCancelEditBtn").style.display = "none";
+  document.getElementById("brokerFormStatus").textContent = "";
+}
+
+function saveBroker(event){
+  event.preventDefault();
+  const statusEl = document.getElementById("brokerFormStatus");
+  statusEl.className = "status-msg";
+  statusEl.textContent = "";
+
+  const number = document.getElementById("b_number").value.trim();
+  if (!number){
+    statusEl.textContent = "رقم الوسيط مطلوب";
+    statusEl.className = "status-msg err";
+    return false;
+  }
+
+  const name = document.getElementById("b_name").value.trim();
+  if (!name){
+    statusEl.textContent = "اسم الوسيط مطلوب";
+    statusEl.className = "status-msg err";
+    return false;
+  }
+
+  const data = {
+    name,
+    phone: document.getElementById("b_phone").value.trim(),
+    notes: document.getElementById("b_notes").value.trim()
+  };
+
+  db.collection("brokers").doc(String(number)).set(data)
+    .then(async () => {
+      statusEl.textContent = "تم الحفظ بنجاح ✔";
+      statusEl.className = "status-msg ok";
+      await loadAllBrokers();
+      resetBrokerForm();
+    })
+    .catch(e => {
+      statusEl.textContent = "حدث خطأ أثناء الحفظ: " + e.message;
+      statusEl.className = "status-msg err";
+      console.error(e);
+    });
+
+  return false;
+}
+
+function editBroker(docId, data){
+  editingBrokerId = docId;
+  document.getElementById("b_number").value = docId;
+  document.getElementById("b_number").disabled = true;
+  document.getElementById("b_name").value = data.name || "";
+  document.getElementById("b_phone").value = data.phone || "";
+  document.getElementById("b_notes").value = data.notes || "";
+
+  renderBrokerPropertiesPreview(docId);
+
+  document.getElementById("brokerFormTitle").textContent = "تعديل بيانات الوسيط #" + docId;
+  document.getElementById("brokerSaveBtnText").textContent = "حفظ التعديلات";
+  document.getElementById("brokerCancelEditBtn").style.display = "inline-block";
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function deleteBroker(docId){
+  const linkedCount = (brokerPropertiesIndex[docId] || []).length;
+  const warning = linkedCount
+    ? `تحذير: هذا الوسيط مرتبط بـ ${linkedCount} عرض حاليًا. حذفه لن يحذف العروض لكنها ستبقى بلا وسيط محدد. `
+    : "";
+  if (!confirm(warning + "هل أنت متأكد من حذف هذا الوسيط؟")) return;
+  db.collection("brokers").doc(docId).delete()
+    .then(loadAllBrokers)
+    .catch(e => {
+      alert("حدث خطأ أثناء الحذف: " + e.message);
+      console.error(e);
+    });
+}
+
+function listenToBrokers(){
+  if (unsubscribeBrokers) { unsubscribeBrokers(); unsubscribeBrokers = null; }
+  if (!window.db) return;
+
+  unsubscribeBrokers = db.collection("brokers").onSnapshot(snap => {
+    lastBrokerDocs = snap.docs;
+    renderBrokersList(lastBrokerDocs);
+  }, err => {
+    console.error("خطأ في تحميل الوسطاء", err);
+  });
+}
+
+function renderBrokerCategoryFilter(){
+  const wrap = document.getElementById("brokerCategoryFilter");
+  const options = [{key:"all", label:"الكل"}, ...Object.entries(CATEGORIES).map(([key,c]) => ({key, label:c.label}))];
+  wrap.innerHTML = "";
+  options.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = opt.label;
+    btn.className = brokerCategoryFilter === opt.key ? "active" : "";
+    btn.addEventListener("click", () => {
+      brokerCategoryFilter = opt.key;
+      renderBrokerCategoryFilter();
+      renderBrokersList(lastBrokerDocs);
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+function renderBrokersList(docs){
+  const rawQuery = (document.getElementById("brokerSearchInput")?.value || "").trim().toLowerCase();
+  const isNumericQuery = /^\d+$/.test(rawQuery);
+
+  const filtered = docs.filter(doc => {
+    const d = doc.data();
+    const properties = brokerPropertiesIndex[doc.id] || [];
+
+    if (brokerCategoryFilter !== "all" && !properties.some(p => p.category === brokerCategoryFilter)) return false;
+
+    if (!rawQuery) return true;
+
+    if (isNumericQuery){
+      if (String(doc.id) === rawQuery) return true;
+      return properties.some(p => matchesOwnerProperty(p, rawQuery, true));
+    }
+
+    if ((d.name || "").toLowerCase().includes(rawQuery)) return true;
+    if ((d.phone || "").toLowerCase().includes(rawQuery)) return true;
+    return properties.some(p => matchesOwnerProperty(p, rawQuery, false));
+  });
+
+  document.getElementById("brokersCount").textContent = filtered.length;
+
+  const listWrap = document.getElementById("brokersList");
+  const emptyState = document.getElementById("brokersEmptyState");
+  listWrap.innerHTML = "";
+
+  if (filtered.length === 0){
+    emptyState.textContent = rawQuery ? "لا نتائج مطابقة." : "لا يوجد وسطاء بعد.";
+    emptyState.style.display = "block";
+    return;
+  }
+  emptyState.style.display = "none";
+
+  filtered.sort((a,b) => (parseInt(a.id)||0) - (parseInt(b.id)||0));
+
+  filtered.forEach(doc => {
+    const d = doc.data();
+    const card = document.createElement("div");
+    card.className = "owner-card";
+
+    const allProperties = brokerPropertiesIndex[doc.id] || [];
+    const visibleProperties = brokerCategoryFilter === "all"
+      ? allProperties
+      : allProperties.filter(p => p.category === brokerCategoryFilter);
+
+    const chips = visibleProperties.map(p => {
+      const label = CATEGORIES[p.category]?.label || p.category;
+      return `<span class="property-chip chip-${p.category}">${label} - رقم ${p.number}</span>`;
+    }).join("") || `<span style="color:var(--muted); font-size:.82rem;">لا توجد عقارات مرتبطة</span>`;
+
+    card.innerHTML = `
+      <div class="owner-info">
+        <h3>#${doc.id} - ${d.name || "وسيط غير معروف"}</h3>
+        ${d.phone ? `<div class="owner-phone"><a href="https://wa.me/966${d.phone.replace(/^0/,"")}" target="_blank"><i class="fa-brands fa-whatsapp"></i> ${d.phone}</a></div>` : ``}
+        <div class="property-chips">${chips}</div>
+        ${d.notes ? `<div class="owner-notes">📝 ${d.notes}</div>` : ``}
+      </div>
+      <div class="row-actions">
+        <button class="btn-edit" data-action="edit"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn-delete" data-action="delete"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    `;
+    card.querySelector('[data-action="edit"]').addEventListener("click", () => editBroker(doc.id, d));
+    card.querySelector('[data-action="delete"]').addEventListener("click", () => deleteBroker(doc.id));
+    listWrap.appendChild(card);
+  });
+}
+
+document.getElementById("brokerSearchInput")?.addEventListener("input", () => renderBrokersList(lastBrokerDocs));
 
 </script>
 
