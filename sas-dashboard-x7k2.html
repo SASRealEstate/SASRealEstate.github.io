@@ -465,6 +465,11 @@ button{ cursor:pointer; border:none; }
       <div class="panel">
         <h2><i class="fa-solid fa-users"></i> الملاك (<span id="ownersCount">0</span>)</h2>
 
+        <div id="legacyOwnerWarning" style="display:none; margin-bottom:14px; padding:12px 16px; background:#fff3cd; border:1px solid #ffe08a; border-radius:10px; font-size:.85rem; color:#7a5b00;">
+          ⚠️ يوجد <span id="legacyOwnerCount">0</span> مالك برقم قديم غير متسلسل.
+          <button type="button" class="btn-import" style="margin-inline-start:8px;" onclick="migrateOwnerIds()"><i class="fa-solid fa-arrows-rotate"></i> إصلاح الأرقام تلقائيًا</button>
+        </div>
+
         <input type="text" id="ownerSearchInput" placeholder="ابحث بالاسم، الجوال، أو رقم العرض (رقم دقيق - مثال: 8)" style="margin-bottom:12px;">
 
         <div class="status-filter" id="ownerCategoryFilter"></div>
@@ -1273,6 +1278,61 @@ async function loadOwnerPropertiesIndex(){
   }));
 }
 
+/* ---- إصلاح أرقام الملاك القديمة (غير المتسلسلة) ---- */
+
+function checkLegacyOwners(docs){
+  const legacyCount = docs.filter(d => !/^\d+$/.test(d.id)).length;
+  const warn = document.getElementById("legacyOwnerWarning");
+  if (!warn) return;
+  document.getElementById("legacyOwnerCount").textContent = legacyCount;
+  warn.style.display = legacyCount > 0 ? "block" : "none";
+}
+
+async function migrateOwnerIds(){
+  if (!confirm("سيتم إعطاء الملاك القدامى أرقامًا متسلسلة جديدة بدءًا من 1 (أو بعد آخر رقم مستخدم)، وتحديث كل العروض المرتبطة بهم تلقائيًا لتبقى الروابط سليمة. هذا الإجراء لا يمكن التراجع عنه. متابعة؟")) return;
+
+  try{
+    const snap = await db.collection("owners").get();
+    const numericIds = snap.docs.map(d => parseInt(d.id, 10)).filter(n => !isNaN(n));
+    let nextNumber = numericIds.length ? Math.max(...numericIds) + 1 : 1;
+
+    const legacyDocs = snap.docs.filter(d => !/^\d+$/.test(d.id));
+    if (!legacyDocs.length){
+      alert("لا يوجد ملاك بأرقام قديمة يحتاجون إصلاح.");
+      return;
+    }
+
+    const idMap = {};
+    legacyDocs.forEach(doc => { idMap[doc.id] = String(nextNumber++); });
+
+    for (const doc of legacyDocs){
+      await db.collection("owners").doc(idMap[doc.id]).set(doc.data());
+      await db.collection("owners").doc(doc.id).delete();
+    }
+
+    let updatedListingsCount = 0;
+    for (const c of Object.values(CATEGORIES)){
+      const listingSnap = await db.collection(c.collection).get();
+      for (const listingDoc of listingSnap.docs){
+        const d = listingDoc.data();
+        if (d.ownerNumber && idMap[d.ownerNumber]){
+          await db.collection(c.collection).doc(listingDoc.id).update({ ownerNumber: idMap[d.ownerNumber] });
+          updatedListingsCount++;
+        }
+      }
+    }
+
+    alert(`تم إصلاح ${legacyDocs.length} مالك، وتحديث ${updatedListingsCount} عرض مرتبط بهم.`);
+
+    await loadAllOwners();
+    await loadOwnerPropertiesIndex();
+    listenToOwners();
+  }catch(e){
+    alert("حدث خطأ أثناء الإصلاح: " + e.message);
+    console.error(e);
+  }
+}
+
 /* ---- نموذج المالك ---- */
 
 function suggestNextOwnerNumber(){
@@ -1416,6 +1476,8 @@ function matchesOwnerProperty(p, query, isNumericQuery){
 }
 
 function renderOwnersList(docs){
+  checkLegacyOwners(docs);
+
   const rawQuery = (document.getElementById("ownerSearchInput")?.value || "").trim().toLowerCase();
   const isNumericQuery = /^\d+$/.test(rawQuery);
 
