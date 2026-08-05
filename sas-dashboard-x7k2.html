@@ -866,23 +866,28 @@ function renderFormFields(){
   wireComputedFields();
 }
 
+function recalcPricePerMeter(){
+  if (currentCategory !== "lands") return;
+  const priceEl = document.getElementById("f_price");
+  const areaEl = document.getElementById("f_area");
+  const perMeterEl = document.getElementById("f_pricePerMeter");
+  if (!priceEl || !areaEl || !perMeterEl) return;
+
+  const price = parseFloat(priceEl.value);
+  const area = parseFloat(areaEl.value);
+  if (price > 0 && area > 0){
+    perMeterEl.value = Math.round(price / area);
+  }
+}
+
 function wireComputedFields(){
   if (currentCategory === "lands"){
     const priceEl = document.getElementById("f_price");
     const areaEl = document.getElementById("f_area");
-    const perMeterEl = document.getElementById("f_pricePerMeter");
-    if (!priceEl || !areaEl || !perMeterEl) return;
-
-    const recalc = () => {
-      const price = parseFloat(priceEl.value);
-      const area = parseFloat(areaEl.value);
-      if (price > 0 && area > 0){
-        perMeterEl.value = Math.round(price / area);
-      }
-    };
-    priceEl.addEventListener("input", recalc);
-    areaEl.addEventListener("input", recalc);
-    recalc();
+    if (!priceEl || !areaEl) return;
+    priceEl.addEventListener("input", recalcPricePerMeter);
+    areaEl.addEventListener("input", recalcPricePerMeter);
+    recalcPricePerMeter();
   }
 }
 
@@ -940,6 +945,7 @@ function editListing(docId, data){
     el.value = f.key === "id" ? (data.id || docId) : (data[f.key] || "");
   });
   document.getElementById("f_id").disabled = true;
+  recalcPricePerMeter();
   document.getElementById("formTitle").textContent = "تعديل عرض رقم " + docId;
   document.getElementById("saveBtnText").textContent = "حفظ التعديلات";
   document.getElementById("cancelEditBtn").style.display = "inline-block";
