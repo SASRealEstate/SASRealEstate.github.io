@@ -265,6 +265,9 @@ button{ cursor:pointer; border:none; }
   background:var(--gold-light); color:#5a4713; border:1px solid #e6d18f;
   padding:3px 12px; border-radius:999px; font-size:.78rem; font-weight:700;
 }
+.property-chip.chip-rent{ background:#dbe9f2; color:#1c4a68; border-color:#b7d4e6; }
+.property-chip.chip-buildings{ background:#e1e9c9; color:#3b3f0c; border-color:#c9d6a0; }
+.property-chip.chip-lands{ background:var(--gold-light); color:#5a4713; border-color:#e6d18f; }
 
 .row-actions{ display:flex; gap:6px; justify-content:center; }
 .row-actions button{ padding:6px 10px; border-radius:6px; font-size:.8rem; }
@@ -446,7 +449,9 @@ button{ cursor:pointer; border:none; }
       <div class="panel">
         <h2><i class="fa-solid fa-users"></i> الملاك (<span id="ownersCount">0</span>)</h2>
 
-        <input type="text" id="ownerSearchInput" placeholder="ابحث بالاسم، الجوال، أو رقم العرض (مثال: 8)" style="margin-bottom:16px;">
+        <input type="text" id="ownerSearchInput" placeholder="ابحث بالاسم، الجوال، أو رقم العرض (رقم دقيق - مثال: 8)" style="margin-bottom:12px;">
+
+        <div class="status-filter" id="ownerCategoryFilter"></div>
 
         <div id="ownersList"></div>
         <div id="ownersEmptyState" class="empty-state" style="display:none;">لا يوجد ملاك بعد.</div>
@@ -641,6 +646,7 @@ let currentMode = "listings";
 let editingOwnerId = null;
 let unsubscribeOwners = null;
 let lastOwnerDocs = [];
+let ownerCategoryFilter = "all";
 
 function cat(){ return CATEGORIES[currentCategory]; }
 
@@ -707,6 +713,7 @@ function switchMode(mode){
   document.getElementById("ownersSection").style.display = mode === "owners" ? "block" : "none";
   if (mode === "owners"){
     resetOwnerForm();
+    renderOwnerCategoryFilter();
     listenToOwners();
   }
 }
@@ -1236,15 +1243,49 @@ function listenToOwners(){
   });
 }
 
+function renderOwnerCategoryFilter(){
+  const wrap = document.getElementById("ownerCategoryFilter");
+  const options = [{key:"all", label:"الكل"}, ...Object.entries(CATEGORIES).map(([key,c]) => ({key, label:c.label}))];
+  wrap.innerHTML = "";
+  options.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = opt.label;
+    btn.className = ownerCategoryFilter === opt.key ? "active" : "";
+    btn.addEventListener("click", () => {
+      ownerCategoryFilter = opt.key;
+      renderOwnerCategoryFilter();
+      renderOwnersList(lastOwnerDocs);
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+function matchesOwnerProperty(p, query, isNumericQuery){
+  const number = String(p.number || "").toLowerCase();
+  if (isNumericQuery) return number === query;
+  return number.includes(query);
+}
+
 function renderOwnersList(docs){
-  const query = (document.getElementById("ownerSearchInput")?.value || "").trim().toLowerCase();
+  const rawQuery = (document.getElementById("ownerSearchInput")?.value || "").trim().toLowerCase();
+  const isNumericQuery = /^\d+$/.test(rawQuery);
 
   const filtered = docs.filter(doc => {
-    if (!query) return true;
     const d = doc.data();
-    if ((d.name || "").toLowerCase().includes(query)) return true;
-    if ((d.phone || "").toLowerCase().includes(query)) return true;
-    return (d.properties || []).some(p => String(p.number).toLowerCase() === query);
+    const properties = d.properties || [];
+
+    if (ownerCategoryFilter !== "all" && !properties.some(p => p.category === ownerCategoryFilter)) return false;
+
+    if (!rawQuery) return true;
+
+    if (isNumericQuery){
+      return properties.some(p => matchesOwnerProperty(p, rawQuery, true));
+    }
+
+    if ((d.name || "").toLowerCase().includes(rawQuery)) return true;
+    if ((d.phone || "").toLowerCase().includes(rawQuery)) return true;
+    return properties.some(p => matchesOwnerProperty(p, rawQuery, false));
   });
 
   document.getElementById("ownersCount").textContent = filtered.length;
@@ -1254,7 +1295,7 @@ function renderOwnersList(docs){
   listWrap.innerHTML = "";
 
   if (filtered.length === 0){
-    emptyState.textContent = query ? "لا نتائج مطابقة." : "لا يوجد ملاك بعد.";
+    emptyState.textContent = rawQuery ? "لا نتائج مطابقة." : "لا يوجد ملاك بعد.";
     emptyState.style.display = "block";
     return;
   }
@@ -1265,9 +1306,13 @@ function renderOwnersList(docs){
     const card = document.createElement("div");
     card.className = "owner-card";
 
-    const chips = (d.properties || []).map(p => {
+    const visibleProperties = ownerCategoryFilter === "all"
+      ? (d.properties || [])
+      : (d.properties || []).filter(p => p.category === ownerCategoryFilter);
+
+    const chips = visibleProperties.map(p => {
       const label = CATEGORIES[p.category]?.label || p.category;
-      return `<span class="property-chip">${label} - رقم ${p.number}</span>`;
+      return `<span class="property-chip chip-${p.category}">${label} - رقم ${p.number}</span>`;
     }).join("") || `<span style="color:var(--muted); font-size:.82rem;">لا توجد عقارات مرتبطة</span>`;
 
     card.innerHTML = `
