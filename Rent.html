@@ -3298,8 +3298,8 @@ function addAutoMapMarkers(listings){
     const lng = parseFloat(item.lng);
     if (!isFinite(lat) || !isFinite(lng)) return;
     const popup = item.location
-      ? `<a href="${item.location}" target="_blank">${item.type || "عرض"} رقم ${item.id}</a>`
-      : `${item.type || "عرض"} رقم ${item.id}`;
+      ? `<a href="${item.location}" target="_blank">شقة ${item.id}</a>`
+      : `شقة ${item.id}`;
     L.marker([lat, lng]).addTo(RentMap).bindPopup(popup);
   });
 }
