@@ -571,6 +571,59 @@ if (!window.db || !window.auth) {
   document.getElementById("setupWarning").style.display = "block";
 }
 
+/* ============ رفع الصور إلى Drive ============ */
+
+const PHOTO_UPLOAD_URL = "https://script.google.com/macros/s/AKfycbzERmTzPjzIKAtMtLXy8G36IR1Bvrj5vItpq_TYjsaZ989py3wZoNhCq2bGtBuTCIT-/exec";
+
+function fileToBase64(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(",")[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function uploadPhotosForListing(listingNumber, fileList, statusEl, urlInputEl){
+  if (!listingNumber){
+    statusEl.textContent = "أدخل رقم العرض أولًا";
+    statusEl.className = "status-msg err";
+    return;
+  }
+  if (!fileList || !fileList.length) return;
+
+  statusEl.textContent = "جارٍ رفع " + fileList.length + " صورة...";
+  statusEl.className = "status-msg";
+
+  try{
+    const files = await Promise.all(Array.from(fileList).map(async f => ({
+      name: f.name,
+      mimeType: f.type,
+      data: await fileToBase64(f)
+    })));
+
+    const res = await fetch(PHOTO_UPLOAD_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ listingNumber: String(listingNumber), files })
+    });
+    const result = await res.json();
+
+    if (result.success){
+      urlInputEl.value = result.folderUrl;
+      statusEl.textContent = "تم رفع الصور بنجاح ✔";
+      statusEl.className = "status-msg ok";
+    } else {
+      statusEl.textContent = "خطأ: " + (result.error || "غير معروف");
+      statusEl.className = "status-msg err";
+    }
+  }catch(e){
+    statusEl.textContent = "تعذر رفع الصور: " + e.message;
+    statusEl.className = "status-msg err";
+    console.error(e);
+  }
+}
+
 /* ============ إعدادات الفئات ============ */
 
 const CATEGORIES = {
@@ -1072,6 +1125,39 @@ function renderFormFields(){
       row.appendChild(clearBtn);
 
       div.appendChild(row);
+    } else if (f.key === "photos" && currentCategory === "rent"){
+      const row = document.createElement("div");
+      row.className = "clearable-input-row";
+      input.style.flex = "1";
+      row.appendChild(input);
+
+      const uploadBtn = document.createElement("button");
+      uploadBtn.type = "button";
+      uploadBtn.className = "btn-clear-select";
+      uploadBtn.title = "رفع صور إلى Drive";
+      uploadBtn.innerHTML = '<i class="fa-solid fa-upload"></i>';
+      row.appendChild(uploadBtn);
+
+      const fileInput = document.createElement("input");
+      fileInput.type = "file";
+      fileInput.multiple = true;
+      fileInput.accept = "image/jpeg,image/png,image/webp";
+      fileInput.style.display = "none";
+
+      const uploadStatus = document.createElement("div");
+      uploadStatus.className = "status-msg";
+      uploadStatus.id = "photoUploadStatus";
+
+      uploadBtn.addEventListener("click", () => fileInput.click());
+      fileInput.addEventListener("change", () => {
+        const listingNumber = document.getElementById("f_id").value.trim();
+        uploadPhotosForListing(listingNumber, fileInput.files, uploadStatus, input);
+        fileInput.value = "";
+      });
+
+      div.appendChild(row);
+      div.appendChild(fileInput);
+      div.appendChild(uploadStatus);
     } else {
       div.appendChild(input);
     }
