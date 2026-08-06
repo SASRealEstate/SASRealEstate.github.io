@@ -577,9 +577,27 @@ if (!window.db || !window.auth) {
   document.getElementById("setupWarning").style.display = "block";
 }
 
-/* ============ رفع الصور إلى Drive ============ */
+/* ============ رفع الصور إلى Drive + تحديد الموقع على الخريطة ============ */
+/* نفس رابط Apps Script يخدم الطلبين، يُميَّز الطلب بحقل action */
 
 const PHOTO_UPLOAD_URL = "https://script.google.com/macros/s/AKfycbzERmTzPjzIKAtMtLXy8G36IR1Bvrj5vItpq_TYjsaZ989py3wZoNhCq2bGtBuTCIT-/exec";
+
+async function resolveLocationToLatLng(url){
+  try{
+    const res = await fetch(PHOTO_UPLOAD_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: "resolveLocation", url })
+    });
+    const result = await res.json();
+    if (result.success) return { lat: result.lat, lng: result.lng };
+    console.warn("تعذر تحديد إحداثيات الموقع:", result.error);
+    return null;
+  }catch(e){
+    console.warn("تعذر الاتصال بخدمة تحديد الموقع", e);
+    return null;
+  }
+}
 
 function fileToBase64(file){
   return new Promise((resolve, reject) => {
@@ -865,6 +883,7 @@ const CATEGORIES = {
 
 let currentCategory = "rent";
 let editingDocId = null;
+let editingOriginalLocation = "";
 let unsubscribeListener = null;
 let idBaselines = {};
 let lastAutoId = null;
@@ -1264,6 +1283,7 @@ function wireComputedFields(){
 
 function resetForm(){
   editingDocId = null;
+  editingOriginalLocation = "";
   document.getElementById("listingForm").reset();
   document.getElementById("formTitle").textContent = "إضافة عرض جديد";
   document.getElementById("saveBtnText").textContent = "حفظ العرض";
@@ -1349,7 +1369,16 @@ async function saveListing(event){
       data.brokerPhone = data.brokerNumber ? (matchedBroker?.phone || "") : "";
     }
 
-    const writeOptions = userRole === "broker" ? { merge: true } : undefined;
+    if (data.location && data.location !== editingOriginalLocation){
+      statusEl.textContent = "جارٍ تحديد الموقع على الخريطة...";
+      const coords = await resolveLocationToLatLng(data.location);
+      if (coords){ data.lat = coords.lat; data.lng = coords.lng; }
+    } else if (!data.location && editingOriginalLocation){
+      data.lat = firebase.firestore.FieldValue.delete();
+      data.lng = firebase.firestore.FieldValue.delete();
+    }
+
+    const writeOptions = { merge: true };
 
     await db.collection(cat().collection).doc(String(id)).set(data, writeOptions);
 
@@ -1369,6 +1398,7 @@ async function saveListing(event){
 
 function editListing(docId, data){
   editingDocId = docId;
+  editingOriginalLocation = data.location || "";
   cat().fields.forEach(f => {
     const el = document.getElementById("f_" + f.key);
     if (!el) return;

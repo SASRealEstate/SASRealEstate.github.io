@@ -1766,6 +1766,20 @@ async function buildCards(){
   listings.sort((a,b) => (parseInt(a.id)||0) - (parseInt(b.id)||0));
   cards.innerHTML = listings.map(renderCardHTML).join("");
   applyFilters();
+  addAutoMapMarkers(listings);
+}
+
+function addAutoMapMarkers(listings){
+  if (typeof LandsMap === "undefined" || !LandsMap) return;
+  listings.forEach(item => {
+    const lat = parseFloat(item.lat);
+    const lng = parseFloat(item.lng);
+    if (!isFinite(lat) || !isFinite(lng)) return;
+    const popup = item.location
+      ? `<a href="${item.location}" target="_blank">${item.type || "عرض"} رقم ${item.id}</a>`
+      : `${item.type || "عرض"} رقم ${item.id}`;
+    L.marker([lat, lng]).addTo(LandsMap).bindPopup(popup);
+  });
 }
 
 function applyFilters(){
