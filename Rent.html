@@ -3181,11 +3181,12 @@ async function getListings(){
 
 function renderCardHTML(item){
     const {id, type, location, floor, rooms, baths, hall, kitchen, store,
-           elevator, furnished, fittedKitchen, entrance, notes, price, rentType, photos} = item;
+           elevator, furnished, fittedKitchen, entrance, notes, price, rentType, photos, brokerPhone} = item;
 
     const divisorMap = {"سنة كاملة":12, "سنة دراسية":10, "صيفية":2};
     const divisor = divisorMap[rentType] || 12;
     const monthlyPrice = Math.round(parseInt(price) / divisor);
+    const contactPhone = brokerPhone ? "966" + brokerPhone.replace(/^0/,"") : "966534108666";
 
     return `
 <div class="card"
@@ -3253,7 +3254,7 @@ function renderCardHTML(item){
 <div class="card-actions">
   <a class="btn-location" href="${location}" target="_blank"><i class="fa-solid fa-location-dot"></i> الموقع</a>
   <a class="btn-photos" href="${photos}" target="_blank"><i class="fa-solid fa-images"></i> الصور</a>
-  <a class="btn-whatsapp" href="https://wa.me/966534108666?text=السلام عليكم , انا مهتم%20بالشقة%20رقم%20${id}" target="_blank"><i class="fa-brands fa-whatsapp"></i> واتساب</a>
+  <a class="btn-whatsapp" href="https://wa.me/${contactPhone}?text=السلام عليكم , انا مهتم%20بالشقة%20رقم%20${id}" target="_blank"><i class="fa-brands fa-whatsapp"></i> واتساب</a>
 <button type="button" class="btn-copy" onclick="
   const text = \`رقم: ${id}
 نوع العقار: ${type}

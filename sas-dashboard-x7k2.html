@@ -520,6 +520,16 @@ button{ cursor:pointer; border:none; }
             </div>
           </div>
 
+          <div class="form-grid" style="margin-top:14px; padding-top:14px; border-top:1px dashed var(--line);">
+            <div class="field wide">
+              <label for="b_authUid">ربط حساب الدخول (UID)</label>
+              <input type="text" id="b_authUid" placeholder="الصق معرف المستخدم (UID) من Firebase Authentication بعد إنشاء حسابه" style="direction:ltr; text-align:left;">
+              <span style="font-size:.75rem; color:var(--muted); display:block; margin-top:4px;">
+                أنشئ حساب الوسيط من Firebase Console &rarr; Authentication &rarr; Users &rarr; Add user، ثم انسخ UID والصقه هنا. بدون هذا الربط لن يتمكن الوسيط من الدخول ورؤية عروضه.
+              </span>
+            </div>
+          </div>
+
           <div style="margin-top:18px;">
             <label style="display:block; font-size:.85rem; font-weight:700; color:var(--olive-dark); margin-bottom:8px;">العقارات المرتبطة (تُحسب تلقائيًا من العروض)</label>
             <div id="brokerPropertiesPreview" class="property-chips"></div>
@@ -577,8 +587,8 @@ const CATEGORIES = {
     fields: [
       {key:"id", label:"رقم العرض", type:"number", required:true},
       {key:"status", label:"الحالة", type:"select", options:["نشط","مؤرشف"]},
-      {key:"ownerNumber", label:"المالك", type:"owner-select"},
-      {key:"brokerNumber", label:"الوسيط", type:"broker-select"},
+      {key:"ownerNumber", label:"المالك", type:"owner-select", brokerHidden:true},
+      {key:"brokerNumber", label:"الوسيط", type:"broker-select", brokerHidden:true},
       {key:"type", label:"نوع العقار", type:"text", value:"شقة"},
       {key:"rentType", label:"نوع الإيجار", type:"select", options:["سنة كاملة","سنة دراسية","صيفية"]},
       {key:"price", label:"الإيجار السنوي (ريال)", type:"number"},
@@ -750,6 +760,10 @@ let lastAutoId = null;
 let currentStatusFilter = "all";
 let lastDocs = [];
 let currentMode = "listings";
+let userRole = null; // "admin" | "broker"
+let myBrokerNumber = null;
+let myBrokerName = null;
+let myBrokerPhone = null;
 let editingOwnerId = null;
 let unsubscribeOwners = null;
 let lastOwnerDocs = [];
@@ -791,18 +805,68 @@ function doLogout(){
 }
 
 if (window.auth){
-  auth.onAuthStateChanged(user => {
+  auth.onAuthStateChanged(async user => {
     if (user){
       document.getElementById("loginScreen").style.display = "none";
+      await detectUserRole(user);
+
+      if (userRole === "unknown"){
+        alert("هذا الحساب غير مرتبط بصلاحية مسؤول أو وسيط. تواصل مع مدير الموقع.");
+        auth.signOut();
+        return;
+      }
+
       document.getElementById("dashboardScreen").style.display = "block";
+      applyRoleUI();
       renderModeTabs();
       renderTabs();
       switchCategory("rent");
     } else {
       document.getElementById("loginScreen").style.display = "flex";
       document.getElementById("dashboardScreen").style.display = "none";
+      userRole = null;
+      myBrokerNumber = null;
+      myBrokerName = null;
     }
   });
+}
+
+async function detectUserRole(user){
+  try{
+    const adminDoc = await db.collection("admins").doc(user.uid).get();
+    if (adminDoc.exists){
+      userRole = "admin";
+      return;
+    }
+  }catch(e){ console.warn("تعذر التحقق من صلاحية المسؤول", e); }
+
+  try{
+    const snap = await db.collection("brokers").where("authUid", "==", user.uid).get();
+    if (!snap.empty){
+      userRole = "broker";
+      myBrokerNumber = snap.docs[0].id;
+      myBrokerName = snap.docs[0].data().name || "";
+      myBrokerPhone = snap.docs[0].data().phone || "";
+      return;
+    }
+  }catch(e){ console.warn("تعذر التحقق من صلاحية الوسيط", e); }
+
+  userRole = "unknown";
+}
+
+function applyRoleUI(){
+  const isBroker = userRole === "broker";
+
+  document.getElementById("modeTabs").style.display = isBroker ? "none" : "flex";
+  document.getElementById("categoryTabs").style.display = isBroker ? "none" : "flex";
+
+  const importWrap = document.getElementById("importFreshWrap");
+  const importLockedWrap = document.getElementById("importLockedWrap");
+  if (importWrap) importWrap.style.display = isBroker ? "none" : "";
+  if (importLockedWrap) importLockedWrap.style.display = isBroker ? "none" : "";
+
+  const titleSpan = document.querySelector(".admin-header .title span");
+  if (titleSpan) titleSpan.textContent = isBroker ? ("مرحبًا، " + myBrokerName) : "لوحة تحكم العروض";
 }
 
 /* ============ التبويبات ============ */
@@ -825,6 +889,7 @@ function renderModeTabs(){
 }
 
 async function switchMode(mode){
+  if (userRole === "broker") mode = "listings";
   currentMode = mode;
   renderModeTabs();
   document.getElementById("listingsSection").style.display = mode === "listings" ? "block" : "none";
@@ -857,12 +922,15 @@ function renderTabs(){
 }
 
 async function switchCategory(key){
+  if (userRole === "broker") key = "rent";
   currentCategory = key;
   currentStatusFilter = "all";
   renderTabs();
   document.getElementById("viewPageLink").href = cat().sourcePage;
   document.getElementById("importBtnText").textContent = "استيراد العروض الحالية من " + cat().sourcePage;
-  await Promise.all([loadAllOwners(), loadAllBrokers()]);
+  if (userRole === "admin"){
+    await Promise.all([loadAllOwners(), loadAllBrokers()]);
+  }
   renderFormFields();
   renderTableHead();
   renderStatusFilter();
@@ -941,6 +1009,8 @@ function renderFormFields(){
   const wrap = document.getElementById("formFields");
   wrap.innerHTML = "";
   cat().fields.forEach(f => {
+    if (userRole === "broker" && f.brokerHidden) return;
+
     const div = document.createElement("div");
     div.className = "field" + (f.wide ? " wide" : "");
 
@@ -1065,6 +1135,7 @@ function saveListing(event){
   const data = {};
   cat().fields.forEach(f => {
     const el = document.getElementById("f_" + f.key);
+    if (!el) return; // field hidden for this role (e.g. owner info for brokers) - leave untouched
     let value = el.value.trim();
     if (f.type === "owner-select" || f.type === "broker-select"){
       const match = value.match(/^#(\d+)/);
@@ -1073,7 +1144,17 @@ function saveListing(event){
     data[f.key] = value;
   });
 
-  db.collection(cat().collection).doc(String(id)).set(data)
+  if (userRole === "broker"){
+    data.brokerNumber = myBrokerNumber;
+    data.brokerPhone = myBrokerPhone;
+  } else if ("brokerNumber" in data){
+    const matchedBroker = allBrokers.find(b => String(b.number) === String(data.brokerNumber));
+    data.brokerPhone = data.brokerNumber ? (matchedBroker?.phone || "") : "";
+  }
+
+  const writeOptions = userRole === "broker" ? { merge: true } : undefined;
+
+  db.collection(cat().collection).doc(String(id)).set(data, writeOptions)
     .then(() => {
       statusEl.textContent = "تم الحفظ بنجاح ✔";
       statusEl.className = "status-msg ok";
@@ -1131,10 +1212,14 @@ function permanentlyDeleteListing(docId){
 
 /* ============ جدول العروض (ديناميكي حسب الفئة) ============ */
 
+function visibleListColumns(){
+  return userRole === "broker" ? cat().listColumns.filter(col => !col.ownerLookup && !col.brokerLookup) : cat().listColumns;
+}
+
 function renderTableHead(){
   const tr = document.getElementById("listingsTableHead");
   tr.innerHTML = "";
-  cat().listColumns.forEach(col => {
+  visibleListColumns().forEach(col => {
     const th = document.createElement("th");
     th.textContent = col.label;
     tr.appendChild(th);
@@ -1219,7 +1304,7 @@ function renderListingsTable(docs){
     const isArchived = d.status === "مؤرشف";
     const tr = document.createElement("tr");
 
-    const cellsHTML = cat().listColumns.map(col => {
+    const cellsHTML = visibleListColumns().map(col => {
       const val = d[col.key] || "";
       let content;
       if (col.statusBadge){
@@ -1263,12 +1348,21 @@ function listenToListings(){
 
   const subscribedCategory = currentCategory;
 
-  unsubscribeListener = db.collection(cat().collection).onSnapshot(snap => {
+  // ID numbers must stay globally unique, so always check the FULL collection for the max,
+  // independent of any per-broker filtering used for the visible table below.
+  db.collection(cat().collection).get().then(fullSnap => {
+    const maxId = fullSnap.docs.reduce((max, d) => Math.max(max, parseInt(d.id, 10) || 0), 0);
+    updateIdBaseline(subscribedCategory, "firestore", maxId);
+  }).catch(e => console.warn("تعذر تحديد آخر رقم عرض", e));
+
+  let query = db.collection(cat().collection);
+  if (userRole === "broker"){
+    query = query.where("brokerNumber", "==", myBrokerNumber);
+  }
+
+  unsubscribeListener = query.onSnapshot(snap => {
     const docs = snap.docs.sort((a,b) => (parseInt(a.id)||0) - (parseInt(b.id)||0));
     lastDocs = docs;
-
-    const maxId = docs.length ? (parseInt(docs[docs.length-1].id, 10) || 0) : 0;
-    updateIdBaseline(subscribedCategory, "firestore", maxId);
 
     renderListingsTable(docs);
   }, err => {
@@ -1843,6 +1937,7 @@ function saveBroker(event){
   const data = {
     name,
     phone: document.getElementById("b_phone").value.trim(),
+    authUid: document.getElementById("b_authUid").value.trim(),
     notes: document.getElementById("b_notes").value.trim()
   };
 
@@ -1868,6 +1963,7 @@ function editBroker(docId, data){
   document.getElementById("b_number").disabled = true;
   document.getElementById("b_name").value = data.name || "";
   document.getElementById("b_phone").value = data.phone || "";
+  document.getElementById("b_authUid").value = data.authUid || "";
   document.getElementById("b_notes").value = data.notes || "";
 
   renderBrokerPropertiesPreview(docId);
@@ -1976,7 +2072,7 @@ function renderBrokersList(docs){
 
     card.innerHTML = `
       <div class="owner-info">
-        <h3>#${doc.id} - ${d.name || "وسيط غير معروف"}</h3>
+        <h3>#${doc.id} - ${d.name || "وسيط غير معروف"} ${d.authUid ? `<span class="broker-tag" style="background:var(--green);">حساب مرتبط</span>` : `<span class="broker-tag" style="background:#b0533f;">بدون حساب</span>`}</h3>
         ${d.phone ? `<div class="owner-phone"><a href="https://wa.me/966${d.phone.replace(/^0/,"")}" target="_blank"><i class="fa-brands fa-whatsapp"></i> ${d.phone}</a></div>` : ``}
         <div class="property-chips">${chips}</div>
         ${d.notes ? `<div class="owner-notes">📝 ${d.notes}</div>` : ``}
