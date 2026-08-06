@@ -202,6 +202,12 @@ button{ cursor:pointer; border:none; }
   font-size:.85rem;
 }
 .btn-clear-select:hover{ background:#f4d7d3; color:var(--danger); border-color:#e6b3ac; }
+.btn-clear-select:disabled{ opacity:.5; cursor:not-allowed; background:#eee; color:var(--muted); }
+.btn-clear-select:disabled:hover{ background:#eee; color:var(--muted); border-color:var(--line); }
+
+.photo-preview-wrap{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+.photo-preview-thumb{ width:70px; height:70px; object-fit:cover; border-radius:8px; border:1px solid var(--line); }
+.photo-preview-actions{ display:flex; gap:8px; width:100%; margin-top:6px; }
 
 .form-actions{ margin-top:18px; display:flex; gap:10px; flex-wrap:wrap; }
 
@@ -622,6 +628,58 @@ async function uploadPhotosForListing(listingNumber, fileList, statusEl, urlInpu
     statusEl.className = "status-msg err";
     console.error(e);
   }
+}
+
+function showPhotoPreview(fileList, previewWrap, statusEl, urlInputEl, fileInputEl){
+  const files = Array.from(fileList);
+  previewWrap.innerHTML = "";
+  statusEl.textContent = "";
+  statusEl.className = "status-msg";
+
+  files.forEach(f => {
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(f);
+    img.className = "photo-preview-thumb";
+    previewWrap.appendChild(img);
+  });
+
+  const actions = document.createElement("div");
+  actions.className = "photo-preview-actions";
+
+  const confirmBtn = document.createElement("button");
+  confirmBtn.type = "button";
+  confirmBtn.className = "btn-save";
+  confirmBtn.textContent = "تأكيد رفع " + files.length + " صورة";
+  confirmBtn.addEventListener("click", () => {
+    const listingNumber = document.getElementById("f_id").value.trim();
+    previewWrap.innerHTML = "";
+    uploadPhotosForListing(listingNumber, fileList, statusEl, urlInputEl);
+  });
+
+  const cancelBtn = document.createElement("button");
+  cancelBtn.type = "button";
+  cancelBtn.className = "btn-cancel";
+  cancelBtn.textContent = "إلغاء";
+  cancelBtn.addEventListener("click", () => {
+    previewWrap.innerHTML = "";
+    fileInputEl.value = "";
+  });
+
+  actions.appendChild(confirmBtn);
+  actions.appendChild(cancelBtn);
+  previewWrap.appendChild(actions);
+}
+
+function updatePhotoUploadAvailability(){
+  const btn = document.getElementById("photoUploadBtn");
+  const hint = document.getElementById("photoUploadHint");
+  if (!btn) return;
+
+  const canUpload = !!editingDocId;
+  btn.disabled = !canUpload;
+  btn.style.opacity = canUpload ? "1" : ".5";
+  btn.style.cursor = canUpload ? "pointer" : "not-allowed";
+  if (hint) hint.textContent = canUpload ? "" : "احفظ العرض أولًا لتتمكن من رفع الصور";
 }
 
 /* ============ إعدادات الفئات ============ */
@@ -1135,6 +1193,7 @@ function renderFormFields(){
       uploadBtn.type = "button";
       uploadBtn.className = "btn-clear-select";
       uploadBtn.title = "رفع صور إلى Drive";
+      uploadBtn.id = "photoUploadBtn";
       uploadBtn.innerHTML = '<i class="fa-solid fa-upload"></i>';
       row.appendChild(uploadBtn);
 
@@ -1143,6 +1202,15 @@ function renderFormFields(){
       fileInput.multiple = true;
       fileInput.accept = "image/jpeg,image/png,image/webp";
       fileInput.style.display = "none";
+      fileInput.id = "photoFileInput";
+
+      const uploadHint = document.createElement("div");
+      uploadHint.id = "photoUploadHint";
+      uploadHint.style.cssText = "font-size:.75rem; color:var(--muted); margin-top:4px;";
+
+      const previewWrap = document.createElement("div");
+      previewWrap.id = "photoPreviewWrap";
+      previewWrap.className = "photo-preview-wrap";
 
       const uploadStatus = document.createElement("div");
       uploadStatus.className = "status-msg";
@@ -1150,13 +1218,14 @@ function renderFormFields(){
 
       uploadBtn.addEventListener("click", () => fileInput.click());
       fileInput.addEventListener("change", () => {
-        const listingNumber = document.getElementById("f_id").value.trim();
-        uploadPhotosForListing(listingNumber, fileInput.files, uploadStatus, input);
-        fileInput.value = "";
+        if (!fileInput.files.length) return;
+        showPhotoPreview(fileInput.files, previewWrap, uploadStatus, input, fileInput);
       });
 
       div.appendChild(row);
       div.appendChild(fileInput);
+      div.appendChild(uploadHint);
+      div.appendChild(previewWrap);
       div.appendChild(uploadStatus);
     } else {
       div.appendChild(input);
@@ -1200,57 +1269,100 @@ function resetForm(){
   document.getElementById("saveBtnText").textContent = "حفظ العرض";
   document.getElementById("cancelEditBtn").style.display = "none";
   const idField = document.getElementById("f_id");
-  if (idField) idField.disabled = false;
+  if (idField){
+    if (userRole === "broker"){
+      idField.value = "";
+      idField.placeholder = "سيُحدَّد تلقائيًا عند الحفظ";
+      idField.disabled = true;
+    } else {
+      idField.disabled = false;
+      suggestNextId();
+    }
+  }
   document.getElementById("formStatus").textContent = "";
-  suggestNextId();
+  updatePhotoUploadAvailability();
 }
 
-function saveListing(event){
+async function getNextListingId(){
+  const counterRef = db.collection("counters").doc(cat().collection);
+  const fallbackSeed = Math.max(
+    (idBaselines[currentCategory]?.firestore) || 0,
+    (idBaselines[currentCategory]?.static) || 0
+  );
+
+  return db.runTransaction(async (tx) => {
+    const counterSnap = await tx.get(counterRef);
+    const current = counterSnap.exists ? (counterSnap.data().value || 0) : fallbackSeed;
+    const next = current + 1;
+    tx.set(counterRef, { value: next });
+    return String(next);
+  });
+}
+
+async function saveListing(event){
   event.preventDefault();
   const statusEl = document.getElementById("formStatus");
   statusEl.className = "status-msg";
   statusEl.textContent = "";
 
-  const id = document.getElementById("f_id").value.trim();
-  if (!id){
-    statusEl.textContent = "رقم العرض مطلوب";
-    statusEl.className = "status-msg err";
-    return false;
-  }
+  let id = editingDocId;
 
-  const data = {};
-  cat().fields.forEach(f => {
-    const el = document.getElementById("f_" + f.key);
-    if (!el) return; // field hidden for this role (e.g. owner info for brokers) - leave untouched
-    let value = el.value.trim();
-    if (f.type === "owner-select" || f.type === "broker-select"){
-      const match = value.match(/^#(\d+)/);
-      value = match ? match[1] : "";
+  try{
+    if (!id){
+      // creating a new listing
+      if (userRole === "broker"){
+        id = await getNextListingId();
+      } else {
+        id = document.getElementById("f_id").value.trim();
+        if (!id){
+          statusEl.textContent = "رقم العرض مطلوب";
+          statusEl.className = "status-msg err";
+          return false;
+        }
+        const existing = await db.collection(cat().collection).doc(String(id)).get();
+        if (existing.exists){
+          statusEl.textContent = "رقم العرض " + id + " مستخدم بالفعل، اختر رقمًا آخر";
+          statusEl.className = "status-msg err";
+          return false;
+        }
+      }
     }
-    data[f.key] = value;
-  });
 
-  if (userRole === "broker"){
-    data.brokerNumber = myBrokerNumber;
-    data.brokerPhone = myBrokerPhone;
-  } else if ("brokerNumber" in data){
-    const matchedBroker = allBrokers.find(b => String(b.number) === String(data.brokerNumber));
-    data.brokerPhone = data.brokerNumber ? (matchedBroker?.phone || "") : "";
-  }
-
-  const writeOptions = userRole === "broker" ? { merge: true } : undefined;
-
-  db.collection(cat().collection).doc(String(id)).set(data, writeOptions)
-    .then(() => {
-      statusEl.textContent = "تم الحفظ بنجاح ✔";
-      statusEl.className = "status-msg ok";
-      resetForm();
-    })
-    .catch(e => {
-      statusEl.textContent = "حدث خطأ أثناء الحفظ: " + e.message;
-      statusEl.className = "status-msg err";
-      console.error(e);
+    const data = {};
+    cat().fields.forEach(f => {
+      const el = document.getElementById("f_" + f.key);
+      if (!el) return; // field hidden for this role (e.g. owner info for brokers) - leave untouched
+      let value = el.value.trim();
+      if (f.type === "owner-select" || f.type === "broker-select"){
+        const match = value.match(/^#(\d+)/);
+        value = match ? match[1] : "";
+      }
+      data[f.key] = value;
     });
+    data.id = String(id);
+
+    if (userRole === "broker"){
+      data.brokerNumber = myBrokerNumber;
+      data.brokerPhone = myBrokerPhone;
+    } else if ("brokerNumber" in data){
+      const matchedBroker = allBrokers.find(b => String(b.number) === String(data.brokerNumber));
+      data.brokerPhone = data.brokerNumber ? (matchedBroker?.phone || "") : "";
+    }
+
+    const writeOptions = userRole === "broker" ? { merge: true } : undefined;
+
+    await db.collection(cat().collection).doc(String(id)).set(data, writeOptions);
+
+    statusEl.textContent = "تم الحفظ بنجاح ✔ - رقم العرض: " + id;
+    statusEl.className = "status-msg ok";
+
+    const savedSnap = await db.collection(cat().collection).doc(String(id)).get();
+    editListing(String(id), savedSnap.data());
+  }catch(e){
+    statusEl.textContent = "حدث خطأ أثناء الحفظ: " + e.message;
+    statusEl.className = "status-msg err";
+    console.error(e);
+  }
 
   return false;
 }
@@ -1270,6 +1382,7 @@ function editListing(docId, data){
   document.getElementById("formTitle").textContent = "تعديل عرض رقم " + docId;
   document.getElementById("saveBtnText").textContent = "حفظ التعديلات";
   document.getElementById("cancelEditBtn").style.display = "inline-block";
+  updatePhotoUploadAvailability();
   window.scrollTo({top:0, behavior:"smooth"});
 }
 
