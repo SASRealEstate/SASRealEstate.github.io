@@ -1403,10 +1403,14 @@ function unarchiveListing(docId){
 
 function permanentlyDeleteListing(docId){
   if (!confirm("سيتم حذف العرض رقم " + docId + " نهائيًا ولا يمكن التراجع عن ذلك. متابعة؟")) return;
-  db.collection(cat().collection).doc(docId).delete().catch(e => {
-    alert("حدث خطأ أثناء الحذف: " + e.message);
-    console.error(e);
-  });
+  db.collection(cat().collection).doc(docId).delete()
+    .then(() => {
+      if (editingDocId === docId) resetForm();
+    })
+    .catch(e => {
+      alert("حدث خطأ أثناء الحذف: " + e.message);
+      console.error(e);
+    });
 }
 
 /* ============ جدول العروض (ديناميكي حسب الفئة) ============ */
