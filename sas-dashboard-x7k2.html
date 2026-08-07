@@ -752,6 +752,7 @@ const CATEGORIES = {
       {key:"furnished", label:"مؤثثة", type:"select", options:["لا","نعم"]},
       {key:"fittedKitchen", label:"مطبخ راكب", type:"select", options:["لا","نعم"]},
       {key:"entrance", label:"المدخل", type:"select", options:["مشترك","مستقل"]},
+      {key:"availableFrom", label:"تاريخ التوفر (اختياري - لن يظهر للزبون إذا تُرك فارغًا)", type:"date"},
       {key:"location", label:"رابط الموقع (خرائط جوجل)", type:"url", wide:true},
       {key:"photos", label:"رابط الصور (Google Drive)", type:"url", wide:true},
       {key:"notes", label:"ملاحظات", type:"textarea", wide:true}
@@ -763,6 +764,7 @@ const CATEGORIES = {
       {key:"prices", label:"الأسعار", pricesDisplay:true},
       {key:"floor", label:"الدور"},
       {key:"rooms", label:"الغرف"},
+      {key:"availableFrom", label:"تاريخ التوفر"},
       {key:"ownerNumber", label:"المالك", ownerLookup:true},
       {key:"brokerNumber", label:"الوسيط", brokerLookup:true}
     ],
@@ -778,6 +780,7 @@ const CATEGORIES = {
           return `${base} (${formatPaymentAmount(prices[rt.key], method, rt.key)})`;
         })
         .join("\n") || "لا توجد أسعار محددة";
+      const availabilityLine = d.availableFrom ? `تاريخ التوفر: ${d.availableFrom}\n` : "";
       return `رقم: ${id}
 نوع العقار: ${d.type || ""}
 الدور: ${d.floor || ""}
@@ -792,7 +795,7 @@ const CATEGORIES = {
 مستقل: ${d.entrance || ""}
 ملاحظات: ${d.notes || ""}
 ${pricesText}
-الموقع: ${d.location || ""}
+${availabilityLine}الموقع: ${d.location || ""}
 الصور: ${d.photos || ""}`;
     }
   },

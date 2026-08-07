@@ -80,6 +80,28 @@
   <div class="filters-wrapper">
 
     <div class="filter-field">
+      <label for="filterType">نوع العقار</label>
+      <select id="filterType">
+        <option value="">الكل</option>
+        <option value="بدروم">بدروم</option>
+        <option value="شقة">شقة</option>
+        <option value="استوديو">استوديو</option>
+        <option value="دور">دور</option>
+        <option value="ملحق">ملحق</option>
+        <option value="رووف">رووف</option>
+        <option value="دوبلكس">دوبلكس</option>
+        <option value="تاون هاوس">تاون هاوس</option>
+        <option value="توين فيلا">توين فيلا</option>
+        <option value="فيلا مستقلة">فيلا مستقلة</option>
+        <option value="قصر">قصر</option>
+        <option value="شاليه">شاليه</option>
+        <option value="منزل شعبي">منزل شعبي</option>
+        <option value="عمارة سكنية">عمارة سكنية</option>
+        <option value="مجمع سكني">مجمع سكني</option>
+      </select>
+    </div>
+
+    <div class="filter-field">
       <label for="filterRentType">نوع الإيجار</label>
       <select id="filterRentType">
         <option value="">الكل</option>
@@ -291,7 +313,7 @@ function getPrimaryPrice(prices){
 
 function renderCardHTML(item){
     const {id, type, location, floor, rooms, baths, hall, kitchen, store,
-           elevator, furnished, fittedKitchen, entrance, notes, photos, brokerPhone} = item;
+           elevator, furnished, fittedKitchen, entrance, notes, photos, brokerPhone, availableFrom} = item;
 
     const prices = getEffectivePrices(item);
     const paymentMethods = getEffectivePaymentMethods(item);
@@ -311,9 +333,12 @@ function renderCardHTML(item){
       return rt.hasPaymentMethod ? `${base} (${formatPaymentAmount(prices[rt.key], paymentMethods[rt.key] || "monthly", rt.key)})` : base;
     }).join("\n") || "لا يوجد سعر محدد";
 
+    const availabilityLine = availableFrom ? `متاح من: ${availableFrom}\n` : "";
+
     return `
 <div class="card"
   data-id="${id}"
+  data-type="${type}"
   data-floor="${floor}"
   data-rooms="${rooms}"
   data-furnished="${furnished}"
@@ -322,7 +347,8 @@ function renderCardHTML(item){
   data-price="${primaryPrice}"
   data-rent-type="${activeTypes.map(rt => rt.key).join(' ')}"
   data-prices='${JSON.stringify(prices)}'
-  data-payment-methods='${JSON.stringify(paymentMethods)}'>
+  data-payment-methods='${JSON.stringify(paymentMethods)}'
+  data-available-from="${availableFrom || ''}">
 
 
   <div class="card-header">${type} – رقم ${id}</div>
@@ -332,6 +358,8 @@ function renderCardHTML(item){
 <div class="multi-price-list">
   ${priceRowsHTML}
 </div>
+
+${availableFrom ? `<div class="availability-badge"><i class="fa-solid fa-calendar-check"></i> متاح من: ${availableFrom}</div>` : ``}
 
     <div class="features">
       <div><i class="fa-solid fa-stairs"></i> الدور: ${floor}</div>
@@ -394,7 +422,7 @@ function renderCardHTML(item){
 مستقل: ${entrance}
 ملاحظات: ${notes}
 ${priceLinesText}
-الموقع: ${location}
+${availabilityLine}الموقع: ${location}
 الصور: ${photos}\`;
   copyTextToClipboard(text, this);
 "><i class="fa-solid fa-copy"></i> نسخ</button>
@@ -429,8 +457,8 @@ function addAutoMapMarkers(listings){
     const lng = parseFloat(item.lng);
     if (!isFinite(lat) || !isFinite(lng)) return;
     const popup = item.location
-      ? `<a href="${item.location}" target="_blank">شقة ${item.id}</a>`
-      : `شقة ${item.id}`;
+      ? `<a href="${item.location}" target="_blank">${item.id}</a>`
+      : `${item.id}`;
     const marker = L.marker([lat, lng]).addTo(RentMap).bindPopup(popup);
     mapMarkersById[String(item.id)] = marker;
   });
@@ -485,6 +513,7 @@ function copyByRentType(targetType) {
 
     const notesEl = card.querySelector('.card-body div[style*="color: #555"], .card-body div[style*="color:#555"]');
     const notes = notesEl ? notesEl.textContent.trim() : '';
+    const availableFrom = card.dataset.availableFrom || '';
 
     return `رقم: ${id}
 النوع: ${targetLabel}
@@ -492,7 +521,7 @@ function copyByRentType(targetType) {
 الدور: ${floor}
 الغرف: ${rooms}
 المميزات: ${features}\n
-${notes ? `ملاحظات: ${notes}\n` : ''}الموقع: ${locationLink}
+${notes ? `ملاحظات: ${notes}\n` : ''}${availableFrom ? `متاح من: ${availableFrom}\n` : ''}الموقع: ${locationLink}
 الصور: ${photoLink}`;
   }).join('\n\n----------------------\n\n');
 
@@ -538,13 +567,14 @@ function copyFilteredOffers() {
 
     const notesEl = card.querySelector('.card-body div[style*="color: #555"], .card-body div[style*="color:#555"]');
     const notes = notesEl ? notesEl.textContent.trim() : '';
+    const availableFrom = card.dataset.availableFrom || '';
 
     return `رقم: ${id}
 ${priceLines}
 الدور: ${floor}
 الغرف: ${rooms}
 المميزات: ${features}\n
-${notes ? `ملاحظات: ${notes}\n` : ''}الموقع: ${locationLink}
+${notes ? `ملاحظات: ${notes}\n` : ''}${availableFrom ? `متاح من: ${availableFrom}\n` : ''}الموقع: ${locationLink}
 الصور: ${photoLink}`;
   }).join('\n\n----------------------\n\n');
 
@@ -558,6 +588,7 @@ ${notes ? `ملاحظات: ${notes}\n` : ''}الموقع: ${locationLink}
 
 window.addEventListener("load",buildCards);
 function applyCardFilters(){
+  const type      = document.getElementById("filterType")?.value || "";
   const furnished = document.getElementById("filterFurnished")?.value || "";
   const elevator  = document.getElementById("filterElevator")?.value || "";
   const entrance  = document.getElementById("filterEntrance")?.value || "";
@@ -574,6 +605,7 @@ function applyCardFilters(){
   document.querySelectorAll(".card").forEach(card=>{
     let show = true;
 
+    const cardType       = card.dataset.type;
     const cardFurnished = card.dataset.furnished;
     const cardElevator  = card.dataset.elevator;
     const cardEntrance  = card.dataset.entrance;
@@ -582,6 +614,7 @@ function applyCardFilters(){
     const cardPrice     = parseInt(card.dataset.price || 0);
     const cardRentTypes = (card.dataset.rentType || "").split(" ").filter(Boolean);
 
+    if(type && cardType !== type) show = false;
     if(furnished && cardFurnished !== furnished) show = false;
     if(elevator && cardElevator !== elevator) show = false;
     if(entrance && cardEntrance !== entrance) show = false;
@@ -598,7 +631,7 @@ function applyCardFilters(){
 }
 
 function resetFilters(){
-  ["filterFurnished","filterElevator","filterEntrance","filterRentType","filterRooms"].forEach(id=>{
+  ["filterType","filterFurnished","filterElevator","filterEntrance","filterRentType","filterRooms"].forEach(id=>{
     const el = document.getElementById(id);
     if (el) el.value = "";
   });
@@ -612,6 +645,7 @@ function resetFilters(){
 
 /* ربط الفلاتر */
 [
+  "filterType",
   "filterFurnished",
   "filterElevator",
   "filterEntrance",

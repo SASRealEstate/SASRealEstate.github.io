@@ -247,8 +247,8 @@ function addAutoMapMarkers(listings){
     const lng = parseFloat(item.lng);
     if (!isFinite(lat) || !isFinite(lng)) return;
     const popup = item.location
-      ? `<a href="${item.location}" target="_blank">عقار ${item.id}</a>`
-      : `عقار ${item.id}`;
+      ? `<a href="${item.location}" target="_blank">${item.id}</a>`
+      : `${item.id}`;
     const marker = L.marker([lat, lng]).addTo(BuildingsMap).bindPopup(popup);
     mapMarkersById[String(item.id)] = marker;
   });
