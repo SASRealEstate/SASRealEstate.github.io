@@ -246,10 +246,12 @@ const RENT_TYPES = [
   {key:"weekly", label:"اسبوع"},
   {key:"daily", label:"يومي"}
 ];
+const RENT_TYPE_MONTHLY_DIVISOR = {yearly:12, schoolYear:10, summer:2};
+
 const LEGACY_RENT_TYPE_TO_KEY = {"سنة كاملة":"yearly", "سنة دراسية":"schoolYear", "صيفية":"summer"};
 
 const PAYMENT_METHODS = [
-  {key:"monthly", label:"شهري", divisor:12, periodLabel:"شهريًا"},
+  {key:"monthly", label:"شهري", periodLabel:"شهريًا"},
   {key:"thirdYearly", label:"ثلث سنوي", divisor:3, periodLabel:"كل 4 أشهر"},
   {key:"quarterly", label:"ربع سنوي", divisor:4, periodLabel:"كل 3 أشهر"},
   {key:"semiAnnual", label:"نصف سنوي", divisor:2, periodLabel:"كل 6 أشهر"},
@@ -269,7 +271,12 @@ function getEffectivePaymentMethods(item){
   return item.paymentMethods || {};
 }
 
-function formatPaymentAmount(price, methodKey){
+function formatPaymentAmount(price, methodKey, rentTypeKey){
+  if (methodKey === "monthly" || !methodKey){
+    const divisor = RENT_TYPE_MONTHLY_DIVISOR[rentTypeKey] || 12;
+    const amount = Math.round((parseFloat(price) || 0) / divisor);
+    return `${amount.toLocaleString()} ريال شهريًا`;
+  }
   const method = PAYMENT_METHODS.find(m => m.key === methodKey) || PAYMENT_METHODS[0];
   const amount = Math.round((parseFloat(price) || 0) / method.divisor);
   if (method.key === "annual") return `دفعة واحدة ${amount.toLocaleString()} ريال`;
@@ -294,14 +301,14 @@ function renderCardHTML(item){
 
     const priceRowsHTML = activeTypes.map(rt => {
       const paymentNote = rt.hasPaymentMethod
-        ? `<span class="price-payment-note">(${formatPaymentAmount(prices[rt.key], paymentMethods[rt.key] || "monthly")})</span>`
+        ? `<span class="price-payment-note">(${formatPaymentAmount(prices[rt.key], paymentMethods[rt.key] || "monthly", rt.key)})</span>`
         : "";
       return `<div class="price-line"><span class="price-type">${rt.label}</span><span class="price-value">${Number(prices[rt.key]).toLocaleString()} ريال</span>${paymentNote}</div>`;
     }).join("") || `<div class="price-line"><span class="price-value" style="color:var(--muted); font-size:.85rem;">السعر غير محدد</span></div>`;
 
     const priceLinesText = activeTypes.map(rt => {
       const base = `${rt.label}: ${prices[rt.key]} ريال`;
-      return rt.hasPaymentMethod ? `${base} (${formatPaymentAmount(prices[rt.key], paymentMethods[rt.key] || "monthly")})` : base;
+      return rt.hasPaymentMethod ? `${base} (${formatPaymentAmount(prices[rt.key], paymentMethods[rt.key] || "monthly", rt.key)})` : base;
     }).join("\n") || "لا يوجد سعر محدد";
 
     return `
@@ -460,7 +467,7 @@ function copyByRentType(targetType) {
     const paymentMethods = JSON.parse(card.dataset.paymentMethods || '{}');
     const price = prices[targetType] || '';
     const paymentNote = (targetHasPaymentMethod && price)
-      ? ` (${formatPaymentAmount(price, paymentMethods[targetType] || "monthly")})`
+      ? ` (${formatPaymentAmount(price, paymentMethods[targetType] || "monthly", targetType)})`
       : '';
     const floor = card.dataset.floor || '';
     const rooms = card.dataset.rooms || '';
@@ -513,7 +520,7 @@ function copyFilteredOffers() {
       .filter(rt => prices[rt.key])
       .map(rt => {
         const base = `${rt.label}: ${prices[rt.key]} ريال`;
-        return rt.hasPaymentMethod ? `${base} (${formatPaymentAmount(prices[rt.key], paymentMethods[rt.key] || "monthly")})` : base;
+        return rt.hasPaymentMethod ? `${base} (${formatPaymentAmount(prices[rt.key], paymentMethods[rt.key] || "monthly", rt.key)})` : base;
       })
       .join('\n') || 'لا يوجد سعر محدد';
     const floor = card.dataset.floor || '';
