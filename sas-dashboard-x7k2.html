@@ -694,11 +694,11 @@ const RENT_TYPE_MONTHLY_DIVISOR = {yearly:12, schoolYear:10, summer:2};
 const LEGACY_RENT_TYPE_TO_KEY = {"سنة كاملة":"yearly", "سنة دراسية":"schoolYear", "صيفية":"summer"};
 
 const PAYMENT_METHODS = [
-  {key:"monthly", label:"شهري", periodLabel:"شهريًا"},
-  {key:"thirdYearly", label:"ثلث سنوي", divisor:3, periodLabel:"كل 4 أشهر"},
-  {key:"quarterly", label:"ربع سنوي", divisor:4, periodLabel:"كل 3 أشهر"},
-  {key:"semiAnnual", label:"نصف سنوي", divisor:2, periodLabel:"كل 6 أشهر"},
-  {key:"annual", label:"سنوي", divisor:1, periodLabel:"دفعة واحدة"}
+  {key:"annual", label:"دفعة", divisor:1, periodLabel:"دفعة واحدة"},
+  {key:"semiAnnual", label:"2 دفعات", divisor:2, periodLabel:"كل 6 أشهر"},
+  {key:"thirdYearly", label:"3 دفعات", divisor:3, periodLabel:"كل 4 أشهر"},
+  {key:"quarterly", label:"4 دفعات", divisor:4, periodLabel:"كل 3 أشهر"},
+  {key:"monthly", label:"12 دفعة", periodLabel:"شهريًا"}
 ];
 
 function legacyPricesFromListing(d){
