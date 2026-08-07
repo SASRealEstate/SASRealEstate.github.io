@@ -682,8 +682,8 @@ function updatePhotoUploadAvailability(){
 
 const RENT_TYPES = [
   {key:"yearly", label:"سنة كاملة", hasPaymentMethod:true},
-  {key:"schoolYear", label:"سنة دراسية", hasPaymentMethod:true},
-  {key:"summer", label:"صيفية", hasPaymentMethod:true},
+  {key:"schoolYear", label:"سنة دراسية", hasPaymentMethod:true, allowedPaymentMethods:["monthly","annual"]},
+  {key:"summer", label:"صيفية", hasPaymentMethod:true, allowedPaymentMethods:["monthly","annual"]},
   {key:"monthly", label:"شهري"},
   {key:"weekly", label:"اسبوع"},
   {key:"daily", label:"يومي"}
@@ -1157,7 +1157,10 @@ function renderFormFields(){
           const methodSelect = document.createElement("select");
           methodSelect.id = "f_paymentMethod_" + rt.key;
           methodSelect.style.cssText = "font-size:.78rem;";
-          PAYMENT_METHODS.forEach(pm => {
+          const allowedMethods = rt.allowedPaymentMethods
+            ? PAYMENT_METHODS.filter(pm => rt.allowedPaymentMethods.includes(pm.key))
+            : PAYMENT_METHODS;
+          allowedMethods.forEach(pm => {
             const opt = document.createElement("option");
             opt.value = pm.key;
             opt.textContent = "طريقة الدفع: " + pm.label;
@@ -1461,7 +1464,8 @@ function editListing(docId, data){
         if (el) el.value = prices[rt.key] || "";
         if (rt.hasPaymentMethod){
           const pmEl = document.getElementById("f_paymentMethod_" + rt.key);
-          const method = paymentMethods[rt.key] || "monthly";
+          let method = paymentMethods[rt.key] || "monthly";
+          if (rt.allowedPaymentMethods && !rt.allowedPaymentMethods.includes(method)) method = "monthly";
           if (pmEl) pmEl.value = method;
           const computedEl = document.getElementById("f_paymentComputed_" + rt.key);
           if (computedEl) computedEl.textContent = prices[rt.key] ? formatPaymentAmount(prices[rt.key], method, rt.key) : "";
