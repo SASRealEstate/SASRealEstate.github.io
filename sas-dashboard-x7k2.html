@@ -394,11 +394,6 @@ button{ cursor:pointer; border:none; }
       <div class="panel">
         <h2><i class="fa-solid fa-list"></i> العروض الحالية (<span id="listingsCount">0</span>)</h2>
 
-        <div id="importFreshWrap" style="margin-bottom:16px; display:none;">
-          <button class="btn-import" onclick="importFromSourcePage()"><i class="fa-solid fa-file-import"></i> <span id="importBtnText">استيراد العروض الحالية من الصفحة</span></button>
-          <span style="font-size:.78rem;color:var(--muted);margin-right:8px;">(مرة واحدة فقط لنقل العروض القديمة إلى قاعدة البيانات)</span>
-        </div>
-
         <div class="status-filter" id="statusFilter"></div>
 
         <div style="overflow-x:auto;">
@@ -686,15 +681,23 @@ function updatePhotoUploadAvailability(){
 /* ============ أنواع الإيجار المتعددة الأسعار ============ */
 
 const RENT_TYPES = [
-  {key:"yearly", label:"سنة كاملة"},
-  {key:"schoolYear", label:"سنة دراسية"},
-  {key:"summer", label:"صيفية"},
+  {key:"yearly", label:"سنة كاملة", hasPaymentMethod:true},
+  {key:"schoolYear", label:"سنة دراسية", hasPaymentMethod:true},
+  {key:"summer", label:"صيفية", hasPaymentMethod:true},
   {key:"monthly", label:"شهري"},
   {key:"weekly", label:"اسبوع"},
   {key:"daily", label:"يومي"}
 ];
 
 const LEGACY_RENT_TYPE_TO_KEY = {"سنة كاملة":"yearly", "سنة دراسية":"schoolYear", "صيفية":"summer"};
+
+const PAYMENT_METHODS = [
+  {key:"monthly", label:"شهري", divisor:12, periodLabel:"شهريًا"},
+  {key:"thirdYearly", label:"ثلث سنوي", divisor:3, periodLabel:"كل 4 أشهر"},
+  {key:"quarterly", label:"ربع سنوي", divisor:4, periodLabel:"كل 3 أشهر"},
+  {key:"semiAnnual", label:"نصف سنوي", divisor:2, periodLabel:"كل 6 أشهر"},
+  {key:"annual", label:"سنوي", divisor:1, periodLabel:"دفعة واحدة"}
+];
 
 function legacyPricesFromListing(d){
   if (!d.price || !d.rentType) return {};
@@ -706,6 +709,17 @@ function effectivePrices(d){
   return (d.prices && Object.keys(d.prices).length) ? d.prices : legacyPricesFromListing(d);
 }
 
+function effectivePaymentMethods(d){
+  return d.paymentMethods || {};
+}
+
+function formatPaymentAmount(price, methodKey){
+  const method = PAYMENT_METHODS.find(m => m.key === methodKey) || PAYMENT_METHODS[0];
+  const amount = Math.round((parseFloat(price) || 0) / method.divisor);
+  if (method.key === "annual") return `دفعة واحدة ${amount.toLocaleString()} ريال`;
+  return `${amount.toLocaleString()} ريال ${method.periodLabel}`;
+}
+
 /* ============ إعدادات الفئات ============ */
 
 const CATEGORIES = {
@@ -713,12 +727,7 @@ const CATEGORIES = {
     label: "شقق للإيجار",
     collection: "listings",
     sourcePage: "Rent.html",
-    tableSelector: "#productTable tbody tr",
     whatsappNoun: "بالشقة",
-    importIndices: {type:1, location:2, floor:3, rooms:4, baths:5, hall:6, kitchen:7, store:8, elevator:9, furnished:10, fittedKitchen:11, entrance:12, notes:13, price:14, rentType:15, photos:16},
-    idIndex: 0,
-    locationIndex: 2,
-    photosIndex: 16,
     fields: [
       {key:"id", label:"رقم العرض", type:"number", required:true},
       {key:"status", label:"الحالة", type:"select", options:["نشط","مؤرشف"]},
@@ -752,9 +761,15 @@ const CATEGORIES = {
     ],
     copyText: (id, d) => {
       const prices = effectivePrices(d);
+      const paymentMethods = effectivePaymentMethods(d);
       const pricesText = RENT_TYPES
         .filter(rt => prices[rt.key])
-        .map(rt => `${rt.label}: ${prices[rt.key]} ريال`)
+        .map(rt => {
+          const base = `${rt.label}: ${prices[rt.key]} ريال`;
+          if (!rt.hasPaymentMethod) return base;
+          const method = paymentMethods[rt.key] || "monthly";
+          return `${base} (${formatPaymentAmount(prices[rt.key], method)})`;
+        })
         .join("\n") || "لا توجد أسعار محددة";
       return `رقم: ${id}
 نوع العقار: ${d.type || ""}
@@ -778,12 +793,7 @@ ${pricesText}
     label: "عقارات للبيع",
     collection: "buildings",
     sourcePage: "AllBuildings.html",
-    tableSelector: "table.dataframe tbody tr",
     whatsappNoun: "بالعقار",
-    importIndices: {type:1, floor:2, location:3, landArea:4, buildArea:5, facades:6, asking:7, price:8, photos:9, notes:10},
-    idIndex: 0,
-    locationIndex: 3,
-    photosIndex: 9,
     fields: [
       {key:"id", label:"رقم", type:"number", required:true},
       {key:"status", label:"الحالة", type:"select", options:["نشط","مؤرشف"]},
@@ -826,12 +836,7 @@ ${pricesText}
     label: "أراضي للبيع",
     collection: "lands",
     sourcePage: "All_Lands.html",
-    tableSelector: "table.dataframe tbody tr",
     whatsappNoun: "بالأرض",
-    importIndices: {plateNumber:0, type:2, offerType:3, location:4, planNumber:5, planName:6, length:7, width:8, area:9, specs:10, facades:11, asking:12, price:13, pricePerMeter:14, photos:15, notes:16},
-    idIndex: 1,
-    locationIndex: 4,
-    photosIndex: 15,
     fields: [
       {key:"id", label:"رقم", type:"number", required:true},
       {key:"status", label:"الحالة", type:"select", options:["نشط","مؤرشف"]},
@@ -994,9 +999,6 @@ function applyRoleUI(){
   document.getElementById("modeTabs").style.display = isBroker ? "none" : "flex";
   document.getElementById("categoryTabs").style.display = isBroker ? "none" : "flex";
 
-  const importWrap = document.getElementById("importFreshWrap");
-  if (importWrap) importWrap.style.display = isBroker ? "none" : "";
-
   const titleSpan = document.querySelector(".admin-header .title span");
   if (titleSpan) titleSpan.textContent = isBroker ? ("مرحبًا، " + myBrokerName) : "لوحة تحكم العروض";
 }
@@ -1059,7 +1061,6 @@ async function switchCategory(key){
   currentStatusFilter = "all";
   renderTabs();
   document.getElementById("viewPageLink").href = cat().sourcePage;
-  document.getElementById("importBtnText").textContent = "استيراد العروض الحالية من " + cat().sourcePage;
   if (userRole === "admin"){
     await Promise.all([loadAllOwners(), loadAllBrokers()]);
   }
@@ -1068,7 +1069,6 @@ async function switchCategory(key){
   renderStatusFilter();
   resetForm();
   listenToListings();
-  loadStaticMaxId(key);
 }
 
 function renderStatusFilter(){
@@ -1113,25 +1113,6 @@ function suggestNextId(){
   }
 }
 
-async function loadStaticMaxId(category){
-  const c = CATEGORIES[category];
-  try{
-    const res = await fetch(c.sourcePage);
-    const html = await res.text();
-    const doc = new DOMParser().parseFromString(html, "text/html");
-    const rows = [...doc.querySelectorAll(c.tableSelector), ...getCommentedRows(doc)];
-    let max = 0;
-    rows.forEach(row => {
-      const td = row.querySelectorAll("td");
-      const idVal = parseInt((td[c.idIndex]?.textContent || "").replace(/[^0-9]/g, ""), 10);
-      if (!isNaN(idVal)) max = Math.max(max, idVal);
-    });
-    updateIdBaseline(category, "static", max);
-  }catch(e){
-    console.warn("تعذر تحديد آخر رقم من الصفحة الثابتة", e);
-  }
-}
-
 /* ============ النموذج (ديناميكي حسب الفئة) ============ */
 
 function renderFormFields(){
@@ -1164,6 +1145,34 @@ function renderFormFields(){
         rtInput.placeholder = "بدون سعر";
         row.appendChild(rtLabel);
         row.appendChild(rtInput);
+
+        if (rt.hasPaymentMethod){
+          const methodSelect = document.createElement("select");
+          methodSelect.id = "f_paymentMethod_" + rt.key;
+          methodSelect.style.cssText = "font-size:.78rem;";
+          PAYMENT_METHODS.forEach(pm => {
+            const opt = document.createElement("option");
+            opt.value = pm.key;
+            opt.textContent = "طريقة الدفع: " + pm.label;
+            if (pm.key === "monthly") opt.selected = true;
+            methodSelect.appendChild(opt);
+          });
+
+          const computedDisplay = document.createElement("div");
+          computedDisplay.id = "f_paymentComputed_" + rt.key;
+          computedDisplay.style.cssText = "font-size:.72rem; color:var(--olive-dark); font-weight:700; min-height:1.2em;";
+
+          const updateComputed = () => {
+            const priceVal = rtInput.value.trim();
+            computedDisplay.textContent = priceVal ? formatPaymentAmount(priceVal, methodSelect.value) : "";
+          };
+          rtInput.addEventListener("input", updateComputed);
+          methodSelect.addEventListener("change", updateComputed);
+
+          row.appendChild(methodSelect);
+          row.appendChild(computedDisplay);
+        }
+
         grid.appendChild(row);
       });
       div.appendChild(grid);
@@ -1374,11 +1383,17 @@ async function saveListing(event){
     cat().fields.forEach(f => {
       if (f.type === "multi-price"){
         const prices = {};
+        const paymentMethods = {};
         RENT_TYPES.forEach(rt => {
           const el = document.getElementById("f_prices_" + rt.key);
           if (el && el.value.trim() !== "") prices[rt.key] = el.value.trim();
+          if (rt.hasPaymentMethod){
+            const pmEl = document.getElementById("f_paymentMethod_" + rt.key);
+            if (pmEl) paymentMethods[rt.key] = pmEl.value;
+          }
         });
         data[f.key] = prices;
+        data.paymentMethods = paymentMethods;
         return;
       }
       const el = document.getElementById("f_" + f.key);
@@ -1433,9 +1448,17 @@ function editListing(docId, data){
   cat().fields.forEach(f => {
     if (f.type === "multi-price"){
       const prices = effectivePrices(data);
+      const paymentMethods = effectivePaymentMethods(data);
       RENT_TYPES.forEach(rt => {
         const el = document.getElementById("f_prices_" + rt.key);
         if (el) el.value = prices[rt.key] || "";
+        if (rt.hasPaymentMethod){
+          const pmEl = document.getElementById("f_paymentMethod_" + rt.key);
+          const method = paymentMethods[rt.key] || "monthly";
+          if (pmEl) pmEl.value = method;
+          const computedEl = document.getElementById("f_paymentComputed_" + rt.key);
+          if (computedEl) computedEl.textContent = prices[rt.key] ? formatPaymentAmount(prices[rt.key], method) : "";
+        }
       });
       return;
     }
@@ -1537,13 +1560,7 @@ function copyListingText(docId, d, btnEl){
   }
 }
 
-function updateImportButtonVisibility(hasData){
-  document.getElementById("importFreshWrap").style.display = hasData ? "none" : "block";
-}
-
 function renderListingsTable(docs){
-  updateImportButtonVisibility(docs.length > 0);
-
   const tbody = document.getElementById("listingsTableBody");
   const emptyState = document.getElementById("emptyState");
   tbody.innerHTML = "";
@@ -1574,7 +1591,13 @@ function renderListingsTable(docs){
       let content;
       if (col.pricesDisplay){
         const prices = effectivePrices(d);
-        const parts = RENT_TYPES.filter(rt => prices[rt.key]).map(rt => `${rt.label}: ${Number(prices[rt.key]).toLocaleString()}`);
+        const paymentMethods = effectivePaymentMethods(d);
+        const parts = RENT_TYPES.filter(rt => prices[rt.key]).map(rt => {
+          const base = `${rt.label}: ${Number(prices[rt.key]).toLocaleString()}`;
+          if (!rt.hasPaymentMethod) return base;
+          const method = paymentMethods[rt.key] || "monthly";
+          return `${base} <span style="color:var(--muted); font-size:.78em;">(${formatPaymentAmount(prices[rt.key], method)})</span>`;
+        });
         content = parts.length ? parts.join("<br>") : `<span style="color:var(--muted);">-</span>`;
       } else {
         const val = d[col.key] || "";
@@ -1640,92 +1663,6 @@ function listenToListings(){
   }, err => {
     console.error("خطأ في تحميل العروض", err);
   });
-}
-
-/* ============ استيراد من الصفحة الحالية ============ */
-
-function stripHtml(s){
-  return (s || "").replace(/<[^>]*>?/gm, "").trim();
-}
-
-function extractRowData(row, c){
-  const td = row.querySelectorAll("td");
-  if (td.length < Object.keys(c.importIndices).length) return null;
-
-  const id = stripHtml(td[c.idIndex]?.innerHTML);
-  if (!id) return null;
-
-  const data = { id };
-  Object.entries(c.importIndices).forEach(([key, idx]) => {
-    if (idx === c.locationIndex || idx === c.photosIndex){
-      data[key] = td[idx]?.querySelector("a")?.getAttribute("href") || "";
-    } else {
-      data[key] = stripHtml(td[idx]?.innerHTML);
-    }
-  });
-
-  if (c.collection === "listings" && data.price && data.rentType){
-    data.prices = legacyPricesFromListing(data);
-    delete data.price;
-    delete data.rentType;
-  }
-
-  return { id, data };
-}
-
-function getCommentedRows(doc){
-  const walker = document.createTreeWalker(doc.body, NodeFilter.SHOW_COMMENT);
-  const rows = [];
-  let node;
-  while ((node = walker.nextNode())){
-    if (!node.data.includes("<tr")) continue;
-    const frag = new DOMParser().parseFromString(
-      `<table><tbody>${node.data}</tbody></table>`, "text/html"
-    );
-    frag.querySelectorAll("tr").forEach(tr => rows.push(tr));
-  }
-  return rows;
-}
-
-async function importFromSourcePage(){
-  const c = cat();
-  if (!confirm(`سيتم استيراد كل العروض الحالية من صفحة ${c.sourcePage} إلى قاعدة البيانات (بما فيها العروض المعلّقة/القديمة كعروض مؤرشفة). إذا كان العرض موجودًا مسبقًا (بنفس الرقم) سيتم تحديثه. متابعة؟`)) return;
-
-  try{
-    const res = await fetch(c.sourcePage);
-    const html = await res.text();
-    const doc = new DOMParser().parseFromString(html, "text/html");
-
-    const liveRows = doc.querySelectorAll(c.tableSelector);
-    const commentedRows = getCommentedRows(doc);
-
-    let count = 0;
-    let archivedCount = 0;
-    const batch = db.batch();
-
-    liveRows.forEach(row => {
-      const result = extractRowData(row, c);
-      if (!result) return;
-      result.data.status = "نشط";
-      batch.set(db.collection(c.collection).doc(result.id), result.data);
-      count++;
-    });
-
-    commentedRows.forEach(row => {
-      const result = extractRowData(row, c);
-      if (!result) return;
-      result.data.status = "مؤرشف";
-      batch.set(db.collection(c.collection).doc(result.id), result.data);
-      count++;
-      archivedCount++;
-    });
-
-    await batch.commit();
-    alert(`تم استيراد ${count} عرضًا بنجاح (منها ${archivedCount} عرض مؤرشف)`);
-  }catch(e){
-    alert("حدث خطأ أثناء الاستيراد: " + e.message);
-    console.error(e);
-  }
 }
 
 /* ============ الملاك ============ */

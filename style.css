@@ -311,6 +311,21 @@ select:focus, input:focus{
 
 .notices-wrap{ padding:0 20px; }
 
+.load-error{
+  background:#fdecea;
+  border:1px solid #f5c2c0;
+  border-right:5px solid #d9534f;
+  border-radius:10px;
+  padding:26px 20px;
+  margin:24px auto;
+  max-width:1400px;
+  text-align:center;
+  font-size:1rem;
+  font-weight:700;
+  line-height:1.8;
+  color:#7a2e2b;
+}
+
 /* ===== Cards ===== */
 
 #productTable, table.dataframe{ display:none; }
@@ -396,6 +411,12 @@ select:focus, input:focus{
   font-weight:900;
   color:var(--olive-dark);
   font-size:1.05rem;
+}
+
+.price-line .price-payment-note{
+  font-weight:500;
+  color:var(--muted);
+  font-size:.78rem;
 }
 
 .price{
