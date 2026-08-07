@@ -84,6 +84,8 @@
     <label for="maxAreaInput">إلى:</label>
     <input id="maxAreaInput" placeholder="أعلى مساحة" type="number"/>
   </div>
+
+  <button type="button" id="resetFiltersBtn" class="btn-reset-filters" onclick="resetFilters()">إعادة تعيين الفلاتر</button>
 </div>
 
 <div class="cards" id="cards"></div>
@@ -1474,145 +1476,6 @@
 
   L.marker([18.275406366370408, 42.59176906998552]).addTo(LandsMap)
     .bindPopup('<a href="https://maps.app.goo.gl/2NUqCqLExX86fFG87" target="_blank">📍 موقع المكتب </a>');
-
-
-  L.marker([18.317031616137314, 42.62076053673479]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/xogyHiSc9o9qovxo6" target="_blank">تجارية 1 </a>');
-
-  L.marker([18.261505279227162, 42.60617606013096]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/simWRYBXVdzuB2aU6" target="_blank">تجارية 2 </a>');
-
-  L.marker([18.24866459674192, 42.60696186914708]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/fLdnn21r8AVRDsau9" target="_blank">تجارية 3 </a>');
-
-  L.marker([18.213293730550564, 42.580779306746706]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/zMd3hgBsR5XMLZ2S6" target="_blank">تجارية 4 </a>');
-
-  L.marker([18.298797757432784, 42.59382458478703]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/ofzpX9GshkWddEGA7" target="_blank">تجارية 5 </a>');
-
-  L.marker([18.284662463483745, 42.59332478465824]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/47qvc782gy94nFd88" target="_blank">تجارية 6 </a>');
-
-  L.marker([18.297109398374843, 42.619251911033444]).addTo(LandsMap)
-    .bindPopup('<a href="https://goo.gl/maps/4ucUTXPk1FtX34nr8" target="_blank">زراعية 7 </a>');
-
-  L.marker([18.29729784667323, 42.61926800430974]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/nFg5CLwizEad13c19" target="_blank">زراعية 8 </a>');
-
-  L.marker([18.29164541791735, 42.64201954487548]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/A8GYfgv2oSCuPYjQA" target="_blank">زراعية 9 </a>');
-
-  L.marker([18.283740342025173, 42.65627573956742]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/QXanVr7wMSwzgZfD8" target="_blank">سكنية 10 </a>');
-
-  L.marker([18.289342419091707, 42.587680906746705]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/7VdrnMibhxDF1Mnt7" target="_blank">سكنية 11 </a>');
-
-  L.marker([18.365978470592353, 42.55933841469391]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/iwJGNwKXgFJPUAGo9" target="_blank">سكنية 12 </a>');
-
-  L.marker([18.272595162416668, 42.618333158316304]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/6cDp71CdaQjb7uha9" target="_blank">سكنية 13 </a>');
-
-  L.marker([18.35749673129308, 42.55508778650631]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/kKwvQ2cg4YVmajct7" target="_blank">سكنية 14 </a>');
-
-  L.marker([18.32209094226089, 42.56094297168378]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/zPSqFyY2g94fQaoB9" target="_blank">سكنية 15 </a>');
-
-  L.marker([18.345168210566516, 42.758319988624386]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/CJV1o16EUGDLtRkH7" target="_blank">سكنية 16 </a>');
-
-  L.marker([18.244193477328892, 42.516582493172315]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/SrcbBcWQZexUfT5w6" target="_blank">سكنية 17 </a>');
-
-  L.marker([18.277362778594426, 42.59804977116591]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/j7kbMnjfsfLnN6Fj6" target="_blank">سكنية 18 </a>');
-
-  L.marker([18.277362778594426, 42.59804977116591]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/ranJyPNEznPUB5kY8" target="_blank">سكنية 19 </a>');
-
-  L.marker([18.283242873335613, 42.5993668219876]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/2tJPF4uX63L9Ajfj6" target="_blank">سكنية 20 </a>');
-
-  L.marker([18.26054249460357, 42.612103301520264]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/6KbAHvDfyB1vopoWA" target="_blank">سكنية 21 </a>');
-
-  L.marker([18.307321615260477, 42.63861831738496]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/fqad44C4ZYYN2yT36" target="_blank">سكنية 22 </a>');
-
-  L.marker([18.306319430046415, 42.64091370261797]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/p54oAjFx9nA2LmWcA" target="_blank">سكنية 23 </a>');
-
-  L.marker([18.303165212723606, 42.649733511964364]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/TFjfJyzw25QJE7y69" target="_blank">سكنية 24 </a>');
-
-  L.marker([17.89980524240371, 42.26565932836844]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/zARubnVPXwoMVkDk6" target="_blank">سكنية 25 </a>');
-
-  L.marker([18.320854980275893, 42.608893142386144]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/wjkzBjGr8HXRqPeD9" target="_blank">سكنية 26 </a>');
-
-  L.marker([18.415298213994877, 42.56624988274037]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/XCqHpjuBfRLUrmCTA" target="_blank">سكنية 27 </a>');
-
-  L.marker([18.262273224132112, 42.60456456103844]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/jFuwYGhioN4DswMx9" target="_blank">سكنية 28 </a>');
-
-  L.marker([18.275281699728694, 42.590025052871354]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/P3a58ZaBhuEuHThx5" target="_blank">سكنية 29 </a>');
-
-  L.marker([18.27570745308567, 42.589005317791134]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/VhhfwcsmV4KHXjCK9" target="_blank">سكنية 30 </a>');
-
-  L.marker([18.31585799059864, 42.62928318418233]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/5BArbC2983EfJeFM8" target="_blank">سكنية 31 </a>');
-
-  L.marker([18.220501382497126, 42.60253812536326]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/BWjY881yuFHZqeBC7" target="_blank">سكنية 32 </a>');
-
-  L.marker([18.312310378086572, 42.64994469970459]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/QxbGTqL5MPe3Lwk47" target="_blank">سكنية 33 </a>');
-
-  L.marker([18.29788417635921, 42.504120728518636]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/RQtUvhi7191ytF3MA" target="_blank">سكنية 34 </a>');
-
-  // L.marker([18.259486683631973, 42.574173839366374]).addTo(LandsMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/vuABBNYdbLkW9R6Z7" target="_blank">صناعية 35 </a>');
-
-  L.marker([18.533875855207665, 42.10907139047828]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/h4BqEKjBcjbbGTp5A" target="_blank">سكنية 36 </a>');
-
-  L.marker([18.520387906871857, 42.04118707190383]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/owdCTVLFMdSKB1pg6" target="_blank">سكنية 37 </a>');
-
-  L.marker([18.301569972110116, 42.606259755822116]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/jeRDwJFRJSZ94n8y6" target="_blank">زراعية 38 </a>');  
-    
-  L.marker([18.273339403990374, 42.589604708793495]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/hFw4fB8N11sV8sBw7" target="_blank">سكنية 39 </a>');   
-  
-  L.marker([18.26493618829012, 42.61180427116426]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/kvrUmAyJcomM8L6x6" target="_blank">سكنية 40 </a>');
-
-  L.marker([18.258779622699063, 42.61305954232852]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/JWec7xzYpbNV7EB4A" target="_blank">سكنية 41 </a>');  
-    
-  L.marker([18.34309633477808, 42.620534142328516]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/LcHHdpj8NV3shGWU6" target="_blank">سكنية 42 </a>');   
-  
-  L.marker([18.302221594015542, 42.59050309781351]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/AzxXVdvNvL4sh73M9" target="_blank">زراعية 43 </a>'); 
-
-  L.marker([17.993702635750473, 42.241688703654226]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/X7svnJGFuBtTKs8i9" target="_blank">سكنية 44 </a>'); 
-
-  L.marker([18.251275006301825, 42.61130742058692]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/EBCc4akg9MEygkNK7" target="_blank">سكنية 45 </a>');   
-
-    L.marker([18.278374256788116, 42.4808291959891]).addTo(LandsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/cwtFB3W159c5Rvvn7" target="_blank">زراعية 46 </a>');     
 </script>
 
 <script>
@@ -1699,6 +1562,7 @@ function renderCardHTML(item){
 
   return `
 <div class="card"
+  data-id="${id}"
   data-type="${type}"
   data-price="${price}"
   data-area="${area}">
@@ -1765,12 +1629,17 @@ async function buildCards(){
   const listings = await getListings();
   listings.sort((a,b) => (parseInt(a.id)||0) - (parseInt(b.id)||0));
   cards.innerHTML = listings.map(renderCardHTML).join("");
-  applyFilters();
   addAutoMapMarkers(listings);
+  applyFilters();
 }
+
+const mapMarkersById = {};
 
 function addAutoMapMarkers(listings){
   if (typeof LandsMap === "undefined" || !LandsMap) return;
+  Object.values(mapMarkersById).forEach(marker => LandsMap.removeLayer(marker));
+  Object.keys(mapMarkersById).forEach(key => delete mapMarkersById[key]);
+
   listings.forEach(item => {
     const lat = parseFloat(item.lat);
     const lng = parseFloat(item.lng);
@@ -1778,8 +1647,28 @@ function addAutoMapMarkers(listings){
     const popup = item.location
       ? `<a href="${item.location}" target="_blank">أرض ${item.id}</a>`
       : `أرض ${item.id}`;
-    L.marker([lat, lng]).addTo(LandsMap).bindPopup(popup);
+    const marker = L.marker([lat, lng]).addTo(LandsMap).bindPopup(popup);
+    mapMarkersById[String(item.id)] = marker;
   });
+}
+
+function syncMapMarkersWithFilters(){
+  if (typeof LandsMap === "undefined" || !LandsMap) return;
+  document.querySelectorAll(".card").forEach(card => {
+    const marker = mapMarkersById[card.dataset.id];
+    if (!marker) return;
+    const visible = card.style.display !== "none";
+    if (visible && !LandsMap.hasLayer(marker)) marker.addTo(LandsMap);
+    if (!visible && LandsMap.hasLayer(marker)) LandsMap.removeLayer(marker);
+  });
+}
+
+function resetFilters(){
+  ["filterType","minPriceInput","maxPriceInput","minAreaInput","maxAreaInput"].forEach(id=>{
+    const el = document.getElementById(id);
+    if (el) el.value = "";
+  });
+  applyFilters();
 }
 
 function applyFilters(){
@@ -1801,6 +1690,8 @@ function applyFilters(){
 
     card.style.display = show ? "" : "none";
   });
+
+  syncMapMarkersWithFilters();
 }
 
 ["filterType","minPriceInput","maxPriceInput","minAreaInput","maxAreaInput"]

@@ -416,6 +416,14 @@ button{ cursor:pointer; border:none; }
           </div>
         </div>
 
+        <div id="mapBackfillWrap" style="margin-bottom:16px; display:none;">
+          <button type="button" class="btn-import" onclick="backfillMapPins()">
+            <i class="fa-solid fa-map-location-dot"></i> تحديد مواقع العروض القديمة على الخريطة
+          </button>
+          <span style="font-size:.78rem;color:var(--muted);margin-right:8px;">يبحث في كل الفئات (شقق، عقارات، أراضي) عن العروض التي لديها رابط موقع بدون إحداثيات محفوظة، ويحاول تحديدها تلقائيًا — مرة واحدة تكفي</span>
+          <div id="mapBackfillStatus" class="status-msg" style="margin-top:8px;"></div>
+        </div>
+
         <div class="status-filter" id="statusFilter"></div>
 
         <div style="overflow-x:auto;">
@@ -599,6 +607,42 @@ async function resolveLocationToLatLng(url){
   }
 }
 
+async function backfillMapPins(){
+  if (!confirm("سيتم البحث في كل الفئات عن العروض التي لديها رابط موقع بدون إحداثيات، ومحاولة تحديدها تلقائيًا. قد يستغرق هذا بعض الوقت حسب عدد العروض. متابعة؟")) return;
+
+  const statusEl = document.getElementById("mapBackfillStatus");
+  const collections = [
+    {key: "listings", label: "شقق الإيجار"},
+    {key: "buildings", label: "العقارات"},
+    {key: "lands", label: "الأراضي"}
+  ];
+
+  let updated = 0, failed = 0, skipped = 0;
+
+  for (const col of collections){
+    const snap = await db.collection(col.key).get();
+    for (const doc of snap.docs){
+      const data = doc.data();
+      if (!data.location){ continue; }
+      if (data.lat && data.lng){ skipped++; continue; }
+
+      statusEl.textContent = `جارٍ معالجة ${col.label} - عرض رقم ${doc.id}... (تم: ${updated}، تعذر: ${failed})`;
+      statusEl.className = "status-msg";
+
+      const coords = await resolveLocationToLatLng(data.location);
+      if (coords){
+        await db.collection(col.key).doc(doc.id).update({ lat: coords.lat, lng: coords.lng });
+        updated++;
+      } else {
+        failed++;
+      }
+    }
+  }
+
+  statusEl.textContent = `اكتمل: تم تحديد ${updated} عرض، تعذر تحديد ${failed}، ${skipped} كان محددًا مسبقًا.`;
+  statusEl.className = "status-msg " + (failed > 0 ? "" : "ok");
+}
+
 function fileToBase64(file){
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -697,7 +741,7 @@ function updatePhotoUploadAvailability(){
   btn.disabled = !canUpload;
   btn.style.opacity = canUpload ? "1" : ".5";
   btn.style.cursor = canUpload ? "pointer" : "not-allowed";
-  if (hint) hint.textContent = canUpload ? "" : "احفظ العرض أولًا لتتمكن من رفع الصور";
+  if (hint) hint.innerHTML = canUpload ? "" : '<i class="fa-solid fa-circle-info"></i> اضغط "حفظ العرض" مرة واحدة أولًا لتفعيل رفع الصور';
 }
 
 /* ============ إعدادات الفئات ============ */
@@ -995,6 +1039,9 @@ function applyRoleUI(){
   if (importWrap) importWrap.style.display = isBroker ? "none" : "";
   if (importLockedWrap) importLockedWrap.style.display = isBroker ? "none" : "";
 
+  const mapBackfillWrap = document.getElementById("mapBackfillWrap");
+  if (mapBackfillWrap) mapBackfillWrap.style.display = isBroker ? "none" : "block";
+
   const titleSpan = document.querySelector(".admin-header .title span");
   if (titleSpan) titleSpan.textContent = isBroker ? ("مرحبًا، " + myBrokerName) : "لوحة تحكم العروض";
 }
@@ -1225,7 +1272,7 @@ function renderFormFields(){
 
       const uploadHint = document.createElement("div");
       uploadHint.id = "photoUploadHint";
-      uploadHint.style.cssText = "font-size:.75rem; color:var(--muted); margin-top:4px;";
+      uploadHint.style.cssText = "font-size:.8rem; color:#a15c00; font-weight:600; margin-top:6px;";
 
       const previewWrap = document.createElement("div");
       previewWrap.id = "photoPreviewWrap";

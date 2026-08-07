@@ -157,6 +157,8 @@
     <label for="maxPriceInput">إلى:</label>
     <input id="maxPriceInput" placeholder="الحد الأعلى (السنوي)" type="number"/>
   </div>
+
+  <button type="button" id="resetFiltersBtn" class="btn-reset-filters" onclick="resetFilters()">إعادة تعيين الفلاتر</button>
 </div>
 
 <div class="cards" id="cards"></div>
@@ -2667,430 +2669,6 @@ window.addEventListener('load', function() {
 
   L.marker([18.275406366370408, 42.59176906998552]).addTo(RentMap)
     .bindPopup('<a href="https://maps.app.goo.gl/2NUqCqLExX86fFG87" target="_blank">📍 موقع المكتب </a>');
-
-
-
-    
-  // L.marker([18.300364593176624, 42.593944199093286]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/Uw88fZud3RmqRmT97" target="_blank">شقة 1 </a>');
-    
-  // L.marker([18.300364593176624, 42.593944199093286]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/Uw88fZud3RmqRmT97" target="_blank">شقة 2 </a>');
-    
-  // L.marker([18.300364593176624, 42.593944199093286]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/Uw88fZud3RmqRmT97" target="_blank">شقة 3 </a>');
-    
-  // L.marker([18.300364593176624, 42.593944199093286]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/Uw88fZud3RmqRmT97" target="_blank">شقة 4 </a>');
-    
-  //  L.marker([18.274311336639393, 42.5901284632807]).addTo(RentMap)
-  //    .bindPopup('<a href="https://maps.app.goo.gl/kbm3dEPS6TyyY2q58" target="_blank">شقة 5 </a>');
-    
-  // L.marker([18.300364593176624, 42.593944199093286]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/Uw88fZud3RmqRmT97" target="_blank">شقة 6 </a>');
-    
-   L.marker([18.27595252626433, 42.59003249173324]).addTo(RentMap)
-     .bindPopup('<a href="https://maps.app.goo.gl/2cxL5K9zBFfDtFXo8" target="_blank">شقة 7 </a>');
-    
-  // L.marker([18.300364593176624, 42.593944199093286]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/Uw88fZud3RmqRmT97" target="_blank">شقة 8 </a>');
-    
-  // L.marker([18.300364593176624, 42.593944199093286]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/Uw88fZud3RmqRmT97" target="_blank">شقة 9 </a>');
-    
-   //L.marker([18.274108553015708, 42.59007808947173]).addTo(RentMap)
-   //  .bindPopup('<a href="https://maps.app.goo.gl/mtTr2BmuC256b2Vu9" target="_blank">شقة 10 </a>');
-    
-  //L.marker([18.30032469386425, 42.59391224047831]).addTo(RentMap)
-  //  .bindPopup('<a href="https://maps.app.goo.gl/Uw88fZud3RmqRmT97" target="_blank">شقة 11 </a>');
-    
- // L.marker([18.30028765024584, 42.59400533960163]).addTo(RentMap)
-  //  .bindPopup('<a href="https://maps.app.goo.gl/GnJR2cFeFx1dNta79" target="_blank">شقة 12 </a>');
-
-  // L.marker([18.300364593176624, 42.593944199093286]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/Uw88fZud3RmqRmT97" target="_blank">شقة 13 </a>');
-
-  // L.marker([18.300364593176624, 42.593944199093286]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/Uw88fZud3RmqRmT97" target="_blank">شقة 14 </a>');
-
- // L.marker([18.274658523599495, 42.58890933070823]).addTo(RentMap)
-  //  .bindPopup('<a href="https://maps.app.goo.gl/nEQgs8VmzaDxHUf7A" target="_blank">شقة 15 </a>');
-
-  // L.marker([18.300364593176624, 42.593944199093286]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/Uw88fZud3RmqRmT97" target="_blank">شقة 16 </a>');
-    
-  // L.marker([18.300364593176624, 42.593944199093286]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/Uw88fZud3RmqRmT97" target="_blank">شقة 17 </a>');
-    
-  // L.marker([18.300364593176624, 42.593944199093286]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/Uw88fZud3RmqRmT97" target="_blank">شقة 18 </a>');
-    
-  // L.marker([18.300364593176624, 42.593944199093286]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/Uw88fZud3RmqRmT97" target="_blank">شقة 19 </a>');
-    
-  // L.marker([18.300364593176624, 42.593944199093286]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/Uw88fZud3RmqRmT97" target="_blank">شقة 20 </a>');
-    
-  // L.marker([18.300364593176624, 42.593944199093286]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/Uw88fZud3RmqRmT97" target="_blank">شقة 21 </a>');
-
-  // L.marker([18.300364593176624, 42.593944199093286]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/Uw88fZud3RmqRmT97" target="_blank">شقة 23 </a>');
-
- //  L.marker([18.27595000725538, 42.58913264001658]).addTo(RentMap)
- //   .bindPopup('<a href="https://maps.app.goo.gl/7ZCEjnVvu3ircVkz7" target="_blank">شقة 24 </a>');
-
-  // L.marker([18.274658523599495, 42.58890933070823]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/nEQgs8VmzaDxHUf7A" target="_blank">شقة 25 </a>');
-
-  // L.marker([18.300364593176624, 42.593944199093286]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/Uw88fZud3RmqRmT97" target="_blank">شقة 26 </a>');
-
-  // L.marker([18.300364593176624, 42.593944199093286]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/Uw88fZud3RmqRmT97" target="_blank">شقة 27 </a>');
-
-  // L.marker([18.274658523599495, 42.58890933070823]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/nEQgs8VmzaDxHUf7A" target="_blank">شقة 28 </a>');
-
-  // L.marker([18.300364593176624, 42.593944199093286]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/Uw88fZud3RmqRmT97" target="_blank">شقة 29 </a>');
-    
-  // L.marker([18.300364593176624, 42.593944199093286]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/Uw88fZud3RmqRmT97" target="_blank">شقة 30 </a>');
-    
-  // L.marker([18.300364593176624, 42.593944199093286]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/Uw88fZud3RmqRmT97" target="_blank">شقة 31 </a>');
-    
-  // L.marker([18.300364593176624, 42.593944199093286]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/Uw88fZud3RmqRmT97" target="_blank">شقة 32 </a>');
-    
-  // L.marker([18.300364593176624, 42.593944199093286]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/Uw88fZud3RmqRmT97" target="_blank">شقة 33 </a>');
-    
-  //  L.marker([18.277539272352524, 42.59194627726043]).addTo(RentMap)
-  //    .bindPopup('<a href="https://maps.app.goo.gl/hCJ5MATm72FVDxzH7" target="_blank">شقة 34 </a>');
-
-  // L.marker([18.300364593176624, 42.593944199093286]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/Uw88fZud3RmqRmT97" target="_blank">شقة 35 </a>');
-
-  //   L.marker([18.25910730956596, 42.596062594845385]).addTo(RentMap)
-  //     .bindPopup('<a href="https://maps.app.goo.gl/Uu8ugDPoY4f1AYzRA" target="_blank">شقة 36 </a>');
-
-  // L.marker([18.274658523599495, 42.58890933070823]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/nEQgs8VmzaDxHUf7A" target="_blank">شقة 37 </a>');
-
-  // L.marker([18.300364593176624, 42.593944199093286]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/Uw88fZud3RmqRmT97" target="_blank">شقة 38 </a>');
-
-  // L.marker([18.274658523599495, 42.58890933070823]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/nEQgs8VmzaDxHUf7A" target="_blank">شقة 39 </a>');
-    
-  // L.marker([18.223555599999997, 42.59924463558224]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/BzjH7LpjhVvkrmK58" target="_blank">شقة 40 </a>');
-
-  // L.marker([18.223555599999997, 42.59924463558224]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/BzjH7LpjhVvkrmK58" target="_blank">شقة 41 </a>');
-
-
-  // L.marker([18.275486353375104, 42.590893221478886]).addTo(RentMap)
-  //  .bindPopup('<a href="https://maps.app.goo.gl/BYBBzmMju8PEiJKYA" target="_blank">شقة 42 </a>');
-
-
-  //L.marker([18.300003979754557, 42.59276555092437]).addTo(RentMap)
-  //  .bindPopup('<a href="https://maps.app.goo.gl/Qr1A3qJRGgY7bvEU9" target="_blank">شقة 43 </a>');
-
-  // L.marker([18.275409501419073, 42.59043436441777]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/MMnR4y961L8EYv1D6" target="_blank">شقة 44 </a>');
-
-  // L.marker([18.2765474,42.590215]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/7VauMU3s86T1n9a29" target="_blank">شقة 45 </a>');
-
-  L.marker([18.275999423041878, 42.58926478849086]).addTo(RentMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/GyfE6ADAm66schqZ8" target="_blank">شقة 47 </a>');
-
-  // L.marker([18.221840190821357, 42.54391368215424]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/ygkRw82L12dNcZsd7" target="_blank">شقة 48 </a>');
-
-  // L.marker([18.273838605312296, 42.58903876269203]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/FmNe5ETXg63uvuNx5" target="_blank">شقة 49 </a>');
-
-  L.marker([18.278120640635713, 42.59035131773256]).addTo(RentMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/VbQeNJYs7Sqn8s2w8" target="_blank">شقة 50 </a>');
-
-  //L.marker([18.274442000000004, 42.59708954232851]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/drCBRoJfP3K4ByCFA" target="_blank">شقة 51 </a>');
-
-  // L.marker([18.28398809764962, 42.596285878678835]).addTo(RentMap)
-  //  .bindPopup('<a href="https://maps.app.goo.gl/RuPiVjF83uTV26h89" target="_blank">شقة 52</a>');
-
-
-  // L.marker([18.27804884339589, 42.59111986095427]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/RuPiVjF83uTV26h89" target="_blank">شقة 53 </a>');
-
-  //  L.marker([18.276958359308804, 42.597414953306334]).addTo(RentMap)
-   // .bindPopup('<a href="https://maps.app.goo.gl/bBdEKgsiVrsfFe3y6" target="_blank">شقة 54 </a>');
-
-  // L.marker([18.277098885431688, 42.59747370979238]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/rvJZJ3dqaDuUQhZcA" target="_blank">شقة 55</a>');
-
-
-   // L.marker([18.238100326748718, 42.53006450239231]).addTo(RentMap)
-   //  .bindPopup('<a href="https://maps.app.goo.gl/TDHwC9je6Z6vJG5F6" target="_blank">شقة 56 </a>');
-
- //  L.marker([18.300668438772963, 42.593617265177954]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/sPAmQZD1PNMwmcF98" target="_blank">شقة 57 </a>');
-
-  // L.marker([18.300663345677485, 42.593648110580716]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/tGx8o3Cygt3MDvKY8" target="_blank">شقة 58 </a>');
-
- //  L.marker([18.30066079912969, 42.59369907255049]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/2P55zamrTrNc9Ukn6" target="_blank">شقة 59 </a>');
-     
-   L.marker([18.27816273746275, 42.591115957671484]).addTo(RentMap)
-     .bindPopup('<a href="https://maps.app.goo.gl/QsxNJ8eJx1e1BpsD9" target="_blank">شقة 60 </a>');
-
-  //  L.marker([18.276672999999995, 42.590179542328514]).addTo(RentMap)
-  //    .bindPopup('<a href="https://maps.app.goo.gl/Rd6nxLSfbUSisNNG9" target="_blank">شقة 61 </a>');        
-
-  // L.marker([18.28683280724328, 42.58964517651302]).addTo(RentMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/q4CQu4Wud8N9VKGA6" target="_blank">شقة 62 </a>');
-
-   //L.marker([18.2768745055109, 42.59059575580078]).addTo(RentMap)
-   //  .bindPopup('<a href="https://maps.app.goo.gl/MojC77YwFcoQCUdi8" target="_blank">شقة 63 </a>');
-     
-   //L.marker([18.278528363280643, 42.591835988344236]).addTo(RentMap)
-    // .bindPopup('<a href="https://maps.app.goo.gl/LhhRrcNJiWJSgzxi9" target="_blank">شقة 64 </a>');
-
-   //L.marker([18.278528999998887, 42.5918628104336]).addTo(RentMap)
-   //   .bindPopup('<a href="https://maps.app.goo.gl/DsbcMbVVUWVHDLEs7" target="_blank">شقة 65 </a>');
-     
-   //L.marker([18.278462144570366, 42.59181386012126]).addTo(RentMap)
-   //  .bindPopup('<a href="https://maps.app.goo.gl/Y8foxSbqg7G5T5S5A" target="_blank">شقة 66 </a>');
-
-   //L.marker([18.278493937476792, 42.59182081349278]).addTo(RentMap)
-   //  .bindPopup('<a href="https://maps.app.goo.gl/CfPmYpBHSKNkEvMeA" target="_blank">شقة 67 </a>');
-
-   //L.marker([18.274081187753296, 42.592749542328505]).addTo(RentMap)
-   //  .bindPopup('<a href="https://maps.app.goo.gl/3JfuumYf4xygtUwZA" target="_blank">شقة 68 </a>');
-
-   //L.marker([18.27311537562058, 42.589602813492775]).addTo(RentMap)
-   //  .bindPopup('<a href="https://maps.app.goo.gl/16WFdxubKnzS62Qv6" target="_blank">شقة 69 </a>');
-
-  // L.marker([18.27311537562058, 42.58947406746386]).addTo(RentMap)
-   //  .bindPopup('<a href="https://maps.app.goo.gl/RwWNv68EsVoFQzta9" target="_blank">شقة 70 </a>');
-
-   //L.marker([18.273044060938062, 42.58950625397109]).addTo(RentMap)
-   //  .bindPopup('<a href="https://maps.app.goo.gl/MxS7GUaQMbbqrirv5" target="_blank">شقة 71 </a>');
-
-  //  L.marker([18.272977099999995, 42.58982128280684]).addTo(RentMap)
-  //    .bindPopup('<a href="https://maps.app.goo.gl/AU74ppgorMJ9aa1h9" target="_blank">شقة 72 </a>');
-
-   //L.marker([18.275391750708934, 42.58919881349277]).addTo(RentMap)
-   //  .bindPopup('<a href="https://maps.app.goo.gl/hzbrWiNio7uZKeDG8" target="_blank">شقة 73 </a>');
-
-
-   // L.marker([18.276413797609198, 42.591411296694616]).addTo(RentMap)
-   //   .bindPopup('<a href="https://maps.app.goo.gl/Bz7eSmaFthzHPx788" target="_blank">شقة 74 </a>');
-
-  //  L.marker([18.276338838707353, 42.5913797202545]).addTo(RentMap)
-  //    .bindPopup('<a href="https://maps.app.goo.gl/Hnc43iSZH73bPKeR9" target="_blank">شقة 75 </a>');
-
-  //  L.marker([18.275391750708934, 42.58919881349277]).addTo(RentMap)
-  //    .bindPopup('<a href="https://maps.app.goo.gl/srN66uJqqwYbuCR46" target="_blank">شقة 76 </a>');
-
-  //  L.marker([18.273014219186177, 42.58958930394678]).addTo(RentMap)
-  //    .bindPopup('<a href="https://maps.app.goo.gl/5fLxtuFhqxFsTjDTA" target="_blank">شقة 77 </a>');
-
-  //  L.marker([18.277068836723625, 42.597366529447754]).addTo(RentMap)
-  //    .bindPopup('<a href="https://maps.app.goo.gl/TaZ3MTButP7dApXs7" target="_blank">شقة 78 </a>');
-
-    // L.marker([18.276831173166045, 42.59825002433471]).addTo(RentMap)
-    //   .bindPopup('<a href="https://maps.app.goo.gl/U299xNFhVE5e6zJk7" target="_blank">شقة 79 </a>');
-
-
-   L.marker([18.275975258157416, 42.58950348591837]).addTo(RentMap)
-     .bindPopup('<a href="https://maps.app.goo.gl/EdRQZTrKWUGJXXi99" target="_blank">شقة 80 </a>');   
-
-
-   //L.marker([18.275971437791704, 42.58950214481383]).addTo(RentMap)
-   //  .bindPopup('<a href="https://maps.app.goo.gl/eMwQL8Z8TgYrCY8p7" target="_blank">شقة 81 </a>');    
-
-   //L.marker([18.279285130672623, 42.59446332838423]).addTo(RentMap)
-   //  .bindPopup('<a href="https://maps.app.goo.gl/u3XwzhsYYeYUh9G99" target="_blank">82 رووف</a>');
-
-
-  //  L.marker([18.260216026429184, 42.60474740000001]).addTo(RentMap)
-  //    .bindPopup('<a href="https://maps.app.goo.gl/afrnRytcYbLEq6eJA" target="_blank">شقة 83 </a>');    
-
-  //  L.marker([18.260209658575306, 42.60475276445915]).addTo(RentMap)
-  //    .bindPopup('<a href="https://maps.app.goo.gl/xyy8Fvxgn2yNqaMQA" target="_blank">84 شقة</a>');
-
-  //   L.marker([18.260219847141666, 42.6047474]).addTo(RentMap)
-  //    .bindPopup('<a href="https://maps.app.goo.gl/h274mXvuXToG1fpQ8" target="_blank">شقة 85 </a>');
-     
-   //   L.marker([18.274230640216935, 42.594143594273795]).addTo(RentMap)
- //     .bindPopup('<a href="https://maps.app.goo.gl/ftTdXgzWtMWZRBDG7" target="_blank">شقة 86 </a>');    
-
-  //    L.marker([18.279798180242924, 42.60715320354032]).addTo(RentMap)
-  //    .bindPopup('<a href="https://maps.app.goo.gl/Gb5sJGLwLVLVcnuT9" target="_blank">شقة 87 </a>'); 
-
-
-    //  L.marker([18.279759927543417, 42.60717644527177]).addTo(RentMap)
-    //  .bindPopup('<a href="https://maps.app.goo.gl/bnEZqv8NGafPAwRJ9" target="_blank">شقة 88 </a>'); 
-
-
-    //  L.marker([18.27600404730105, 42.58965098234065]).addTo(RentMap)
-    //  .bindPopup('<a href="https://maps.app.goo.gl/nBRpHUE5SSPUYzKx5" target="_blank">شقة 89 </a>'); 
-
-
-    //  L.marker([18.23434323356922, 42.58594840722083]).addTo(RentMap)
-    //  .bindPopup('<a href="https://maps.app.goo.gl/7BcZV8caKsTJZ3oJ8" target="_blank">شقة 90 </a>'); 
-
-
-     //  L.marker([18.207718797459453, 42.520416101910044]).addTo(RentMap)
-     // .bindPopup('<a href="https://maps.app.goo.gl/UFT16b3HLhkgw2Yi8" target="_blank">شقة 91 </a>');
-
-
-     // L.marker([18.30028128861591, 42.593963140800135]).addTo(RentMap)
-     // .bindPopup('<a href="https://maps.app.goo.gl/Dfz4GG9uSwe7cvLT6" target="_blank">شقة 92 </a>');  
-
-
-
-            L.marker([18.258578193170095, 42.60903917342451]).addTo(RentMap)
-      .bindPopup('<a href="https://maps.app.goo.gl/jVPwJPvoyLSR5AiW9" target="_blank">شقة 93 </a>');  
-
-
-     //       L.marker([18.272913808041533, 42.58991415008947]).addTo(RentMap)
-     // .bindPopup('<a href="https://maps.app.goo.gl/GSTie74BwjvMyDSz6" target="_blank">شقة 94 </a>');  
-
-     //       L.marker([18.20775695990487, 42.52044295214915]).addTo(RentMap)
-    //  .bindPopup('<a href="https://maps.app.goo.gl/Jc57NRpMvQaQt5u27" target="_blank">شقة 95 </a>');  
-
-
-    //        L.marker([18.272319000000007, 42.59868868220893]).addTo(RentMap)
-    //  .bindPopup('<a href="https://maps.app.goo.gl/Bh4gdUJVVsSxh2mZ9" target="_blank">شقة 96 </a>');
-      
-
-     //       L.marker([18.30301327325663, 42.631034658895544]).addTo(RentMap)
-    //  .bindPopup('<a href="https://maps.app.goo.gl/ZBWoMmBxFHW7e4XUA" target="_blank">شقة 97 </a>');
-
-
-      //        L.marker([18.273805865289027, 42.589053137432344]).addTo(RentMap)
-      //.bindPopup('<a href="https://maps.app.goo.gl/v42RRvXyQQe2byK66" target="_blank">شقة 98 </a>');
-
-
-      //            L.marker([18.279736578304554, 42.607027906746374]).addTo(RentMap)
-      //.bindPopup('<a href="https://maps.app.goo.gl/tqNSFJgyh9Cppsd29" target="_blank">شقة 99 </a>');
-      
-       //.     L.marker([18.276998687316883, 42.597377318686085]).addTo(RentMap)
-      //..bindPopup('<a href="https://maps.app.goo.gl/wkj4fmj9XKJd5pRC9" target="_blank">شقة 100 </a>');
-
-            //            L.marker([18.27748319468935, 42.59191010427003]).addTo(RentMap)
-      //.bindPopup('<a href="https://maps.app.goo.gl/4umRwrfgef7jJzm78" target="_blank">شقة 101 </a>');
-
-       //     L.marker([18.26399310807312, 42.605506434759434]).addTo(RentMap)
-     //.bindPopup('<a href="https://maps.app.goo.gl/yftQyenT9wJqXSRh7" target="_blank">شقة 102 </a>');
-      
-                L.marker([18.286348246758138, 42.59697442205093]).addTo(RentMap)
-      .bindPopup('<a href="https://maps.app.goo.gl/EvFS3oPv8LthS2nz9" target="_blank">شقة 103 </a>');
-
-
-
-                L.marker([18.284057340983416, 42.585691721851504]).addTo(RentMap)
-      .bindPopup('<a href="https://maps.app.goo.gl/jjgnU3m53ngD7Ns69" target="_blank">شقة 104 </a>');
-
-                      L.marker([18.223499083422062, 42.59926051349533]).addTo(RentMap)
-      .bindPopup('<a href="https://maps.app.goo.gl/a5vUL9qrTa5JF2KC6" target="_blank">شقة 105 </a>');
-
-                      L.marker([18.29583339927557, 42.58600312567454]).addTo(RentMap)
-      .bindPopup('<a href="https://maps.app.goo.gl/hJWF2viUvT4nnh618" target="_blank">شقة 106 </a>');
-
-                      L.marker([18.27789237505959, 42.59009190674639]).addTo(RentMap)
-      .bindPopup('<a href="https://maps.app.goo.gl/nACiqA5mzBZkxKfp8" target="_blank">شقة 107 </a>');
-
-     //                 L.marker([18.27391615709146, 42.617179622863496]).addTo(RentMap)
-    //  .bindPopup('<a href="https://maps.app.goo.gl/UXfT3m6VfYfCw5DYA" target="_blank">دور 108 </a>');
-
-                      L.marker([18.258570094331754, 42.6090424490750]).addTo(RentMap)
-      .bindPopup('<a href="https://maps.app.goo.gl/jVPwJPvoyLSR5AiW9" target="_blank">شقة 109 </a>');
-
-                            L.marker([18.258570094331755, 42.6090424490749]).addTo(RentMap)
-      .bindPopup('<a href="https://maps.app.goo.gl/jVPwJPvoyLSR5AiW9" target="_blank">شقة 110 </a>');
-
-      //  L.marker([]).addTo(RentMap)
-      //.bindPopup('<a href="" target="_blank">شقة 111 </a>');
-
-        L.marker([18.28849290476431, 42.58844589999764]).addTo(RentMap)
-      .bindPopup('<a href="https://maps.app.goo.gl/sjS989VYx4zbQkT39" target="_blank">شقة 112 </a>');
-
-    //  L.marker([18.26394990000002, 42.60034285889554]).addTo(RentMap)
-    //  .bindPopup('<a href="https://maps.app.goo.gl/iRs9ZAhPANxdnUnXA" target="_blank">شقة 113 </a>');
-
-      L.marker([18.27783210000099, 42.591120999392444]).addTo(RentMap)
-      .bindPopup('<a href="https://maps.app.goo.gl/yxKNiGxHBKfe3W3i6" target="_blank">شقة 114 </a>');
-
-    // L.marker([18.285416165754963, 42.59069341272661]).addTo(RentMap)
-    //.bindPopup('<a href="https://maps.app.goo.gl/aDuENqDMywCnDDH5A" target="_blank">شقة 115 </a>');
-
-      L.marker([18.20775695990489, 42.52044295214917]).addTo(RentMap)
-      .bindPopup('<a href="https://maps.app.goo.gl/Jc57NRpMvQaQt5u27" target="_blank">شقة 116 </a>');
-
-    // L.marker([18.20775695990488, 42.52044295214916]).addTo(RentMap)
-    //.bindPopup('<a href="https://maps.app.goo.gl/Jc57NRpMvQaQt5u27" target="_blank">شقة 117 </a>');
-
-    // L.marker([18.20775695990489, 42.52044295214917]).addTo(RentMap)
-    // .bindPopup('<a href="https://maps.app.goo.gl/Jc57NRpMvQaQt5u27" target="_blank">شقة 118 </a>');
-
-    // L.marker([18.216843136270253, 42.5907105186301]).addTo(RentMap)
-    // .bindPopup('<a href="https://maps.app.goo.gl/XPttRZf8dMfJqoDL7" target="_blank">شقة 119 </a>');
-
-    //  L.marker([18.281448526258288, 42.592468393632615]).addTo(RentMap)
-    //  .bindPopup('<a href="https://maps.app.goo.gl/cc644qLxUKgR5KW18" target="_blank">شقة 120 </a>');
-
-    //  L.marker([18.28145173868868, 42.59258680527104]).addTo(RentMap)
-    //  .bindPopup('<a href="https://maps.app.goo.gl/5Pduj4gGweZcCjqq9" target="_blank">ملحق 121 </a>');
-
-      L.marker([18.25735597278001, 42.61155416510971]).addTo(RentMap)
-      .bindPopup('<a href="https://maps.app.goo.gl/ovEWG4DSbd7BMne7A" target="_blank">شقة وملحق 122 </a>');
-
-      L.marker([18.257372146387485, 42.61149668560409]).addTo(RentMap)
-     .bindPopup('<a href="https://maps.app.goo.gl/ovEWG4DSbd7BMne7A" target="_blank">شقة وملحق 123 </a>');
-
-    // L.marker([18.277905109470616, 42.59009727116476]).addTo(RentMap)
-    // .bindPopup('<a href="https://maps.app.goo.gl/HCfpfmHjCsgUhLyLA" target="_blank">شقة 124 </a>');
-
-      L.marker([18.276912832244395, 42.59057574478887]).addTo(RentMap)
-      .bindPopup('<a href="https://maps.app.goo.gl/4yMzhLTMmjjiFFco8" target="_blank">شقة 125 </a>');
-
-      L.marker([18.258400520880897, 42.62022020434698]).addTo(RentMap)
-      .bindPopup('<a href="https://maps.app.goo.gl/qvP4PuDN6UYHoe7V7" target="_blank">شقة 126 </a>');
-
-      L.marker([18.276304093811323, 42.58902631779119]).addTo(RentMap)
-      .bindPopup('<a href="https://maps.app.goo.gl/uzHVxY4Wj7EWMoMM7" target="_blank">رووف 127 </a>');
-
-      L.marker([18.278353131510144, 42.52036582004011]).addTo(RentMap)
-      .bindPopup('<a href="https://maps.app.goo.gl/hkAxEpgAytDMwxvh6" target="_blank">فيلا 128 </a>');
-
-      L.marker([18.22276979538092, 42.59993864417625]).addTo(RentMap)
-      .bindPopup('<a href="https://maps.app.goo.gl/o9QfPNYSqicc6HNR7" target="_blank">شقة 129 </a>');
-
-    //  L.marker([18.216860191108005, 42.5906564024502]).addTo(RentMap)
-    //  .bindPopup('<a href="https://maps.app.goo.gl/XPttRZf8dMfJqoDL7" target="_blank">شقة 130 </a>');
-
-      L.marker([18.21684490444581, 42.59069931779119]).addTo(RentMap)
-      .bindPopup('<a href="https://maps.app.goo.gl/XPttRZf8dMfJqoDL7" target="_blank">شقة 131 </a>');
-
-    //  L.marker([18.258352226425846, 42.6086323380144]).addTo(RentMap)
-    //  .bindPopup('<a href="https://maps.app.goo.gl/fJsSxJSrd1f8RN8ZA" target="_blank">شقة 132 </a>');
-
-      L.marker([18.285633461226155, 42.58912857116475]).addTo(RentMap)
-      .bindPopup('<a href="https://maps.app.goo.gl/63ppPyXhVec6TEmd7" target="_blank">شقة 133 </a>');
-
-      L.marker([18.255006513838488, 42.608097000109034]).addTo(RentMap)
-      .bindPopup('<a href="https://maps.app.goo.gl/NuQKjvDPYsch9Xwf6" target="_blank">شقة 134 </a>');
-
-       L.marker([18.275391750708934, 42.58919881349277]).addTo(RentMap)
-      .bindPopup('<a href="https://maps.app.goo.gl/hzbrWiNio7uZKeDG8" target="_blank">شقة 135 </a>');
 </script>
 
 
@@ -3190,6 +2768,7 @@ function renderCardHTML(item){
 
     return `
 <div class="card"
+  data-id="${id}"
   data-floor="${floor}"
   data-rooms="${rooms}"
   data-furnished="${furnished}"
@@ -3291,8 +2870,13 @@ async function buildCards(){
   addAutoMapMarkers(listings);
 }
 
+const mapMarkersById = {};
+
 function addAutoMapMarkers(listings){
   if (typeof RentMap === "undefined" || !RentMap) return;
+  Object.values(mapMarkersById).forEach(marker => RentMap.removeLayer(marker));
+  Object.keys(mapMarkersById).forEach(key => delete mapMarkersById[key]);
+
   listings.forEach(item => {
     const lat = parseFloat(item.lat);
     const lng = parseFloat(item.lng);
@@ -3300,7 +2884,19 @@ function addAutoMapMarkers(listings){
     const popup = item.location
       ? `<a href="${item.location}" target="_blank">شقة ${item.id}</a>`
       : `شقة ${item.id}`;
-    L.marker([lat, lng]).addTo(RentMap).bindPopup(popup);
+    const marker = L.marker([lat, lng]).addTo(RentMap).bindPopup(popup);
+    mapMarkersById[String(item.id)] = marker;
+  });
+}
+
+function syncMapMarkersWithFilters(){
+  if (typeof RentMap === "undefined" || !RentMap) return;
+  document.querySelectorAll(".card").forEach(card => {
+    const marker = mapMarkersById[card.dataset.id];
+    if (!marker) return;
+    const visible = card.style.display !== "none";
+    if (visible && !RentMap.hasLayer(marker)) marker.addTo(RentMap);
+    if (!visible && RentMap.hasLayer(marker)) RentMap.removeLayer(marker);
   });
 }
 
@@ -3389,6 +2985,21 @@ function applyCardFilters(){
 
     card.style.display = show ? "" : "none";
   });
+
+  syncMapMarkersWithFilters();
+}
+
+function resetFilters(){
+  ["filterFurnished","filterElevator","filterEntrance","filterRentType","filterRooms"].forEach(id=>{
+    const el = document.getElementById(id);
+    if (el) el.value = "";
+  });
+  const minPriceEl = document.getElementById("minPriceInput");
+  const maxPriceEl = document.getElementById("maxPriceInput");
+  if (minPriceEl) minPriceEl.value = "";
+  if (maxPriceEl) maxPriceEl.value = "";
+  document.querySelectorAll(".floorCheckbox:checked").forEach(cb => cb.checked = false);
+  applyCardFilters();
 }
 
 /* ربط الفلاتر */

@@ -96,6 +96,8 @@
     <label for="maxBuildAreaInput">إلى:</label>
     <input id="maxBuildAreaInput" placeholder="أعلى مساحة" type="number"/>
   </div>
+
+  <button type="button" id="resetFiltersBtn" class="btn-reset-filters" onclick="resetFilters()">إعادة تعيين الفلاتر</button>
 </div>
 
 <div class="cards" id="cards"></div>
@@ -1464,128 +1466,6 @@ TORO 25 ايطاليه الصنع
     .bindPopup('<a href="https://maps.app.goo.gl/2NUqCqLExX86fFG87" target="_blank">📍 موقع المكتب </a>');
 
 
-  L.marker([18.295448192309642, 42.59017838528318]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/DhMzTaCxP7NDUGwYA" target="_blank"> رووف 1 </a>');
-    
-  L.marker([18.29544564568519, 42.59025214602892]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/f9zgwAp5e1Z8Vy3x7" target="_blank"> رووف 2 </a>');
-    
-  L.marker([18.29545455887059, 42.59029237916295]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/g4W7kKY7Sym9ZThJA" target="_blank"> شقة 3 </a>');
-
-  L.marker([18.258956069015674, 42.61336420659143]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/SuHWtPiHUUgbK3RT8" target="_blank"> رووف 4 </a>');
-
-  L.marker([18.306194294576645, 42.644288736199066]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/1rmhwAkwddKQUGzGA" target="_blank"> شقة 5 </a>');
-      
-  L.marker([18.237898457150877, 42.60546908381463]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/4CZHtYoTWjXeQ8VZA" target="_blank"> عمارة 6 </a>');
-      
-  /* L.marker([18.27153289720851, 42.60783960956468]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/897FC9BCheyuTbiK7" target="_blank"> رووف 7 </a>');
-      
-  L.marker([18.271513209475184, 42.607904998461414]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/FCV3j2ckX8kVPyR5A" target="_blank"> دور 8 </a>');
-       */
-  L.marker([18.353180816901435, 42.508010658895415]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/1B9SL7Q9dTYfZiZu7" target="_blank"> عمارة 9 </a>');
-      
-  L.marker([18.30320599585491, 42.63910993193296]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/LgT2sND9o5ESrx9F9" target="_blank"> فيلا 10 </a>');
-      
-//  L.marker([18, 42]).addTo(BuildingsMap)
-//    .bindPopup('<a href="" target="_blank"> فيلا 11 </a>');
-      
-  L.marker([18.308778692913513, 42.60602595473852]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/vP5kcoNLBM42DEEU9" target="_blank"> 12 استراحة </a>');
-      
-  L.marker([18.25782384854564, 42.61311230790873]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/FpwtbVNfuGMJtZUq5" target="_blank"> شقة 13 </a>');
-      
-  L.marker([18.20474214467735, 42.53675635094187]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/85xx4WfSzgByB2JJA" target="_blank"> شقة 14 </a>');
-      
-  L.marker([18.26137988041797, 42.614333169370575]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/JcQcE9PSNvHtuBuz5" target="_blank"> شقة 15 </a>');
-      
-//  L.marker([18, 42]).addTo(BuildingsMap)
-//    .bindPopup('<a href="" target="_blank"> عمارة 16 </a>');
-      
-  L.marker([18.31411198540041, 42.73946614039992]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/DFDwTca98ECrAsNF6" target="_blank"> عمارة 17 </a>');
-      
-  L.marker([18.240275725727763, 42.532001597002086]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/ZLTg4P2Co9psYE6Q9" target="_blank"> رووف 18 </a>');
-      
-  L.marker([18.240248977668376, 42.53200293810656]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/ZLTg4P2Co9psYE6Q9" target="_blank"> 19 رووف </a>');
-      
-  L.marker([18.240226050757048, 42.53201634915123]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/ZLTg4P2Co9psYE6Q9" target="_blank"> 20 شقة </a>');
-      
-  L.marker([18.240212039865312, 42.53202439577804]).addTo(BuildingsMap)
-    bindPopup('<a href="https://maps.app.goo.gl/ZLTg4P2Co9psYE6Q9" target="_blank"> 21 شقة </a>');
-
-  L.marker([18.21615055044882, 42.58447509762166]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/8YvcLCu13YaoMw6q6" target="_blank"> شقة 22 </a>');
-      
-  L.marker([18.240523995977536, 42.52406512791641]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/KAS4dBEca1nUerBWA" target="_blank"> فيلا 23 </a>');
-      
-  L.marker([18.226807769728957, 42.49968936683564]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/EDzqv1QuYgsmn6bG6" target="_blank"> عمارة تجارية 24 </a>');
-      
-  L.marker([18.274259023475413, 42.596644874989856]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/rAYw4P2nfFFUrDZE9" target="_blank"> شقة 25 </a>');
-      
-  L.marker([18.252154516596686, 42.59925172982985]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/HiDFCYUAN48YY4dC9" target="_blank"> شقة 26 </a>');
-      
-  L.marker([18.275496123798863, 42.591031288539526]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/PDpNCqoFLq7UiGN3A" target="_blank"> فيلا 27 </a>');
-
-  L.marker([18.27485391361432, 42.5902432792424]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/26TYYrswsSxVL7Ti9" target="_blank"> فيلا 28 </a>');
-
-  L.marker([18.274740004527885, 42.590230869647435]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/ZJ5M8ak2LmpzkSgP7" target="_blank"> فيلا 29 </a>');
-      
-  L.marker([18.27297884603055, 42.58993690674639]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/hzDUzdmQZAVykyDG6" target="_blank"> فيلا و4 شقق 30 </a>');
-
-  L.marker([18.27751361778034, 42.59195903578066]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/Ni7tn1FDLMd5n6fs9" target="_blank"> عمارة 31 </a>');  
-
-  L.marker([18.295882451509108, 42.588164802326354]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/k5rVWokcJBUkiLjG6" target="_blank"> فيلا 32 </a>'); 
-
-  L.marker([18.281912726940323, 42.59223927172071]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/yQsirfAkUX7Wma98A" target="_blank"> فيلا و6شقق 33 </a>');    
-
-  L.marker([18.273136900698155, 42.63541122149147]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/ND1C9ody3e3Dw5co7" target="_blank"> فيلا 34 </a>');    
-
- // L.marker([]).addTo(BuildingsMap)
- //   .bindPopup('<a href="" target="_blank"></a>');   
-
-  L.marker([18.315342538717655, 42.625802809272855]).addTo(BuildingsMap)
-    .bindPopup('<a href="https://maps.app.goo.gl/AG3Mhsc3geX7YQLP8" target="_blank"> فيلا 36 </a>');    
-
-  L.marker([18.315342538717655, 42.625802809272855]).addTo(BuildingsMap)
-    .bindPopup('<a href="" target="_blank"> فيلا 37 </a>');       
-
-  // L.marker([18.315342538717655, 42.625802809272855]).addTo(BuildingsMap)
-  //   .bindPopup('<a href="https://maps.app.goo.gl/DqisXZSFovwT7ThU7" target="_blank"> فيلا 38 </a>');    
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1666,6 +1546,7 @@ function renderCardHTML(item){
   const {id, type, floor, location, landArea, buildArea, facades, asking, price, photos, notes} = item;
   return `
 <div class="card"
+  data-id="${id}"
   data-type="${type}"
   data-price="${price}"
   data-land-area="${landArea}"
@@ -1719,12 +1600,17 @@ async function buildCards(){
   const listings = await getListings();
   listings.sort((a,b) => (parseInt(a.id)||0) - (parseInt(b.id)||0));
   cards.innerHTML = listings.map(renderCardHTML).join("");
-  applyFilters();
   addAutoMapMarkers(listings);
+  applyFilters();
 }
+
+const mapMarkersById = {};
 
 function addAutoMapMarkers(listings){
   if (typeof BuildingsMap === "undefined" || !BuildingsMap) return;
+  Object.values(mapMarkersById).forEach(marker => BuildingsMap.removeLayer(marker));
+  Object.keys(mapMarkersById).forEach(key => delete mapMarkersById[key]);
+
   listings.forEach(item => {
     const lat = parseFloat(item.lat);
     const lng = parseFloat(item.lng);
@@ -1732,8 +1618,28 @@ function addAutoMapMarkers(listings){
     const popup = item.location
       ? `<a href="${item.location}" target="_blank">عقار ${item.id}</a>`
       : `عقار ${item.id}`;
-    L.marker([lat, lng]).addTo(BuildingsMap).bindPopup(popup);
+    const marker = L.marker([lat, lng]).addTo(BuildingsMap).bindPopup(popup);
+    mapMarkersById[String(item.id)] = marker;
   });
+}
+
+function syncMapMarkersWithFilters(){
+  if (typeof BuildingsMap === "undefined" || !BuildingsMap) return;
+  document.querySelectorAll(".card").forEach(card => {
+    const marker = mapMarkersById[card.dataset.id];
+    if (!marker) return;
+    const visible = card.style.display !== "none";
+    if (visible && !BuildingsMap.hasLayer(marker)) marker.addTo(BuildingsMap);
+    if (!visible && BuildingsMap.hasLayer(marker)) BuildingsMap.removeLayer(marker);
+  });
+}
+
+function resetFilters(){
+  ["filterType","minPriceInput","maxPriceInput","minLandAreaInput","maxLandAreaInput","minBuildAreaInput","maxBuildAreaInput"].forEach(id=>{
+    const el = document.getElementById(id);
+    if (el) el.value = "";
+  });
+  applyFilters();
 }
 
 function applyFilters(){
@@ -1759,6 +1665,8 @@ function applyFilters(){
 
     card.style.display = show ? "" : "none";
   });
+
+  syncMapMarkersWithFilters();
 }
 
 ["filterType","minPriceInput","maxPriceInput","minLandAreaInput","maxLandAreaInput","minBuildAreaInput","maxBuildAreaInput"]

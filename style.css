@@ -261,6 +261,25 @@ select:focus, input:focus{
   font-size:.85rem;
 }
 
+.btn-reset-filters{
+  display:block;
+  margin:16px auto 0;
+  padding:9px 22px;
+  background:#fff;
+  border:1.5px solid var(--olive);
+  color:var(--olive-dark);
+  font-weight:700;
+  font-size:.85rem;
+  border-radius:9px;
+  cursor:pointer;
+  transition:background .15s, color .15s;
+}
+
+.btn-reset-filters:hover{
+  background:var(--olive);
+  color:#fff;
+}
+
 .price-range input{ width:140px; }
 
 /* ===== Notices ===== */
