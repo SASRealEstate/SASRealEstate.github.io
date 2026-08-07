@@ -155,15 +155,25 @@ select:focus, input:focus{
 }
 
 .toolbar-row button{
-  background:transparent;
-  border:1px dashed rgba(255,255,255,.35);
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.25);
+  border-radius:999px;
+  color:#fff;
   font-size:.78rem;
+  font-family:inherit;
+  padding:8px 16px;
+  cursor:pointer;
+  transition:.2s;
 }
 
 .toolbar-row button:hover{
   background:var(--gold);
   border-color:var(--gold);
   color:#fff;
+  transform:translateY(-1px);
 }
 
 /* ===== Page title ===== */
@@ -356,6 +366,36 @@ select:focus, input:focus{
   gap:8px;
   flex-wrap:wrap;
   margin-bottom:10px;
+}
+
+.multi-price-list{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:5px;
+  margin-bottom:14px;
+}
+
+.price-line{
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+}
+
+.price-line .price-type{
+  font-weight:700;
+  color:var(--olive-dark);
+  background:var(--cream);
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:2px 12px;
+  font-size:.75rem;
+}
+
+.price-line .price-value{
+  font-weight:900;
+  color:var(--olive-dark);
+  font-size:1.05rem;
 }
 
 .price{
@@ -573,6 +613,8 @@ select:focus, input:focus{
   .asking-line{ font-size:.75rem; }
 
   .rent-type-badge{ font-size:.65rem; padding:3px 10px; margin:0 auto 10px; }
+  .price-line .price-value{ font-size:.9rem; }
+  .price-line .price-type{ font-size:.68rem; padding:2px 10px; }
 
   .features{ grid-template-columns:1fr; gap:6px; border-top:1px solid var(--line); padding-top:8px; }
   .features div{ font-size:.72rem; gap:5px; }

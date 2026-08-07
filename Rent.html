@@ -46,9 +46,13 @@
 
   <div class="toolbar-row">
     <div class="top-container">
-      <button onclick="copyByRentType('سنة كاملة')"><i class="fa-solid fa-copy"></i> نسخ كل سنة كاملة</button>
-      <button onclick="copyByRentType('سنة دراسية')"><i class="fa-solid fa-copy"></i> نسخ كل سنة دراسية</button>
-      <button onclick="copyByRentType('صيفية')"><i class="fa-solid fa-copy"></i> نسخ كل صيفية</button>
+      <button onclick="copyFilteredOffers()"><i class="fa-solid fa-filter"></i> نسخ العروض المطابقة للفلاتر</button>
+      <button onclick="copyByRentType('yearly')"><i class="fa-solid fa-copy"></i> نسخ كل سنة كاملة</button>
+      <button onclick="copyByRentType('schoolYear')"><i class="fa-solid fa-copy"></i> نسخ كل سنة دراسية</button>
+      <button onclick="copyByRentType('summer')"><i class="fa-solid fa-copy"></i> نسخ كل صيفية</button>
+      <button onclick="copyByRentType('monthly')"><i class="fa-solid fa-copy"></i> نسخ كل شهري</button>
+      <button onclick="copyByRentType('weekly')"><i class="fa-solid fa-copy"></i> نسخ كل اسبوعي</button>
+      <button onclick="copyByRentType('daily')"><i class="fa-solid fa-copy"></i> نسخ كل يومي</button>
     </div>
   </div>
 </header>
@@ -81,9 +85,12 @@
       <label for="filterRentType">نوع الإيجار</label>
       <select id="filterRentType">
         <option value="">الكل</option>
-        <option value="سنة كاملة">سنة كاملة</option>
-        <option value="سنة دراسية">سنة دراسية</option>
-        <option value="صيفية">صيفية</option>
+        <option value="yearly">سنة كاملة</option>
+        <option value="schoolYear">سنة دراسية</option>
+        <option value="summer">صيفية</option>
+        <option value="monthly">شهري</option>
+        <option value="weekly">اسبوع</option>
+        <option value="daily">يومي</option>
       </select>
     </div>
 
@@ -2757,14 +2764,45 @@ async function getListings(){
   return getStaticListings();
 }
 
+const RENT_TYPES = [
+  {key:"yearly", label:"سنة كاملة"},
+  {key:"schoolYear", label:"سنة دراسية"},
+  {key:"summer", label:"صيفية"},
+  {key:"monthly", label:"شهري"},
+  {key:"weekly", label:"اسبوع"},
+  {key:"daily", label:"يومي"}
+];
+const LEGACY_RENT_TYPE_TO_KEY = {"سنة كاملة":"yearly", "سنة دراسية":"schoolYear", "صيفية":"summer"};
+
+function getEffectivePrices(item){
+  if (item.prices && Object.keys(item.prices).length) return item.prices;
+  if (item.price && item.rentType){
+    const key = LEGACY_RENT_TYPE_TO_KEY[item.rentType];
+    if (key) return { [key]: item.price };
+  }
+  return {};
+}
+
+function getPrimaryPrice(prices){
+  if (prices.yearly) return parseInt(prices.yearly) || 0;
+  const vals = Object.values(prices).map(v => parseInt(v)).filter(v => !isNaN(v));
+  return vals.length ? Math.min(...vals) : 0;
+}
+
 function renderCardHTML(item){
     const {id, type, location, floor, rooms, baths, hall, kitchen, store,
-           elevator, furnished, fittedKitchen, entrance, notes, price, rentType, photos, brokerPhone} = item;
+           elevator, furnished, fittedKitchen, entrance, notes, photos, brokerPhone} = item;
 
-    const divisorMap = {"سنة كاملة":12, "سنة دراسية":10, "صيفية":2};
-    const divisor = divisorMap[rentType] || 12;
-    const monthlyPrice = Math.round(parseInt(price) / divisor);
+    const prices = getEffectivePrices(item);
+    const activeTypes = RENT_TYPES.filter(rt => prices[rt.key]);
+    const primaryPrice = getPrimaryPrice(prices);
     const contactPhone = brokerPhone ? "966" + brokerPhone.replace(/^0/,"") : "966534108666";
+
+    const priceRowsHTML = activeTypes.map(rt =>
+      `<div class="price-line"><span class="price-type">${rt.label}</span><span class="price-value">${Number(prices[rt.key]).toLocaleString()} ريال</span></div>`
+    ).join("") || `<div class="price-line"><span class="price-value" style="color:var(--muted); font-size:.85rem;">السعر غير محدد</span></div>`;
+
+    const priceLinesText = activeTypes.map(rt => `${rt.label}: ${prices[rt.key]} ريال`).join("\n") || "لا يوجد سعر محدد";
 
     return `
 <div class="card"
@@ -2774,19 +2812,18 @@ function renderCardHTML(item){
   data-furnished="${furnished}"
   data-elevator="${elevator}"
   data-entrance="${entrance}"
-  data-price="${price}"
-  data-rent-type="${rentType}">
+  data-price="${primaryPrice}"
+  data-rent-type="${activeTypes.map(rt => rt.key).join(' ')}"
+  data-prices='${JSON.stringify(prices)}'>
 
 
   <div class="card-header">${type} – رقم ${id}</div>
 
   <div class="card-body">
 
-<div class="price-row">
-  <span class="price">${price} ريال</span>
-  <span class="monthly">(${monthlyPrice.toLocaleString()} شهريًا)</span>
+<div class="multi-price-list">
+  ${priceRowsHTML}
 </div>
-<span class="rent-type-badge">${rentType}</span>
 
     <div class="features">
       <div><i class="fa-solid fa-stairs"></i> الدور: ${floor}</div>
@@ -2848,9 +2885,7 @@ function renderCardHTML(item){
 مطبخ راكب: ${fittedKitchen}
 مستقل: ${entrance}
 ملاحظات: ${notes}
-السعر: ${price} ريال
-الشهري: ${monthlyPrice.toLocaleString()} ريال شهرياً
-نوع الإيجار: ${rentType}
+${priceLinesText}
 الموقع: ${location}
 الصور: ${photos}\`;
   copyTextToClipboard(text, this);
@@ -2902,17 +2937,20 @@ function syncMapMarkersWithFilters(){
 
 
 function copyByRentType(targetType) {
+  const targetLabel = (RENT_TYPES.find(rt => rt.key === targetType) || {}).label || targetType;
+
   const cards = Array.from(document.querySelectorAll('.card'))
-    .filter(card => card.dataset.rentType === targetType);
+    .filter(card => (card.dataset.rentType || "").split(" ").includes(targetType));
 
   if (!cards.length) {
-    alert(`لا توجد شقق من نوع ${targetType}`);
+    alert(`لا توجد شقق من نوع ${targetLabel}`);
     return;
   }
 
   const allText = cards.map(card => {
     const id = card.querySelector('.card-header')?.textContent?.trim() || '';
-    const price = card.dataset.price || '';
+    const prices = JSON.parse(card.dataset.prices || '{}');
+    const price = prices[targetType] || '';
     const floor = card.dataset.floor || '';
     const rooms = card.dataset.rooms || '';
 
@@ -2931,8 +2969,8 @@ function copyByRentType(targetType) {
     const notes = notesEl ? notesEl.textContent.trim() : '';
 
     return `رقم: ${id}
-النوع: ${targetType}
-السعر: ${price}
+النوع: ${targetLabel}
+السعر: ${price} ريال
 الدور: ${floor}
 الغرف: ${rooms}
 المميزات: ${features}\n
@@ -2941,7 +2979,55 @@ ${notes ? `ملاحظات: ${notes}\n` : ''}الموقع: ${locationLink}
   }).join('\n\n----------------------\n\n');
 
   navigator.clipboard.writeText(allText).then(() => {
-    alert(`تم نسخ جميع شقق ${targetType}`);
+    alert(`تم نسخ جميع شقق ${targetLabel}`);
+  }).catch(() => {
+    alert('حدث خطأ أثناء النسخ');
+  });
+}
+
+function copyFilteredOffers() {
+  const cards = Array.from(document.querySelectorAll('.card'))
+    .filter(card => card.style.display !== 'none');
+
+  if (!cards.length) {
+    alert('لا توجد عروض مطابقة للفلاتر الحالية');
+    return;
+  }
+
+  const allText = cards.map(card => {
+    const id = card.querySelector('.card-header')?.textContent?.trim() || '';
+    const prices = JSON.parse(card.dataset.prices || '{}');
+    const priceLines = RENT_TYPES
+      .filter(rt => prices[rt.key])
+      .map(rt => `${rt.label}: ${prices[rt.key]} ريال`)
+      .join('\n') || 'لا يوجد سعر محدد';
+    const floor = card.dataset.floor || '';
+    const rooms = card.dataset.rooms || '';
+
+    const locationLink = card.querySelector('.card-actions a[href*="maps.app"]')?.href || '';
+    const photoLink = card.querySelector('.card-actions a[href*="drive.google.com"], .card-actions a[href*="photos"]')?.href || '';
+
+    const featureItems = Array.from(card.querySelectorAll('.features div'))
+      .map(el => el.textContent.replace(/\s+/g, ' ').trim());
+
+    const firstLine = featureItems.slice(0, 6).join(' | ');
+    const secondLine = featureItems.slice(6).join(' | ');
+    const features = secondLine ? `${firstLine}\n${secondLine}` : firstLine;
+
+    const notesEl = card.querySelector('.card-body div[style*="color: #555"], .card-body div[style*="color:#555"]');
+    const notes = notesEl ? notesEl.textContent.trim() : '';
+
+    return `رقم: ${id}
+${priceLines}
+الدور: ${floor}
+الغرف: ${rooms}
+المميزات: ${features}\n
+${notes ? `ملاحظات: ${notes}\n` : ''}الموقع: ${locationLink}
+الصور: ${photoLink}`;
+  }).join('\n\n----------------------\n\n');
+
+  navigator.clipboard.writeText(allText).then(() => {
+    alert(`تم نسخ ${cards.length} عرضًا مطابقًا للفلاتر الحالية`);
   }).catch(() => {
     alert('حدث خطأ أثناء النسخ');
   });
@@ -2972,16 +3058,16 @@ function applyCardFilters(){
     const cardFloor     = card.dataset.floor;
     const cardRooms     = parseInt(card.dataset.rooms || 0);
     const cardPrice     = parseInt(card.dataset.price || 0);
-    const cardRentType  = card.dataset.rentType;
+    const cardRentTypes = (card.dataset.rentType || "").split(" ").filter(Boolean);
 
     if(furnished && cardFurnished !== furnished) show = false;
     if(elevator && cardElevator !== elevator) show = false;
     if(entrance && cardEntrance !== entrance) show = false;
-    if(rentType && cardRentType !== rentType) show = false;
+    if(rentType && !cardRentTypes.includes(rentType)) show = false;
 
     if(minRooms && cardRooms < minRooms) show = false;
     if(selectedFloors.length && !selectedFloors.includes(cardFloor)) show = false;
-    if(cardPrice < minPrice || cardPrice > maxPrice) show = false;
+    if(cardPrice > 0 && (cardPrice < minPrice || cardPrice > maxPrice)) show = false;
 
     card.style.display = show ? "" : "none";
   });

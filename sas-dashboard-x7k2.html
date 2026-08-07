@@ -683,6 +683,29 @@ function updatePhotoUploadAvailability(){
   if (hint) hint.innerHTML = canUpload ? "" : '<i class="fa-solid fa-circle-info"></i> اضغط "حفظ العرض" مرة واحدة أولًا لتفعيل رفع الصور';
 }
 
+/* ============ أنواع الإيجار المتعددة الأسعار ============ */
+
+const RENT_TYPES = [
+  {key:"yearly", label:"سنة كاملة"},
+  {key:"schoolYear", label:"سنة دراسية"},
+  {key:"summer", label:"صيفية"},
+  {key:"monthly", label:"شهري"},
+  {key:"weekly", label:"اسبوع"},
+  {key:"daily", label:"يومي"}
+];
+
+const LEGACY_RENT_TYPE_TO_KEY = {"سنة كاملة":"yearly", "سنة دراسية":"schoolYear", "صيفية":"summer"};
+
+function legacyPricesFromListing(d){
+  if (!d.price || !d.rentType) return {};
+  const key = LEGACY_RENT_TYPE_TO_KEY[d.rentType];
+  return key ? { [key]: d.price } : {};
+}
+
+function effectivePrices(d){
+  return (d.prices && Object.keys(d.prices).length) ? d.prices : legacyPricesFromListing(d);
+}
+
 /* ============ إعدادات الفئات ============ */
 
 const CATEGORIES = {
@@ -702,8 +725,7 @@ const CATEGORIES = {
       {key:"ownerNumber", label:"المالك", type:"owner-select", brokerHidden:true},
       {key:"brokerNumber", label:"الوسيط", type:"broker-select", brokerHidden:true},
       {key:"type", label:"نوع العقار", type:"text", value:"شقة"},
-      {key:"rentType", label:"نوع الإيجار", type:"select", options:["سنة كاملة","سنة دراسية","صيفية"]},
-      {key:"price", label:"الإيجار السنوي (ريال)", type:"number"},
+      {key:"prices", label:"الأسعار (أدخل السعر لكل نوع تريد عرضه فقط)", type:"multi-price", wide:true},
       {key:"floor", label:"الدور", type:"text"},
       {key:"rooms", label:"عدد الغرف", type:"text"},
       {key:"baths", label:"دورات المياه", type:"text"},
@@ -722,17 +744,18 @@ const CATEGORIES = {
       {key:"id", label:"رقم"},
       {key:"status", label:"الحالة", statusBadge:true},
       {key:"type", label:"النوع"},
-      {key:"price", label:"السعر", suffix:" ريال"},
-      {key:"rentType", label:"نوع الإيجار", badge:true},
+      {key:"prices", label:"الأسعار", pricesDisplay:true},
       {key:"floor", label:"الدور"},
       {key:"rooms", label:"الغرف"},
       {key:"ownerNumber", label:"المالك", ownerLookup:true},
       {key:"brokerNumber", label:"الوسيط", brokerLookup:true}
     ],
     copyText: (id, d) => {
-      const divisorMap = {"سنة كاملة":12, "سنة دراسية":10, "صيفية":2};
-      const divisor = divisorMap[d.rentType] || 12;
-      const monthlyPrice = Math.round(parseInt(d.price) / divisor) || 0;
+      const prices = effectivePrices(d);
+      const pricesText = RENT_TYPES
+        .filter(rt => prices[rt.key])
+        .map(rt => `${rt.label}: ${prices[rt.key]} ريال`)
+        .join("\n") || "لا توجد أسعار محددة";
       return `رقم: ${id}
 نوع العقار: ${d.type || ""}
 الدور: ${d.floor || ""}
@@ -746,9 +769,7 @@ const CATEGORIES = {
 مطبخ راكب: ${d.fittedKitchen || ""}
 مستقل: ${d.entrance || ""}
 ملاحظات: ${d.notes || ""}
-السعر: ${d.price || ""} ريال
-الشهري: ${monthlyPrice.toLocaleString()} ريال شهرياً
-نوع الإيجار: ${d.rentType || ""}
+${pricesText}
 الموقع: ${d.location || ""}
 الصور: ${d.photos || ""}`;
     }
@@ -1127,6 +1148,29 @@ function renderFormFields(){
     label.textContent = f.label + (f.required ? " *" : "") + (f.computed ? " (يُحسب تلقائيًا)" : "");
     div.appendChild(label);
 
+    if (f.type === "multi-price"){
+      const grid = document.createElement("div");
+      grid.style.cssText = "display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px;";
+      RENT_TYPES.forEach(rt => {
+        const row = document.createElement("div");
+        row.style.cssText = "display:flex; flex-direction:column; gap:4px;";
+        const rtLabel = document.createElement("label");
+        rtLabel.textContent = rt.label;
+        rtLabel.style.cssText = "font-size:.78rem; color:var(--muted);";
+        rtLabel.setAttribute("for", "f_prices_" + rt.key);
+        const rtInput = document.createElement("input");
+        rtInput.type = "number";
+        rtInput.id = "f_prices_" + rt.key;
+        rtInput.placeholder = "بدون سعر";
+        row.appendChild(rtLabel);
+        row.appendChild(rtInput);
+        grid.appendChild(row);
+      });
+      div.appendChild(grid);
+      wrap.appendChild(div);
+      return;
+    }
+
     let input;
     if (f.type === "select"){
       input = document.createElement("select");
@@ -1328,6 +1372,15 @@ async function saveListing(event){
 
     const data = {};
     cat().fields.forEach(f => {
+      if (f.type === "multi-price"){
+        const prices = {};
+        RENT_TYPES.forEach(rt => {
+          const el = document.getElementById("f_prices_" + rt.key);
+          if (el && el.value.trim() !== "") prices[rt.key] = el.value.trim();
+        });
+        data[f.key] = prices;
+        return;
+      }
       const el = document.getElementById("f_" + f.key);
       if (!el) return; // field hidden for this role (e.g. owner info for brokers) - leave untouched
       let value = el.value.trim();
@@ -1378,6 +1431,14 @@ function editListing(docId, data){
   editingDocId = docId;
   editingOriginalLocation = data.location || "";
   cat().fields.forEach(f => {
+    if (f.type === "multi-price"){
+      const prices = effectivePrices(data);
+      RENT_TYPES.forEach(rt => {
+        const el = document.getElementById("f_prices_" + rt.key);
+        if (el) el.value = prices[rt.key] || "";
+      });
+      return;
+    }
     const el = document.getElementById("f_" + f.key);
     if (!el) return;
     if (f.key === "id"){ el.value = data.id || docId; return; }
@@ -1510,18 +1571,24 @@ function renderListingsTable(docs){
     const tr = document.createElement("tr");
 
     const cellsHTML = visibleListColumns().map(col => {
-      const val = d[col.key] || "";
       let content;
-      if (col.statusBadge){
-        content = `<span class="${isArchived ? 'badge-archived' : 'badge-active'}">${val || "نشط"}</span>`;
-      } else if (col.badge){
-        content = `<span class="badge-rent">${val}</span>`;
-      } else if (col.ownerLookup){
-        content = val ? getOwnerLabelByNumber(val) : `<span style="color:var(--muted);">-</span>`;
-      } else if (col.brokerLookup){
-        content = val ? getBrokerLabelByNumber(val) : `<span style="color:var(--muted);">-</span>`;
+      if (col.pricesDisplay){
+        const prices = effectivePrices(d);
+        const parts = RENT_TYPES.filter(rt => prices[rt.key]).map(rt => `${rt.label}: ${Number(prices[rt.key]).toLocaleString()}`);
+        content = parts.length ? parts.join("<br>") : `<span style="color:var(--muted);">-</span>`;
       } else {
-        content = val + (col.suffix && val ? col.suffix : "");
+        const val = d[col.key] || "";
+        if (col.statusBadge){
+          content = `<span class="${isArchived ? 'badge-archived' : 'badge-active'}">${val || "نشط"}</span>`;
+        } else if (col.badge){
+          content = `<span class="badge-rent">${val}</span>`;
+        } else if (col.ownerLookup){
+          content = val ? getOwnerLabelByNumber(val) : `<span style="color:var(--muted);">-</span>`;
+        } else if (col.brokerLookup){
+          content = val ? getBrokerLabelByNumber(val) : `<span style="color:var(--muted);">-</span>`;
+        } else {
+          content = val + (col.suffix && val ? col.suffix : "");
+        }
       }
       return `<td>${content}</td>`;
     }).join("");
@@ -1596,6 +1663,12 @@ function extractRowData(row, c){
       data[key] = stripHtml(td[idx]?.innerHTML);
     }
   });
+
+  if (c.collection === "listings" && data.price && data.rentType){
+    data.prices = legacyPricesFromListing(data);
+    delete data.price;
+    delete data.rentType;
+  }
 
   return { id, data };
 }
