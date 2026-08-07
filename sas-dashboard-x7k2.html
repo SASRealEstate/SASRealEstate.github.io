@@ -399,31 +399,6 @@ button{ cursor:pointer; border:none; }
           <span style="font-size:.78rem;color:var(--muted);margin-right:8px;">(مرة واحدة فقط لنقل العروض القديمة إلى قاعدة البيانات)</span>
         </div>
 
-        <div id="importLockedWrap" style="margin-bottom:16px; display:none;">
-          <button type="button" class="btn-import" onclick="toggleImportUnlock()">
-            <i class="fa-solid fa-lock"></i> استيراد متقدم (مقفل)
-          </button>
-          <span style="font-size:.78rem;color:var(--muted);margin-right:8px;">يوجد بيانات محفوظة بالفعل — الاستيراد سيستبدلها بالنسخة القديمة من الصفحة</span>
-
-          <div id="importUnlockBox" style="display:none; margin-top:12px; padding:14px 16px; background:#fff3cd; border:1px solid #ffe08a; border-radius:10px;">
-            <label style="display:flex; align-items:center; gap:8px; font-size:.85rem; font-weight:700; color:#7a5b00; cursor:pointer;">
-              <input type="checkbox" id="importConfirmCheckbox" style="width:auto;" onchange="document.getElementById('importConfirmedBtn').disabled = !this.checked;">
-              أعلم أن هذا سيستبدل أي تعديلات قمت بها من لوحة التحكم بالنسخة الموجودة في الصفحة الثابتة
-            </label>
-            <button type="button" id="importConfirmedBtn" class="btn-import" style="margin-top:10px; opacity:.5;" disabled onclick="importFromSourcePage()">
-              <i class="fa-solid fa-triangle-exclamation"></i> متابعة الاستيراد الآن
-            </button>
-          </div>
-        </div>
-
-        <div id="mapBackfillWrap" style="margin-bottom:16px; display:none;">
-          <button type="button" class="btn-import" onclick="backfillMapPins()">
-            <i class="fa-solid fa-map-location-dot"></i> تحديد مواقع العروض القديمة على الخريطة
-          </button>
-          <span style="font-size:.78rem;color:var(--muted);margin-right:8px;">يبحث في كل الفئات (شقق، عقارات، أراضي) عن العروض التي لديها رابط موقع بدون إحداثيات محفوظة، ويحاول تحديدها تلقائيًا — مرة واحدة تكفي</span>
-          <div id="mapBackfillStatus" class="status-msg" style="margin-top:8px;"></div>
-        </div>
-
         <div class="status-filter" id="statusFilter"></div>
 
         <div style="overflow-x:auto;">
@@ -605,42 +580,6 @@ async function resolveLocationToLatLng(url){
     console.warn("تعذر الاتصال بخدمة تحديد الموقع", e);
     return null;
   }
-}
-
-async function backfillMapPins(){
-  if (!confirm("سيتم البحث في كل الفئات عن العروض التي لديها رابط موقع بدون إحداثيات، ومحاولة تحديدها تلقائيًا. قد يستغرق هذا بعض الوقت حسب عدد العروض. متابعة؟")) return;
-
-  const statusEl = document.getElementById("mapBackfillStatus");
-  const collections = [
-    {key: "listings", label: "شقق الإيجار"},
-    {key: "buildings", label: "العقارات"},
-    {key: "lands", label: "الأراضي"}
-  ];
-
-  let updated = 0, failed = 0, skipped = 0;
-
-  for (const col of collections){
-    const snap = await db.collection(col.key).get();
-    for (const doc of snap.docs){
-      const data = doc.data();
-      if (!data.location){ continue; }
-      if (data.lat && data.lng){ skipped++; continue; }
-
-      statusEl.textContent = `جارٍ معالجة ${col.label} - عرض رقم ${doc.id}... (تم: ${updated}، تعذر: ${failed})`;
-      statusEl.className = "status-msg";
-
-      const coords = await resolveLocationToLatLng(data.location);
-      if (coords){
-        await db.collection(col.key).doc(doc.id).update({ lat: coords.lat, lng: coords.lng });
-        updated++;
-      } else {
-        failed++;
-      }
-    }
-  }
-
-  statusEl.textContent = `اكتمل: تم تحديد ${updated} عرض، تعذر تحديد ${failed}، ${skipped} كان محددًا مسبقًا.`;
-  statusEl.className = "status-msg " + (failed > 0 ? "" : "ok");
 }
 
 function fileToBase64(file){
@@ -1035,12 +974,7 @@ function applyRoleUI(){
   document.getElementById("categoryTabs").style.display = isBroker ? "none" : "flex";
 
   const importWrap = document.getElementById("importFreshWrap");
-  const importLockedWrap = document.getElementById("importLockedWrap");
   if (importWrap) importWrap.style.display = isBroker ? "none" : "";
-  if (importLockedWrap) importLockedWrap.style.display = isBroker ? "none" : "";
-
-  const mapBackfillWrap = document.getElementById("mapBackfillWrap");
-  if (mapBackfillWrap) mapBackfillWrap.style.display = isBroker ? "none" : "block";
 
   const titleSpan = document.querySelector(".admin-header .title span");
   if (titleSpan) titleSpan.textContent = isBroker ? ("مرحبًا، " + myBrokerName) : "لوحة تحكم العروض";
@@ -1112,9 +1046,6 @@ async function switchCategory(key){
   renderTableHead();
   renderStatusFilter();
   resetForm();
-  document.getElementById("importUnlockBox").style.display = "none";
-  document.getElementById("importConfirmCheckbox").checked = false;
-  document.getElementById("importConfirmedBtn").disabled = true;
   listenToListings();
   loadStaticMaxId(key);
 }
@@ -1547,12 +1478,6 @@ function copyListingText(docId, d, btnEl){
 
 function updateImportButtonVisibility(hasData){
   document.getElementById("importFreshWrap").style.display = hasData ? "none" : "block";
-  document.getElementById("importLockedWrap").style.display = hasData ? "block" : "none";
-}
-
-function toggleImportUnlock(){
-  const box = document.getElementById("importUnlockBox");
-  box.style.display = box.style.display === "none" ? "block" : "none";
 }
 
 function renderListingsTable(docs){
