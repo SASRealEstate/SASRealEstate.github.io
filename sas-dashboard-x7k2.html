@@ -362,6 +362,7 @@ button{ cursor:pointer; border:none; }
     </div>
     <div class="actions">
       <a class="btn-header" id="viewPageLink" href="Rent.html" target="_blank"><i class="fa-solid fa-eye"></i> عرض الصفحة</a>
+      <a class="btn-header" href="RequestOffer.html" target="_blank"><i class="fa-solid fa-magnifying-glass-dollar"></i> نموذج طلب عقار/أرض</a>
       <a class="btn-header" id="floorplan3dLink" href="experimental/floorplan3d/editor/" target="_blank" style="display:none;"><i class="fa-solid fa-cube"></i> محرر الشقة ثلاثية الأبعاد</a>
       <button class="btn-header" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i> خروج</button>
     </div>
@@ -1061,6 +1062,7 @@ async function switchMode(mode){
   document.getElementById("listingsSection").style.display = mode === "listings" ? "block" : "none";
   document.getElementById("ownersSection").style.display = mode === "owners" ? "block" : "none";
   document.getElementById("brokersSection").style.display = mode === "brokers" ? "block" : "none";
+  document.getElementById("requestsSection").style.display = mode === "requests" ? "block" : "none";
   if (mode === "owners"){
     renderOwnerCategoryFilter();
     await Promise.all([loadAllOwners(), loadLinkIndexes()]);
@@ -1072,6 +1074,10 @@ async function switchMode(mode){
     await Promise.all([loadAllBrokers(), loadLinkIndexes()]);
     resetBrokerForm();
     listenToBrokers();
+  }
+  if (mode === "requests"){
+    renderRequestStatusFilter();
+    listenToRequests();
   }
 }
 
@@ -2340,6 +2346,110 @@ function renderBrokersList(docs){
 }
 
 document.getElementById("brokerSearchInput")?.addEventListener("input", () => renderBrokersList(lastBrokerDocs));
+
+/* ============ طلبات العملاء ============ */
+
+function listenToRequests(){
+  if (unsubscribeRequests) { unsubscribeRequests(); unsubscribeRequests = null; }
+  if (!window.db) return;
+
+  unsubscribeRequests = db.collection("propertyRequests").onSnapshot(snap => {
+    lastRequestDocs = snap.docs;
+    renderRequestsList(lastRequestDocs);
+  }, err => {
+    console.error("خطأ في تحميل طلبات العملاء", err);
+  });
+}
+
+function renderRequestStatusFilter(){
+  const wrap = document.getElementById("requestStatusFilter");
+  const options = [
+    {key:"all", label:"الكل"},
+    {key:"جديد", label:"جديد"},
+    {key:"تم التواصل", label:"تم التواصل"}
+  ];
+  wrap.innerHTML = "";
+  options.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = opt.label;
+    btn.className = requestStatusFilter === opt.key ? "active" : "";
+    btn.addEventListener("click", () => {
+      requestStatusFilter = opt.key;
+      renderRequestStatusFilter();
+      renderRequestsList(lastRequestDocs);
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+function markRequestStatus(docId, status){
+  db.collection("propertyRequests").doc(docId).update({ status }).catch(e => {
+    alert("حدث خطأ أثناء تحديث الحالة: " + e.message);
+    console.error(e);
+  });
+}
+
+function deleteRequest(docId){
+  if (!confirm("سيتم حذف هذا الطلب نهائيًا. متابعة؟")) return;
+  db.collection("propertyRequests").doc(docId).delete().catch(e => {
+    alert("حدث خطأ أثناء الحذف: " + e.message);
+    console.error(e);
+  });
+}
+
+function renderRequestsList(docs){
+  const filtered = requestStatusFilter === "all"
+    ? docs
+    : docs.filter(doc => (doc.data().status || "جديد") === requestStatusFilter);
+
+  document.getElementById("requestsCount").textContent = filtered.length;
+
+  const listWrap = document.getElementById("requestsList");
+  const emptyState = document.getElementById("requestsEmptyState");
+  listWrap.innerHTML = "";
+
+  if (filtered.length === 0){
+    emptyState.style.display = "block";
+    return;
+  }
+  emptyState.style.display = "none";
+
+  const sorted = [...filtered].sort((a,b) => {
+    const ta = a.data().createdAt?.toMillis ? a.data().createdAt.toMillis() : 0;
+    const tb = b.data().createdAt?.toMillis ? b.data().createdAt.toMillis() : 0;
+    return tb - ta;
+  });
+
+  sorted.forEach(doc => {
+    const d = doc.data();
+    const isContacted = d.status === "تم التواصل";
+    const card = document.createElement("div");
+    card.className = "owner-card";
+
+    const dateStr = d.createdAt?.toDate ? d.createdAt.toDate().toLocaleString("ar-SA") : "";
+
+    card.innerHTML = `
+      <div class="owner-info">
+        <h3>${d.name || "بدون اسم"} <span class="broker-tag" style="background:${isContacted ? 'var(--green)' : 'var(--gold)'};">${d.status || "جديد"}</span></h3>
+        ${d.phone ? `<div class="owner-phone"><a href="https://wa.me/966${d.phone.replace(/^0/,"")}" target="_blank"><i class="fa-brands fa-whatsapp"></i> ${d.phone}</a></div>` : ``}
+        <div class="owner-broker-line"><i class="fa-solid fa-tag"></i> ${d.type || "-"}</div>
+        ${d.location ? `<div class="owner-broker-line"><i class="fa-solid fa-location-dot"></i> ${d.location}</div>` : ``}
+        ${d.area ? `<div class="owner-broker-line"><i class="fa-solid fa-vector-square"></i> ${d.area}</div>` : ``}
+        ${d.budget ? `<div class="owner-broker-line"><i class="fa-solid fa-sack-dollar"></i> ${d.budget}</div>` : ``}
+        ${d.notes ? `<div class="owner-notes">📝 ${d.notes}</div>` : ``}
+        ${dateStr ? `<div class="owner-notes" style="margin-top:4px;">🕒 ${dateStr}</div>` : ``}
+      </div>
+      <div class="row-actions">
+        <button class="btn-edit" data-action="toggle" title="${isContacted ? 'إعادة تعيين كجديد' : 'تحديد كتم التواصل'}"><i class="fa-solid ${isContacted ? 'fa-rotate-left' : 'fa-check'}"></i></button>
+        <button class="btn-delete" data-action="delete"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    `;
+    card.querySelector('[data-action="toggle"]').addEventListener("click", () => markRequestStatus(doc.id, isContacted ? "جديد" : "تم التواصل"));
+    card.querySelector('[data-action="delete"]').addEventListener("click", () => deleteRequest(doc.id));
+    listWrap.appendChild(card);
+  });
+}
 
 </script>
 

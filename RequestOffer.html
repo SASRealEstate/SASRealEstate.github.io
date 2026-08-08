@@ -168,11 +168,28 @@
       </div>
 
       <div class="request-field">
-        <label for="r_category">نوع الطلب *</label>
-        <select id="r_category" required>
+        <label for="r_type">نوع العقار *</label>
+        <select id="r_type" required>
           <option value="">— اختر —</option>
-          <option value="أرض للبيع">أرض للبيع</option>
-          <option value="عقار للبيع">عقار للبيع (شقة / فيلا / عمارة / محل تجاري ...)</option>
+          <option value="بدروم">بدروم</option>
+          <option value="شقة">شقة</option>
+          <option value="استوديو">استوديو</option>
+          <option value="دور">دور</option>
+          <option value="ملحق">ملحق</option>
+          <option value="رووف">رووف</option>
+          <option value="دوبلكس">دوبلكس</option>
+          <option value="تاون هاوس">تاون هاوس</option>
+          <option value="توين فيلا">توين فيلا</option>
+          <option value="فيلا مستقلة">فيلا مستقلة</option>
+          <option value="قصر">قصر</option>
+          <option value="شاليه">شاليه</option>
+          <option value="منزل شعبي">منزل شعبي</option>
+          <option value="عمارة سكنية">عمارة سكنية</option>
+          <option value="مجمع سكني">مجمع سكني</option>
+          <option value="أرض تجارية">أرض تجارية</option>
+          <option value="أرض سكنية">أرض سكنية</option>
+          <option value="أرض زراعية">أرض زراعية</option>
+          <option value="أرض صناعية">أرض صناعية</option>
         </select>
       </div>
 
@@ -232,7 +249,7 @@ document.getElementById("requestForm").addEventListener("submit", async function
   const data = {
     name: document.getElementById("r_name").value.trim(),
     phone: document.getElementById("r_phone").value.trim(),
-    category: document.getElementById("r_category").value,
+    type: document.getElementById("r_type").value,
     location: document.getElementById("r_location").value.trim(),
     area: document.getElementById("r_area").value.trim(),
     budget: document.getElementById("r_budget").value.trim(),
@@ -241,8 +258,8 @@ document.getElementById("requestForm").addEventListener("submit", async function
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   };
 
-  if (!data.name || !data.phone || !data.category){
-    statusMsg.textContent = "يرجى تعبئة الاسم ورقم الجوال ونوع الطلب.";
+  if (!data.name || !data.phone || !data.type){
+    statusMsg.textContent = "يرجى تعبئة الاسم ورقم الجوال ونوع العقار.";
     statusMsg.className = "request-status-msg err";
     return;
   }
