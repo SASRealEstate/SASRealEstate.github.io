@@ -89,6 +89,7 @@ export class CanvasEditor {
       metersPerPixel: baseMetersPerPixel,
       baseMetersPerPixel,
       opacity: 0.6,
+      rotation: 0,
     };
     this._notifyBackgroundImageChange();
     this.draw();
@@ -96,6 +97,15 @@ export class CanvasEditor {
 
   setBackgroundOpacity(opacity) {
     if (this.backgroundImage) this.backgroundImage.opacity = opacity;
+    this.draw();
+  }
+
+  // `degrees` is clockwise, matching how the slider reads to a user (drag
+  // right = rotate right) — canvas rotate() is already clockwise for a
+  // Y-down screen space, so no sign flip is needed here.
+  setBackgroundRotation(degrees) {
+    if (!this.backgroundImage) return;
+    this.backgroundImage.rotation = (degrees * Math.PI) / 180;
     this.draw();
   }
 
@@ -456,12 +466,22 @@ export class CanvasEditor {
 
   _drawBackgroundImage() {
     if (!this.backgroundImage) return;
-    const { img, x, z, metersPerPixel, opacity } = this.backgroundImage;
+    const { img, x, z, metersPerPixel, opacity, rotation } = this.backgroundImage;
+    const width = img.naturalWidth * metersPerPixel;
+    const height = img.naturalHeight * metersPerPixel;
     const topLeft = this.worldToScreen({ x, z });
-    const bottomRight = this.worldToScreen({ x: x + img.naturalWidth * metersPerPixel, z: z + img.naturalHeight * metersPerPixel });
-    this.ctx.globalAlpha = opacity;
-    this.ctx.drawImage(img, topLeft.x, topLeft.y, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y);
-    this.ctx.globalAlpha = 1;
+    const bottomRight = this.worldToScreen({ x: x + width, z: z + height });
+    const screenWidth = bottomRight.x - topLeft.x;
+    const screenHeight = bottomRight.y - topLeft.y;
+    const center = this.worldToScreen({ x: x + width / 2, z: z + height / 2 });
+
+    const { ctx } = this;
+    ctx.save();
+    ctx.globalAlpha = opacity;
+    ctx.translate(center.x, center.y);
+    ctx.rotate(rotation ?? 0);
+    ctx.drawImage(img, -screenWidth / 2, -screenHeight / 2, screenWidth, screenHeight);
+    ctx.restore();
   }
 
   _drawGrid() {

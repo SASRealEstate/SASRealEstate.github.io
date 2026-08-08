@@ -118,9 +118,12 @@ main walkthrough page, so there's no separate rendering path to keep in sync.
   "2 م") that stays accurate as you zoom, on top of the grid already being
   1m per square (bold every 5m).
 - **Background sketch image** — upload a photo/scan of an actual كروكي,
-  adjust its opacity, and trace directly over it. Two ways to size it:
+  adjust its opacity, and trace directly over it. Ways to fit it to the grid:
   - **Resize slider** — drag to enlarge/shrink the image by eye, scaling
     around its own center so it doesn't drift while you fit it to the grid.
+  - **Rotate slider** — straighten a crooked scan/photo, or reorient the
+    sketch entirely; rotates around the image's own center, independent of
+    scale/position.
   - **Calibrate scale** — click two points whose real-world distance you
     know (e.g. a dimension written on the sketch) and enter that distance in
     meters, for a precise fit instead of an eyeballed one. This is the "use
@@ -129,7 +132,9 @@ main walkthrough page, so there's no separate rendering path to keep in sync.
 
   Calibrating resets the resize slider's "100%" to mean *that* calibrated
   size — so nudging the slider afterward fine-tunes from the calibrated fit
-  instead of silently reverting to the original upload-time guess.
+  instead of silently reverting to the original upload-time guess. Rotation
+  is untouched by calibration (they're independent), and a fresh upload
+  resets both scale and rotation back to their defaults.
 - **Export/Import JSON** — download the current apartment as a `.json` file
   matching the `data/sampleApartment.js` schema exactly, or load one back in
   to keep editing. Good for saving a layout as a new fixture under `data/`.

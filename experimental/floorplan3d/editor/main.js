@@ -36,6 +36,8 @@ for (const btn of document.querySelectorAll('.tool-btn')) {
 // Background sketch image
 const imageScaleInput = document.getElementById('image-scale');
 const imageScaleValue = document.getElementById('image-scale-value');
+const imageRotateInput = document.getElementById('image-rotate');
+const imageRotateValue = document.getElementById('image-rotate-value');
 
 document.getElementById('image-upload').addEventListener('change', (e) => {
   const file = e.target.files[0];
@@ -51,11 +53,21 @@ imageScaleInput.addEventListener('input', (e) => {
   editor.setBackgroundScale(Number(e.target.value));
   imageScaleValue.textContent = `${e.target.value}%`;
 });
-// Fires on upload and after calibration — both reset what "100%" means, so
-// the slider always starts back at 100 representing the latest known-good size.
-editor.onBackgroundImageChange(() => {
+imageRotateInput.addEventListener('input', (e) => {
+  editor.setBackgroundRotation(Number(e.target.value));
+  imageRotateValue.textContent = `${e.target.value}°`;
+});
+// Fires on upload (resets both sliders) and after calibration (which only
+// touches scale/position, not rotation) — reading the actual current values
+// back from the image keeps both sliders honest regardless of which fired.
+editor.onBackgroundImageChange((bg) => {
   imageScaleInput.value = 100;
   imageScaleValue.textContent = '100%';
+  if (bg) {
+    const degrees = Math.round((bg.rotation * 180) / Math.PI);
+    imageRotateInput.value = degrees;
+    imageRotateValue.textContent = `${degrees}°`;
+  }
 });
 
 // Dimensions
