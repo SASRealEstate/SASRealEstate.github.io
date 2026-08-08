@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 import { projectPointOntoSegment } from '../utils/geometry.js';
 
-const PLAYER_HEIGHT = 1.6; // eye level, meters
+export const PLAYER_HEIGHT = 1.6; // eye level, meters
 const PLAYER_RADIUS = 0.3; // collision radius, meters
 const MOVE_SPEED = 3.2; // meters/second
 
@@ -23,6 +23,7 @@ export function createFirstPersonControls({ camera, domElement, wallColliders, s
   camera.position.set(startPosition.x, PLAYER_HEIGHT, startPosition.z);
 
   const keyState = { forward: false, backward: false, left: false, right: false };
+  let lockOnClickEnabled = true;
 
   function onKeyDown(e) {
     const key = KEY_MAP[e.code];
@@ -33,7 +34,7 @@ export function createFirstPersonControls({ camera, domElement, wallColliders, s
     if (key) keyState[key] = false;
   }
   function onClick() {
-    controls.lock();
+    if (lockOnClickEnabled) controls.lock();
   }
 
   document.addEventListener('keydown', onKeyDown);
@@ -103,5 +104,12 @@ export function createFirstPersonControls({ camera, domElement, wallColliders, s
     controls.dispose();
   }
 
-  return { controls, update, requestLock: onClick, dispose, get isLocked() { return controls.isLocked; } };
+  return {
+    controls,
+    update,
+    requestLock: () => controls.lock(),
+    setLockOnClickEnabled: (enabled) => { lockOnClickEnabled = enabled; },
+    dispose,
+    get isLocked() { return controls.isLocked; },
+  };
 }

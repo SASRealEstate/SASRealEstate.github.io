@@ -74,6 +74,22 @@ option — the editor doesn't pass it, so it defaults to orbit). Pointer-lock
 walking doesn't make sense in a small preview pane you're not actively
 navigating — orbit-to-inspect is the right tool there.
 
+**Ground ↔ aerial toggle (Space):** press Space to switch to a bird's-eye
+`OrbitControls` view of the whole apartment (drag to orbit, scroll to zoom),
+and Space again to drop back to first-person — at wherever the aerial
+camera's orbit *target* currently is, not back at the exact spot you left.
+That makes aerial view a way to actually get around a big apartment (look at
+a far room from above, press Space, you're standing in it), not just a
+sightseeing mode. Only the horizontal facing (yaw) carries over between
+modes; pitch resets level so you don't land staring at the floor. See
+`movement/viewModeController.js`, which wraps `firstPersonControls.js` and a
+second `OrbitControls` instance and switches between them. The aerial
+camera starts with a slight tilt rather than perfectly overhead — directly
+above the target is a degenerate case for `OrbitControls`' spherical
+coordinates (the azimuthal angle is ambiguous when both horizontal offsets
+are zero), which made orbit-dragging unreliable right after entering aerial
+mode; the tilt also just reads better than a flat top-down view.
+
 ### The 2D editor (`editor/`)
 
 Split-screen page: a 2D canvas on the left/center for tracing, a live 3D
@@ -102,11 +118,18 @@ main walkthrough page, so there's no separate rendering path to keep in sync.
   "2 م") that stays accurate as you zoom, on top of the grid already being
   1m per square (bold every 5m).
 - **Background sketch image** — upload a photo/scan of an actual كروكي,
-  adjust its opacity, and trace directly over it. **Calibrate scale** lets
-  you click two points whose real-world distance you know (e.g. a dimension
-  written on the sketch) and enter that distance in meters — this is the
-  "use the drawing's dimensions when available" requirement from the spec,
-  done manually rather than pretending to auto-read handwritten numbers.
+  adjust its opacity, and trace directly over it. Two ways to size it:
+  - **Resize slider** — drag to enlarge/shrink the image by eye, scaling
+    around its own center so it doesn't drift while you fit it to the grid.
+  - **Calibrate scale** — click two points whose real-world distance you
+    know (e.g. a dimension written on the sketch) and enter that distance in
+    meters, for a precise fit instead of an eyeballed one. This is the "use
+    the drawing's dimensions when available" requirement from the spec, done
+    manually rather than pretending to auto-read handwritten numbers.
+
+  Calibrating resets the resize slider's "100%" to mean *that* calibrated
+  size — so nudging the slider afterward fine-tunes from the calibrated fit
+  instead of silently reverting to the original upload-time guess.
 - **Export/Import JSON** — download the current apartment as a `.json` file
   matching the `data/sampleApartment.js` schema exactly, or load one back in
   to keep editing. Good for saving a layout as a new fixture under `data/`.
@@ -144,6 +167,9 @@ experimental/floorplan3d/
     geometry.js           Point/segment math shared by the editor and movement/
   movement/
     firstPersonControls.js  WASD + mouse-look + wall collision (Step 2)
+    viewModeController.js    Space-toggle between ground (above) and an
+                              aerial OrbitControls view; handles the handoff
+                              (landing position, yaw) between the two
   editor/
     index.html            Split-screen 2D editor + live 3D preview
     style.css
@@ -176,7 +202,13 @@ One folder is intentionally not created yet, to avoid empty scaffolding:
 - No vertical movement (jumping/crouching) or multi-floor support.
 - Pointer Lock requires a real, un-sandboxed browser tab and a genuine user
   click — it will not activate inside most embedded/automated browser
-  previews (including the one used to test this during development).
+  previews (including the one used to test this during development). The
+  same applies to `Element.setPointerCapture()`, which `OrbitControls` (used
+  in aerial mode and the editor preview) relies on — it needs a pointerId
+  tied to a real, active OS-level pointer, so orbit-dragging can't be
+  verified via synthetic `dispatchEvent` either. Both were verified as far
+  as automation allows (event wiring, camera math, mode-switch state) but
+  need a real browser for the actual drag/mouse-look feel.
 
 ## Dependencies
 

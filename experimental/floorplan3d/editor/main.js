@@ -34,6 +34,9 @@ for (const btn of document.querySelectorAll('.tool-btn')) {
 }
 
 // Background sketch image
+const imageScaleInput = document.getElementById('image-scale');
+const imageScaleValue = document.getElementById('image-scale-value');
+
 document.getElementById('image-upload').addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -43,6 +46,16 @@ document.getElementById('image-upload').addEventListener('change', (e) => {
 });
 document.getElementById('image-opacity').addEventListener('input', (e) => {
   editor.setBackgroundOpacity(Number(e.target.value));
+});
+imageScaleInput.addEventListener('input', (e) => {
+  editor.setBackgroundScale(Number(e.target.value));
+  imageScaleValue.textContent = `${e.target.value}%`;
+});
+// Fires on upload and after calibration — both reset what "100%" means, so
+// the slider always starts back at 100 representing the latest known-good size.
+editor.onBackgroundImageChange(() => {
+  imageScaleInput.value = 100;
+  imageScaleValue.textContent = '100%';
 });
 
 // Dimensions

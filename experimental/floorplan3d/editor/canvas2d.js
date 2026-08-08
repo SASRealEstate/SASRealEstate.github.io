@@ -28,7 +28,8 @@ export class CanvasEditor {
     this.state = state;
 
     this.view = { originX: -1, originZ: -1, scale: 45 };
-    this.backgroundImage = null; // { img, x, z, metersPerPixel, opacity }
+    this.backgroundImage = null; // { img, x, z, metersPerPixel, baseMetersPerPixel, opacity }
+    this.backgroundImageListeners = new Set();
     this.tool = 'select';
     this.selected = null; // { kind, id }
     this.selectionListeners = new Set();
@@ -80,19 +81,53 @@ export class CanvasEditor {
   }
 
   setBackgroundImage(img) {
+    const baseMetersPerPixel = 10 / img.naturalWidth;
     this.backgroundImage = {
       img,
       x: 0,
       z: 0,
-      metersPerPixel: 10 / img.naturalWidth,
+      metersPerPixel: baseMetersPerPixel,
+      baseMetersPerPixel,
       opacity: 0.6,
     };
+    this._notifyBackgroundImageChange();
     this.draw();
   }
 
   setBackgroundOpacity(opacity) {
     if (this.backgroundImage) this.backgroundImage.opacity = opacity;
     this.draw();
+  }
+
+  // Resizes the background image around its own center (so it doesn't drift
+  // as you adjust it), relative to `baseMetersPerPixel` — the last "100%"
+  // reference point, which is the initial guess on upload and gets moved to
+  // wherever calibration lands (see _runCalibration), so this slider and the
+  // two-point calibration tool never fight over what "actual size" means.
+  setBackgroundScale(percent) {
+    const bg = this.backgroundImage;
+    if (!bg) return;
+    const currentWidth = bg.img.naturalWidth * bg.metersPerPixel;
+    const currentHeight = bg.img.naturalHeight * bg.metersPerPixel;
+    const centerX = bg.x + currentWidth / 2;
+    const centerZ = bg.z + currentHeight / 2;
+
+    bg.metersPerPixel = bg.baseMetersPerPixel * (percent / 100);
+
+    const newWidth = bg.img.naturalWidth * bg.metersPerPixel;
+    const newHeight = bg.img.naturalHeight * bg.metersPerPixel;
+    bg.x = centerX - newWidth / 2;
+    bg.z = centerZ - newHeight / 2;
+    this.draw();
+  }
+
+  onBackgroundImageChange(fn) {
+    this.backgroundImageListeners.add(fn);
+    return () => this.backgroundImageListeners.delete(fn);
+  }
+
+  _notifyBackgroundImageChange() {
+    for (const fn of this.backgroundImageListeners) fn(this.backgroundImage);
   }
 
   _resize() {
@@ -356,6 +391,11 @@ export class CanvasEditor {
         this.backgroundImage.metersPerPixel *= factor;
         this.backgroundImage.x = a.x - (a.x - this.backgroundImage.x) * factor;
         this.backgroundImage.z = a.z - (a.z - this.backgroundImage.z) * factor;
+        // This calibrated size becomes the new "100%" for the resize slider,
+        // so touching the slider afterward fine-tunes from here rather than
+        // silently reverting to the pre-calibration guessed size.
+        this.backgroundImage.baseMetersPerPixel = this.backgroundImage.metersPerPixel;
+        this._notifyBackgroundImageChange();
         this.draw();
       },
     });

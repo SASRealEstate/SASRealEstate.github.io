@@ -6,6 +6,7 @@ import { CUSTOM_APARTMENT_KEY } from './editor/state.js';
 const overlay = document.getElementById('overlay');
 const canvas = document.getElementById('scene-canvas');
 const lockHint = document.getElementById('lock-hint');
+const aerialHint = document.getElementById('aerial-hint');
 
 if (SHOW_DEV_OVERLAY) {
   overlay.hidden = false;
@@ -47,9 +48,9 @@ function findStartPosition(apartment) {
 }
 
 async function boot() {
-  const [{ createScene }, { createFirstPersonControls }] = await Promise.all([
+  const [{ createScene }, { createViewModeController }] = await Promise.all([
     import('./renderer/createScene.js'),
-    import('./movement/firstPersonControls.js'),
+    import('./movement/viewModeController.js'),
   ]);
 
   const apartment = loadApartmentData();
@@ -63,15 +64,26 @@ async function boot() {
 
   scene.add(group);
 
-  const movement = createFirstPersonControls({
+  function updateHints() {
+    if (movement.mode === 'aerial') {
+      lockHint.hidden = true;
+      aerialHint.hidden = false;
+    } else {
+      aerialHint.hidden = true;
+      lockHint.hidden = movement.isLocked;
+    }
+  }
+
+  const movement = createViewModeController({
     camera,
-    domElement: renderer.domElement,
+    renderer,
     wallColliders,
     startPosition: findStartPosition(apartment),
-    onLockChange: (locked) => {
-      lockHint.hidden = locked;
-    },
+    apartmentSize: { width: apartment.dimensions.width, depth: apartment.dimensions.depth },
+    onLockChange: updateHints,
+    onModeChange: updateHints,
   });
+  updateHints();
 
   let lastTime = performance.now();
   renderer.setAnimationLoop(() => {
