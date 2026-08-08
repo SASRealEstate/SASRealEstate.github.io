@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Experimental — 3D Floor Plan Walkthrough (Step 1)</title>
+<link rel="stylesheet" href="style.css" />
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+
+<canvas id="scene-canvas"></canvas>
+
+<div id="overlay" hidden>
+  <strong>Experimental — 3D Floor Plan Walkthrough</strong>
+  <span>Step 1: hard-coded apartment data &rarr; static 3D scene</span>
+  <span>Drag to orbit &middot; scroll to zoom &middot; right-drag to pan</span>
+</div>
+
+<div id="disabled-message" hidden>
+  Feature disabled. Set <code>FEATURE_ENABLED = true</code> in
+  <code>config.js</code> to view this experimental page.
+</div>
+
+<script type="module" src="main.js"></script>
+</body>
+</html>
