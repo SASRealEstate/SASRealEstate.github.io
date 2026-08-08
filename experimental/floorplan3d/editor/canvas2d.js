@@ -165,7 +165,15 @@ export class CanvasEditor {
 
   _eventWorldPoint(e) {
     const rect = this.canvas.getBoundingClientRect();
-    return this.screenToWorld({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    // clientX/Y and getBoundingClientRect are in CSS pixels; screenToWorld
+    // expects device pixels (it inverts worldToScreen, which multiplies by
+    // devicePixelRatio) — skipping this conversion is what caused clicks to
+    // land at the wrong world position on any display with devicePixelRatio
+    // != 1 (e.g. Windows at 125%/150% scaling).
+    return this.screenToWorld({
+      x: (e.clientX - rect.left) * devicePixelRatio,
+      y: (e.clientY - rect.top) * devicePixelRatio,
+    });
   }
 
   _snapPoint(p, fromPoint) {

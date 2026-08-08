@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<link rel="icon" href="Logo.png" type="image/png">
+<title>طلب عقار أو أرض | تطوير ساس العقارية</title>
+<meta name="description" content="قدم طلبك للحصول على عقار أو أرض للبيع تناسب احتياجك - تطوير ساس العقارية">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer">
+
+<link rel="stylesheet" href="style.css">
+
+<style>
+
+.request-wrap{
+  max-width:760px;
+  margin:0 auto;
+  padding:0 20px 60px;
+}
+
+.request-form-panel{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:28px 26px;
+}
+
+.request-field{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  margin-bottom:18px;
+}
+
+.request-field label{
+  font-size:.9rem;
+  font-weight:700;
+  color:var(--olive-dark);
+}
+
+.request-field .hint{
+  font-size:.76rem;
+  font-weight:400;
+  color:var(--muted);
+}
+
+.request-field input,
+.request-field select,
+.request-field textarea{
+  border:1px solid var(--line);
+  border-radius:9px;
+  padding:12px 14px;
+  font-family:inherit;
+  font-size:.95rem;
+  background:var(--cream);
+  color:var(--ink);
+}
+
+.request-field textarea{ resize:vertical; min-height:90px; }
+
+.request-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+
+@media (max-width:600px){
+  .request-row{ grid-template-columns:1fr; }
+}
+
+.btn-submit-request{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  width:100%;
+  padding:15px;
+  border:none;
+  border-radius:999px;
+  background:var(--olive);
+  color:#fff;
+  font-weight:700;
+  font-size:1rem;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.btn-submit-request:hover{ background:var(--olive-dark); }
+.btn-submit-request:disabled{ opacity:.6; cursor:not-allowed; }
+
+.request-status-msg{
+  margin-top:14px;
+  padding:14px 16px;
+  border-radius:10px;
+  font-size:.9rem;
+  font-weight:700;
+  text-align:center;
+  display:none;
+}
+
+.request-status-msg.ok{
+  display:block;
+  background:#e6f6ec;
+  border:1px solid #b9e4c8;
+  color:#1c6b3a;
+}
+
+.request-status-msg.err{
+  display:block;
+  background:#fdecea;
+  border:1px solid #f5c2c0;
+  color:#7a2e2b;
+}
+
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="top-container">
+    <a href="index.html" class="brand">
+      <img src="Logo.png" alt="شعار المكتب" class="logo">
+      <span class="brand-name">تطوير ساس العقارية<small>Sas Real Estate Development</small></span>
+    </a>
+
+    <div class="header-buttons">
+      <a href="tel:0534108666"><i class="fa-solid fa-phone"></i> اتصل الآن</a>
+      <a href="https://wa.me/966534108666" class="cta-whatsapp"><i class="fa-brands fa-whatsapp"></i> واتساب</a>
+      <a href="index.html"><i class="fa-solid fa-house"></i> الرئيسية</a>
+    </div>
+  </div>
+</header>
+
+<h2 class="page-title">قدم طلبك</h2>
+<p class="page-subtitle">أخبرنا عن العقار أو الأرض التي تبحث عنها وسنتواصل معك عند توفر ما يناسبك</p>
+
+<div class="request-wrap">
+
+  <div class="notice">
+    📌 هذا النموذج مخصص لطلبات شراء العقارات والأراضي فقط. لطلبات الإيجار، يرجى تصفح <a href="Rent.html">قائمة الشقق للإيجار</a>.
+  </div>
+
+  <div class="request-form-panel">
+    <form id="requestForm">
+      <div class="request-row">
+        <div class="request-field">
+          <label for="r_name">الاسم *</label>
+          <input type="text" id="r_name" required>
+        </div>
+        <div class="request-field">
+          <label for="r_phone">رقم الجوال *</label>
+          <input type="tel" id="r_phone" placeholder="05xxxxxxxx" required>
+        </div>
+      </div>
+
+      <div class="request-field">
+        <label for="r_category">نوع الطلب *</label>
+        <select id="r_category" required>
+          <option value="">— اختر —</option>
+          <option value="أرض للبيع">أرض للبيع</option>
+          <option value="عقار للبيع">عقار للبيع (شقة / فيلا / عمارة / محل تجاري ...)</option>
+        </select>
+      </div>
+
+      <div class="request-row">
+        <div class="request-field">
+          <label for="r_location">الموقع المفضل</label>
+          <input type="text" id="r_location" placeholder="مثال: حي النرجس - جدة">
+        </div>
+        <div class="request-field">
+          <label for="r_area">المساحة المطلوبة</label>
+          <input type="text" id="r_area" placeholder="مثال: 400 م تقريبًا">
+        </div>
+      </div>
+
+      <div class="request-field">
+        <label for="r_budget">الميزانية التقريبية</label>
+        <input type="text" id="r_budget" placeholder="مثال: من 500 إلى 700 ألف ريال">
+      </div>
+
+      <div class="request-field">
+        <label for="r_notes">ملاحظات إضافية</label>
+        <textarea id="r_notes" placeholder="أي تفاصيل إضافية تساعدنا في إيجاد ما يناسبك"></textarea>
+      </div>
+
+      <button type="submit" class="btn-submit-request" id="submitBtn">
+        <i class="fa-solid fa-paper-plane"></i> إرسال الطلب
+      </button>
+
+      <div id="requestStatusMsg" class="request-status-msg"></div>
+    </form>
+  </div>
+
+</div>
+
+<footer class="site-footer">
+  <a href="index.html"><img src="Logo.png" alt="شعار المكتب" class="footer-logo"></a>
+  <div class="footer-links">
+    <a href="tel:0534108666"><i class="fa-solid fa-phone"></i> 0534108666</a>
+    <a href="https://wa.me/966534108666"><i class="fa-brands fa-whatsapp"></i> واتساب</a>
+    <a href="https://maps.app.goo.gl/2NUqCqLExX86fFG87"><i class="fa-solid fa-location-dot"></i> موقع المكتب</a>
+    <a href="Rent.html"><i class="fa-solid fa-key"></i> شقق للإيجار</a>
+  </div>
+  <small>© <span id="footerYear"></span> تطوير ساس العقارية - جميع الحقوق محفوظة</small>
+</footer>
+
+<script>document.getElementById("footerYear").textContent = new Date().getFullYear();</script>
+
+<script>
+document.getElementById("requestForm").addEventListener("submit", async function(event){
+  event.preventDefault();
+
+  const submitBtn = document.getElementById("submitBtn");
+  const statusMsg = document.getElementById("requestStatusMsg");
+  statusMsg.className = "request-status-msg";
+  statusMsg.textContent = "";
+
+  const data = {
+    name: document.getElementById("r_name").value.trim(),
+    phone: document.getElementById("r_phone").value.trim(),
+    category: document.getElementById("r_category").value,
+    location: document.getElementById("r_location").value.trim(),
+    area: document.getElementById("r_area").value.trim(),
+    budget: document.getElementById("r_budget").value.trim(),
+    notes: document.getElementById("r_notes").value.trim(),
+    status: "جديد",
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+
+  if (!data.name || !data.phone || !data.category){
+    statusMsg.textContent = "يرجى تعبئة الاسم ورقم الجوال ونوع الطلب.";
+    statusMsg.className = "request-status-msg err";
+    return;
+  }
+
+  if (!window.db){
+    statusMsg.textContent = "تعذر الاتصال بالخادم، يرجى التواصل معنا مباشرة عبر واتساب.";
+    statusMsg.className = "request-status-msg err";
+    return;
+  }
+
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جارٍ الإرسال...';
+
+  try{
+    await db.collection("propertyRequests").add(data);
+    document.getElementById("requestForm").reset();
+    statusMsg.textContent = "✔ تم استلام طلبك بنجاح، سنتواصل معك في أقرب وقت ممكن.";
+    statusMsg.className = "request-status-msg ok";
+  }catch(e){
+    statusMsg.textContent = "حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى أو التواصل معنا مباشرة عبر واتساب.";
+    statusMsg.className = "request-status-msg err";
+    console.error(e);
+  }finally{
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> إرسال الطلب';
+  }
+});
+</script>
+
+</body>
+</html>

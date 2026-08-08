@@ -362,6 +362,7 @@ button{ cursor:pointer; border:none; }
     </div>
     <div class="actions">
       <a class="btn-header" id="viewPageLink" href="Rent.html" target="_blank"><i class="fa-solid fa-eye"></i> عرض الصفحة</a>
+      <a class="btn-header" id="floorplan3dLink" href="experimental/floorplan3d/editor/" target="_blank" style="display:none;"><i class="fa-solid fa-cube"></i> محرر الشقة ثلاثية الأبعاد</a>
       <button class="btn-header" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i> خروج</button>
     </div>
   </header>
@@ -542,6 +543,19 @@ button{ cursor:pointer; border:none; }
 
         <div id="brokersList"></div>
         <div id="brokersEmptyState" class="empty-state" style="display:none;">لا يوجد وسطاء بعد.</div>
+      </div>
+
+    </div>
+
+    <div id="requestsSection" style="display:none;">
+
+      <div class="panel">
+        <h2><i class="fa-solid fa-inbox"></i> طلبات العملاء (<span id="requestsCount">0</span>)</h2>
+
+        <div class="status-filter" id="requestStatusFilter"></div>
+
+        <div id="requestsList"></div>
+        <div id="requestsEmptyState" class="empty-state" style="display:none;">لا توجد طلبات بعد.</div>
       </div>
 
     </div>
@@ -927,6 +941,9 @@ let brokerCategoryFilter = "all";
 let allBrokers = [];
 let brokerNumberBaseline = 0;
 let brokerPropertiesIndex = {};
+let unsubscribeRequests = null;
+let lastRequestDocs = [];
+let requestStatusFilter = "all";
 
 function cat(){ return CATEGORIES[currentCategory]; }
 
@@ -1011,6 +1028,10 @@ function applyRoleUI(){
 
   const titleSpan = document.querySelector(".admin-header .title span");
   if (titleSpan) titleSpan.textContent = isBroker ? ("مرحبًا، " + myBrokerName) : "لوحة تحكم العروض";
+
+  // Experimental feature, admins only — never shown to brokers.
+  const floorplanLink = document.getElementById("floorplan3dLink");
+  if (floorplanLink) floorplanLink.style.display = (userRole === "admin") ? "inline-flex" : "none";
 }
 
 /* ============ التبويبات ============ */
@@ -1021,7 +1042,8 @@ function renderModeTabs(){
   const modes = [
     {key:"listings", label:"العروض", icon:"fa-building"},
     {key:"owners", label:"الملاك", icon:"fa-users"},
-    {key:"brokers", label:"الوسطاء", icon:"fa-handshake"}
+    {key:"brokers", label:"الوسطاء", icon:"fa-handshake"},
+    {key:"requests", label:"طلبات العملاء", icon:"fa-inbox"}
   ];
   modes.forEach(m => {
     const btn = document.createElement("button");
