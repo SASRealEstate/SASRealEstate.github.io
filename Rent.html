@@ -218,6 +218,23 @@
 
 
 <script>
+function escapeHtml(str){
+  if (str === null || str === undefined) return "";
+  return String(str).replace(/[&<>"']/g, ch => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  }[ch]));
+}
+
+function safeUrl(url){
+  const trimmed = String(url || "").trim();
+  if (/^https?:\/\//i.test(trimmed)) return escapeHtml(trimmed);
+  return "#";
+}
+
 function fallbackCopy(text, onSuccess){
   try{
     const ta = document.createElement('textarea');
@@ -319,13 +336,14 @@ function renderCardHTML(item){
     const paymentMethods = getEffectivePaymentMethods(item);
     const activeTypes = RENT_TYPES.filter(rt => prices[rt.key]);
     const primaryPrice = getPrimaryPrice(prices);
-    const contactPhone = brokerPhone ? "966" + brokerPhone.replace(/^0/,"") : "966534108666";
+    const contactPhoneDigits = (brokerPhone ? String(brokerPhone) : "534108666").replace(/[^\d]/g, "").replace(/^0/, "");
+    const contactPhone = "966" + contactPhoneDigits;
 
     const priceRowsHTML = activeTypes.map(rt => {
       const paymentNote = rt.hasPaymentMethod
-        ? `<span class="price-payment-note">(${formatPaymentAmount(prices[rt.key], paymentMethods[rt.key] || "monthly", rt.key)})</span>`
+        ? `<span class="price-payment-note">(${escapeHtml(formatPaymentAmount(prices[rt.key], paymentMethods[rt.key] || "monthly", rt.key))})</span>`
         : "";
-      return `<div class="price-line"><span class="price-type">${rt.label}</span><span class="price-value">${Number(prices[rt.key]).toLocaleString()} ريال</span>${paymentNote}</div>`;
+      return `<div class="price-line"><span class="price-type">${escapeHtml(rt.label)}</span><span class="price-value">${Number(prices[rt.key]).toLocaleString()} ريال</span>${paymentNote}</div>`;
     }).join("") || `<div class="price-line"><span class="price-value" style="color:var(--muted); font-size:.85rem;">السعر غير محدد</span></div>`;
 
     const priceLinesText = activeTypes.map(rt => {
@@ -335,23 +353,40 @@ function renderCardHTML(item){
 
     const availabilityLine = availableFrom ? `متاح من: ${availableFrom}\n` : "";
 
+    const copyText = `رقم: ${id}
+نوع العقار: ${type}
+الدور: ${floor}
+الغرف: ${rooms}
+دورات المياه: ${baths}
+صالة: ${hall}
+مطبخ: ${kitchen}
+مستودع: ${store}
+مصعد: ${elevator}
+مؤثثة: ${furnished}
+مطبخ راكب: ${fittedKitchen}
+مستقل: ${entrance}
+ملاحظات: ${notes}
+${priceLinesText}
+${availabilityLine}الموقع: ${location}
+الصور: ${photos}`;
+
     return `
 <div class="card"
-  data-id="${id}"
-  data-type="${type}"
-  data-floor="${floor}"
-  data-rooms="${rooms}"
-  data-furnished="${furnished}"
-  data-elevator="${elevator}"
-  data-entrance="${entrance}"
-  data-price="${primaryPrice}"
-  data-rent-type="${activeTypes.map(rt => rt.key).join(' ')}"
-  data-prices='${JSON.stringify(prices)}'
-  data-payment-methods='${JSON.stringify(paymentMethods)}'
-  data-available-from="${availableFrom || ''}">
+  data-id="${escapeHtml(id)}"
+  data-type="${escapeHtml(type)}"
+  data-floor="${escapeHtml(floor)}"
+  data-rooms="${escapeHtml(rooms)}"
+  data-furnished="${escapeHtml(furnished)}"
+  data-elevator="${escapeHtml(elevator)}"
+  data-entrance="${escapeHtml(entrance)}"
+  data-price="${escapeHtml(primaryPrice)}"
+  data-rent-type="${escapeHtml(activeTypes.map(rt => rt.key).join(' '))}"
+  data-prices='${escapeHtml(JSON.stringify(prices))}'
+  data-payment-methods='${escapeHtml(JSON.stringify(paymentMethods))}'
+  data-available-from="${escapeHtml(availableFrom || '')}">
 
 
-  <div class="card-header">${type} – رقم ${id}</div>
+  <div class="card-header">${escapeHtml(type)} – رقم ${escapeHtml(id)}</div>
 
   <div class="card-body">
 
@@ -359,15 +394,15 @@ function renderCardHTML(item){
   ${priceRowsHTML}
 </div>
 
-${availableFrom ? `<div class="availability-badge"><i class="fa-solid fa-calendar-check"></i> متاح من: ${availableFrom}</div>` : ``}
+${availableFrom ? `<div class="availability-badge"><i class="fa-solid fa-calendar-check"></i> متاح من: ${escapeHtml(availableFrom)}</div>` : ``}
 
     <div class="features">
-      <div><i class="fa-solid fa-stairs"></i> الدور: ${floor}</div>
-      <div><i class="fa-solid fa-bed"></i> غرف: ${rooms}</div>
-      <div><i class="fa-solid fa-shower"></i> حمامات: ${baths}</div>
-      <div><i class="fa-solid fa-couch"></i> صالة: ${hall}</div>
-      <div><i class="fa-solid fa-utensils"></i> مطبخ: ${kitchen}</div>
-      <div><i class="fa-solid fa-box-archive"></i>مستودع: ${store}</div>
+      <div><i class="fa-solid fa-stairs"></i> الدور: ${escapeHtml(floor)}</div>
+      <div><i class="fa-solid fa-bed"></i> غرف: ${escapeHtml(rooms)}</div>
+      <div><i class="fa-solid fa-shower"></i> حمامات: ${escapeHtml(baths)}</div>
+      <div><i class="fa-solid fa-couch"></i> صالة: ${escapeHtml(hall)}</div>
+      <div><i class="fa-solid fa-utensils"></i> مطبخ: ${escapeHtml(kitchen)}</div>
+      <div><i class="fa-solid fa-box-archive"></i>مستودع: ${escapeHtml(store)}</div>
 <div>
   <i class="fa-solid fa-arrows-up-down"></i>
   مصعد:
@@ -391,46 +426,34 @@ ${availableFrom ? `<div class="availability-badge"><i class="fa-solid fa-calenda
     ? '<span class="icon-yes">✔</span>'
     : '<span class="icon-no">✖</span>'}
 </div>
-      <div> 
-    مطبخ راكب: 
+      <div>
+    مطبخ راكب:
     ${fittedKitchen === 'نعم'
     ? '<span class="icon-yes">✔</span>'
     : '<span class="icon-no">✖</span>'}
-        
+
         </div>
     </div>
     <!-- ⬆️ انتهى اللصق هنا ⬆️ -->
 
-    ${notes ? `<div class="notes">📝 ${notes}</div>` : ``}
+    ${notes ? `<div class="notes">📝 ${escapeHtml(notes)}</div>` : ``}
   </div>
 <div class="card-actions">
-  <a class="btn-location" href="${location}" target="_blank"><i class="fa-solid fa-location-dot"></i> الموقع</a>
-  <a class="btn-photos" href="${photos}" target="_blank"><i class="fa-solid fa-images"></i> الصور</a>
-  <a class="btn-whatsapp" href="https://wa.me/${contactPhone}?text=السلام عليكم , انا مهتم%20بالشقة%20رقم%20${id}" target="_blank"><i class="fa-brands fa-whatsapp"></i> واتساب</a>
-<button type="button" class="btn-copy" onclick="
-  const text = \`رقم: ${id}
-نوع العقار: ${type}
-الدور: ${floor}
-الغرف: ${rooms}
-دورات المياه: ${baths}
-صالة: ${hall}
-مطبخ: ${kitchen}
-مستودع: ${store}
-مصعد: ${elevator}
-مؤثثة: ${furnished}
-مطبخ راكب: ${fittedKitchen}
-مستقل: ${entrance}
-ملاحظات: ${notes}
-${priceLinesText}
-${availabilityLine}الموقع: ${location}
-الصور: ${photos}\`;
-  copyTextToClipboard(text, this);
-"><i class="fa-solid fa-copy"></i> نسخ</button>
+  <a class="btn-location" href="${safeUrl(location)}" target="_blank"><i class="fa-solid fa-location-dot"></i> الموقع</a>
+  <a class="btn-photos" href="${safeUrl(photos)}" target="_blank"><i class="fa-solid fa-images"></i> الصور</a>
+  <a class="btn-whatsapp" href="https://wa.me/${contactPhone}?text=السلام عليكم , انا مهتم%20بالشقة%20رقم%20${encodeURIComponent(id)}" target="_blank"><i class="fa-brands fa-whatsapp"></i> واتساب</a>
+<button type="button" class="btn-copy" data-copy-text="${escapeHtml(copyText)}"><i class="fa-solid fa-copy"></i> نسخ</button>
 </div>
 
 </div>
 `;
 }
+
+document.addEventListener("click", function(e){
+  const btn = e.target.closest(".btn-copy[data-copy-text]");
+  if (!btn) return;
+  copyTextToClipboard(btn.dataset.copyText, btn);
+});
 
 async function buildCards(){
   const cards=document.getElementById("cards");

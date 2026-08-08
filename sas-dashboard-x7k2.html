@@ -716,6 +716,17 @@ const PAYMENT_METHODS = [
   {key:"monthly", label:"12 دفعة", periodLabel:"شهريًا"}
 ];
 
+function escapeHtml(str){
+  if (str === null || str === undefined) return "";
+  return String(str).replace(/[&<>"']/g, ch => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  }[ch]));
+}
+
 function legacyPricesFromListing(d){
   if (!d.price || !d.rentType) return {};
   const key = LEGACY_RENT_TYPE_TO_KEY[d.rentType];
@@ -1644,17 +1655,17 @@ function renderListingsTable(docs){
         });
         content = parts.length ? parts.join("<br>") : `<span style="color:var(--muted);">-</span>`;
       } else {
-        const val = d[col.key] || "";
+        const val = escapeHtml(d[col.key]);
         if (col.statusBadge){
           content = `<span class="${isArchived ? 'badge-archived' : 'badge-active'}">${val || "نشط"}</span>`;
         } else if (col.badge){
           content = `<span class="badge-rent">${val}</span>`;
         } else if (col.ownerLookup){
-          content = val ? getOwnerLabelByNumber(val) : `<span style="color:var(--muted);">-</span>`;
+          content = val ? escapeHtml(getOwnerLabelByNumber(d[col.key])) : `<span style="color:var(--muted);">-</span>`;
         } else if (col.brokerLookup){
-          content = val ? getBrokerLabelByNumber(val) : `<span style="color:var(--muted);">-</span>`;
+          content = val ? escapeHtml(getBrokerLabelByNumber(d[col.key])) : `<span style="color:var(--muted);">-</span>`;
         } else {
-          content = val + (col.suffix && val ? col.suffix : "");
+          content = val + (col.suffix && val ? escapeHtml(col.suffix) : "");
         }
       }
       return `<td>${content}</td>`;
@@ -1729,7 +1740,7 @@ async function loadAllOwners(){
 function refreshOwnerDatalist(){
   const dl = document.getElementById("ownerOptionsList");
   if (!dl) return;
-  dl.innerHTML = allOwners.map(o => `<option value="${ownerLabel(o)}">`).join("");
+  dl.innerHTML = allOwners.map(o => `<option value="${escapeHtml(ownerLabel(o))}">`).join("");
 }
 
 function ownerLabel(o){
@@ -1760,7 +1771,7 @@ async function loadAllBrokers(){
 function refreshBrokerDatalist(){
   const dl = document.getElementById("brokerOptionsList");
   if (!dl) return;
-  dl.innerHTML = allBrokers.map(b => `<option value="${brokerLabel(b)}">`).join("");
+  dl.innerHTML = allBrokers.map(b => `<option value="${escapeHtml(brokerLabel(b))}">`).join("");
 }
 
 function brokerLabel(b){
@@ -2117,19 +2128,21 @@ function renderOwnersList(docs){
 
     const chips = visibleProperties.map(p => {
       const label = CATEGORIES[p.category]?.label || p.category;
-      return `<span class="property-chip chip-${p.category}">${label} - رقم ${p.number}</span>`;
+      return `<span class="property-chip chip-${escapeHtml(p.category)}">${escapeHtml(label)} - رقم ${escapeHtml(p.number)}</span>`;
     }).join("") || `<span style="color:var(--muted); font-size:.82rem;">لا توجد عقارات مرتبطة</span>`;
 
-    const heading = (d.name ? `#${doc.id} - ${d.name}` : (d.brokerName ? `#${doc.id} - عبر وسيط: ${d.brokerName}` : `#${doc.id} - مالك غير معروف`));
+    const heading = (d.name ? `#${doc.id} - ${escapeHtml(d.name)}` : (d.brokerName ? `#${doc.id} - عبر وسيط: ${escapeHtml(d.brokerName)}` : `#${doc.id} - مالك غير معروف`));
+    const ownerPhoneDigits = (d.phone || "").replace(/[^\d]/g, "").replace(/^0/, "");
+    const brokerPhoneDigits = (d.brokerPhone || "").replace(/[^\d]/g, "").replace(/^0/, "");
 
     card.innerHTML = `
       <div class="owner-info">
         <h3>${heading}${!d.name && d.brokerName ? ` <span class="broker-tag">وسيط</span>` : ``}</h3>
-        ${d.phone ? `<div class="owner-phone"><a href="https://wa.me/966${d.phone.replace(/^0/,"")}" target="_blank"><i class="fa-brands fa-whatsapp"></i> المالك: ${d.phone}</a></div>` : ``}
-        ${d.name && d.brokerName ? `<div class="owner-broker-line"><i class="fa-solid fa-handshake"></i> الوسيط: ${d.brokerName}${d.brokerPhone ? " - " + d.brokerPhone : ""}</div>` : ``}
-        ${!d.name && d.brokerPhone ? `<div class="owner-phone"><a href="https://wa.me/966${d.brokerPhone.replace(/^0/,"")}" target="_blank"><i class="fa-brands fa-whatsapp"></i> الوسيط: ${d.brokerPhone}</a></div>` : ``}
+        ${d.phone ? `<div class="owner-phone"><a href="https://wa.me/966${ownerPhoneDigits}" target="_blank"><i class="fa-brands fa-whatsapp"></i> المالك: ${escapeHtml(d.phone)}</a></div>` : ``}
+        ${d.name && d.brokerName ? `<div class="owner-broker-line"><i class="fa-solid fa-handshake"></i> الوسيط: ${escapeHtml(d.brokerName)}${d.brokerPhone ? " - " + escapeHtml(d.brokerPhone) : ""}</div>` : ``}
+        ${!d.name && d.brokerPhone ? `<div class="owner-phone"><a href="https://wa.me/966${brokerPhoneDigits}" target="_blank"><i class="fa-brands fa-whatsapp"></i> الوسيط: ${escapeHtml(d.brokerPhone)}</a></div>` : ``}
         <div class="property-chips">${chips}</div>
-        ${d.notes ? `<div class="owner-notes">📝 ${d.notes}</div>` : ``}
+        ${d.notes ? `<div class="owner-notes">📝 ${escapeHtml(d.notes)}</div>` : ``}
       </div>
       <div class="row-actions">
         <button class="btn-edit" data-action="edit"><i class="fa-solid fa-pen"></i></button>
@@ -2326,15 +2339,17 @@ function renderBrokersList(docs){
 
     const chips = visibleProperties.map(p => {
       const label = CATEGORIES[p.category]?.label || p.category;
-      return `<span class="property-chip chip-${p.category}">${label} - رقم ${p.number}</span>`;
+      return `<span class="property-chip chip-${escapeHtml(p.category)}">${escapeHtml(label)} - رقم ${escapeHtml(p.number)}</span>`;
     }).join("") || `<span style="color:var(--muted); font-size:.82rem;">لا توجد عقارات مرتبطة</span>`;
+
+    const brokerPhoneDigits = (d.phone || "").replace(/[^\d]/g, "").replace(/^0/, "");
 
     card.innerHTML = `
       <div class="owner-info">
-        <h3>#${doc.id} - ${d.name || "وسيط غير معروف"} ${d.authUid ? `<span class="broker-tag" style="background:var(--green);">حساب مرتبط</span>` : `<span class="broker-tag" style="background:#b0533f;">بدون حساب</span>`}</h3>
-        ${d.phone ? `<div class="owner-phone"><a href="https://wa.me/966${d.phone.replace(/^0/,"")}" target="_blank"><i class="fa-brands fa-whatsapp"></i> ${d.phone}</a></div>` : ``}
+        <h3>#${doc.id} - ${escapeHtml(d.name) || "وسيط غير معروف"} ${d.authUid ? `<span class="broker-tag" style="background:var(--green);">حساب مرتبط</span>` : `<span class="broker-tag" style="background:#b0533f;">بدون حساب</span>`}</h3>
+        ${d.phone ? `<div class="owner-phone"><a href="https://wa.me/966${brokerPhoneDigits}" target="_blank"><i class="fa-brands fa-whatsapp"></i> ${escapeHtml(d.phone)}</a></div>` : ``}
         <div class="property-chips">${chips}</div>
-        ${d.notes ? `<div class="owner-notes">📝 ${d.notes}</div>` : ``}
+        ${d.notes ? `<div class="owner-notes">📝 ${escapeHtml(d.notes)}</div>` : ``}
       </div>
       <div class="row-actions">
         <button class="btn-edit" data-action="edit"><i class="fa-solid fa-pen"></i></button>
@@ -2445,17 +2460,35 @@ function renderRequestsList(docs){
     const customer = customersIndex[phoneKey];
     const locations = Array.isArray(d.locations) ? d.locations : (d.location ? [d.location] : []);
 
+    const safeName = escapeHtml(d.name) || "بدون اسم";
+    const safeStatus = escapeHtml(d.status) || "جديد";
+    const safePhone = escapeHtml(d.phone);
+    const safePhoneDigits = (d.phone || "").replace(/[^\d]/g, "").replace(/^0/, "");
+    const safeType = escapeHtml(d.type);
+    const safeLocations = locations.map(escapeHtml).join(" - ");
+    const safeArea = escapeHtml(d.area);
+    const budgetMin = d.budgetMin ? Number(d.budgetMin) : null;
+    const budgetMax = d.budgetMax ? Number(d.budgetMax) : null;
+    let safeBudget = "";
+    if (budgetMin && budgetMax) safeBudget = `من ${budgetMin.toLocaleString()} إلى ${budgetMax.toLocaleString()} ريال`;
+    else if (budgetMin) safeBudget = `من ${budgetMin.toLocaleString()} ريال`;
+    else if (budgetMax) safeBudget = `حتى ${budgetMax.toLocaleString()} ريال`;
+    else safeBudget = escapeHtml(d.budget);
+    const safePaymentMethod = escapeHtml(d.paymentMethod);
+    const safeBankName = escapeHtml(d.bankName);
+    const safeNotes = escapeHtml(d.notes);
+
     card.innerHTML = `
       <div class="owner-info">
-        <h3>${d.name || "بدون اسم"} <span class="broker-tag" style="background:${isContacted ? 'var(--green)' : 'var(--gold)'};">${d.status || "جديد"}</span></h3>
+        <h3>${safeName} <span class="broker-tag" style="background:${isContacted ? 'var(--green)' : 'var(--gold)'};">${safeStatus}</span></h3>
         <div class="owner-broker-line" style="color:var(--olive-dark); font-weight:700;"><i class="fa-solid fa-clock"></i> تاريخ الطلب: ${dateStr || "غير معروف"}</div>
-        ${d.phone ? `<div class="owner-phone"><a href="https://wa.me/966${d.phone.replace(/^0/,"")}" target="_blank"><i class="fa-brands fa-whatsapp"></i> ${d.phone}</a>${customer && customer.requestCount > 1 ? ` <span class="broker-tag" style="background:var(--blue);">عميل سابق - ${customer.requestCount} طلبات</span>` : ``}</div>` : ``}
-        ${d.type ? `<div class="owner-broker-line"><i class="fa-solid fa-tag"></i> ${d.type}</div>` : ``}
-        ${locations.length ? `<div class="owner-broker-line"><i class="fa-solid fa-location-dot"></i> ${locations.join(" - ")}</div>` : ``}
-        ${d.area ? `<div class="owner-broker-line"><i class="fa-solid fa-vector-square"></i> ${d.area}</div>` : ``}
-        ${d.budget ? `<div class="owner-broker-line"><i class="fa-solid fa-sack-dollar"></i> ${d.budget}</div>` : ``}
-        ${d.paymentMethod ? `<div class="owner-broker-line"><i class="fa-solid fa-money-bill-wave"></i> ${d.paymentMethod}${d.bankName ? " - " + d.bankName : ""}</div>` : ``}
-        ${d.notes ? `<div class="owner-notes">📝 ${d.notes}</div>` : ``}
+        ${d.phone ? `<div class="owner-phone"><a href="https://wa.me/966${safePhoneDigits}" target="_blank"><i class="fa-brands fa-whatsapp"></i> ${safePhone}</a>${customer && customer.requestCount > 1 ? ` <span class="broker-tag" style="background:var(--blue);">عميل سابق - ${customer.requestCount} طلبات</span>` : ``}</div>` : ``}
+        ${safeType ? `<div class="owner-broker-line"><i class="fa-solid fa-tag"></i> ${safeType}</div>` : ``}
+        ${safeLocations ? `<div class="owner-broker-line"><i class="fa-solid fa-location-dot"></i> ${safeLocations}</div>` : ``}
+        ${safeArea ? `<div class="owner-broker-line"><i class="fa-solid fa-vector-square"></i> ${safeArea}</div>` : ``}
+        ${safeBudget ? `<div class="owner-broker-line"><i class="fa-solid fa-sack-dollar"></i> ${safeBudget}</div>` : ``}
+        ${safePaymentMethod ? `<div class="owner-broker-line"><i class="fa-solid fa-money-bill-wave"></i> ${safePaymentMethod}${safeBankName ? " - " + safeBankName : ""}</div>` : ``}
+        ${safeNotes ? `<div class="owner-notes">📝 ${safeNotes}</div>` : ``}
       </div>
       <div class="row-actions">
         <button class="btn-edit" data-action="toggle" title="${isContacted ? 'إعادة تعيين كجديد' : 'تحديد كتم التواصل'}"><i class="fa-solid ${isContacted ? 'fa-rotate-left' : 'fa-check'}"></i></button>

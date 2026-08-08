@@ -114,6 +114,23 @@
 </script>
 
 <script>
+function escapeHtml(str){
+  if (str === null || str === undefined) return "";
+  return String(str).replace(/[&<>"']/g, ch => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  }[ch]));
+}
+
+function safeUrl(url){
+  const trimmed = String(url || "").trim();
+  if (/^https?:\/\//i.test(trimmed)) return escapeHtml(trimmed);
+  return "#";
+}
+
 function fallbackCopy(text, onSuccess){
   try{
     const ta = document.createElement('textarea');
@@ -164,45 +181,7 @@ function renderCardHTML(item){
   const areaNum = parseFloat(area);
   const askingPerMeter = (askingNum > 0 && areaNum > 0) ? Math.round(askingNum / areaNum) : null;
 
-  return `
-<div class="card"
-  data-id="${id}"
-  data-type="${type}"
-  data-price="${price}"
-  data-area="${area}">
-
-  <div class="card-header">${type} – رقم ${id}</div>
-
-  <div class="card-body">
-
-    <div class="price-row">
-      <span class="price">${price ? Number(price).toLocaleString() : "-"} ريال</span>
-      ${pricePerMeter ? `<span class="monthly">(${Number(pricePerMeter).toLocaleString()} / م)</span>` : ``}
-    </div>
-    ${asking ? `<div class="asking-line">السوم: <strong>${askingNum.toLocaleString()} ريال</strong>${askingPerMeter ? ` <span class="monthly">(${askingPerMeter.toLocaleString()} / م)</span>` : ``}</div>` : ``}
-    ${offerType ? `<span class="rent-type-badge">${offerType}</span>` : ``}
-
-    <div class="features">
-      <div><i class="fa-solid fa-vector-square"></i> المساحة: ${area || "-"}</div>
-      <div><i class="fa-solid fa-ruler"></i> طول: ${length || "-"}</div>
-      <div><i class="fa-solid fa-ruler"></i> عرض: ${width || "-"}</div>
-      <div><i class="fa-solid fa-border-all"></i> الواجهات: ${facades || "-"}</div>
-      <div><i class="fa-solid fa-hashtag"></i> رقم القطعة: ${parcelNumber || "-"}</div>
-      <div><i class="fa-solid fa-hashtag"></i> رقم المخطط: ${planNumber || "-"}</div>
-      <div><i class="fa-solid fa-map"></i> المخطط: ${planName || "-"}</div>
-      <div><i class="fa-solid fa-hashtag"></i> رقم اللوحة: ${plateNumber || "-"}</div>
-    </div>
-
-    ${specs ? `<div class="notes">📝 ${specs}</div>` : ``}
-    ${notes ? `<div class="notes">📝 ${notes}</div>` : ``}
-  </div>
-
-  <div class="card-actions">
-    <a class="btn-location" href="${location}" target="_blank"><i class="fa-solid fa-location-dot"></i> الموقع</a>
-    <a class="btn-photos" href="${photos}" target="_blank"><i class="fa-solid fa-images"></i> الصور</a>
-    <a class="btn-whatsapp" href="https://wa.me/966534108666?text=السلام عليكم , انا مهتم%20بالأرض%20رقم%20${id}" target="_blank"><i class="fa-brands fa-whatsapp"></i> واتساب</a>
-    <button type="button" class="btn-copy" onclick="
-      const text = \`رقم: ${id}
+  const copyText = `رقم: ${id}
 رقم اللوحة: ${plateNumber}
 نوع العقار: ${type}
 نوع العرض: ${offerType}
@@ -219,13 +198,56 @@ function renderCardHTML(item){
 سعر المتر: ${pricePerMeter}
 الملاحظات: ${notes}
 الموقع: ${location}
-الصور: ${photos}\`;
-      copyTextToClipboard(text, this);
-    "><i class="fa-solid fa-copy"></i> نسخ</button>
+الصور: ${photos}`;
+
+  return `
+<div class="card"
+  data-id="${escapeHtml(id)}"
+  data-type="${escapeHtml(type)}"
+  data-price="${escapeHtml(price)}"
+  data-area="${escapeHtml(area)}">
+
+  <div class="card-header">${escapeHtml(type)} – رقم ${escapeHtml(id)}</div>
+
+  <div class="card-body">
+
+    <div class="price-row">
+      <span class="price">${price ? Number(price).toLocaleString() : "-"} ريال</span>
+      ${pricePerMeter ? `<span class="monthly">(${Number(pricePerMeter).toLocaleString()} / م)</span>` : ``}
+    </div>
+    ${asking ? `<div class="asking-line">السوم: <strong>${askingNum.toLocaleString()} ريال</strong>${askingPerMeter ? ` <span class="monthly">(${askingPerMeter.toLocaleString()} / م)</span>` : ``}</div>` : ``}
+    ${offerType ? `<span class="rent-type-badge">${escapeHtml(offerType)}</span>` : ``}
+
+    <div class="features">
+      <div><i class="fa-solid fa-vector-square"></i> المساحة: ${escapeHtml(area) || "-"}</div>
+      <div><i class="fa-solid fa-ruler"></i> طول: ${escapeHtml(length) || "-"}</div>
+      <div><i class="fa-solid fa-ruler"></i> عرض: ${escapeHtml(width) || "-"}</div>
+      <div><i class="fa-solid fa-border-all"></i> الواجهات: ${escapeHtml(facades) || "-"}</div>
+      <div><i class="fa-solid fa-hashtag"></i> رقم القطعة: ${escapeHtml(parcelNumber) || "-"}</div>
+      <div><i class="fa-solid fa-hashtag"></i> رقم المخطط: ${escapeHtml(planNumber) || "-"}</div>
+      <div><i class="fa-solid fa-map"></i> المخطط: ${escapeHtml(planName) || "-"}</div>
+      <div><i class="fa-solid fa-hashtag"></i> رقم اللوحة: ${escapeHtml(plateNumber) || "-"}</div>
+    </div>
+
+    ${specs ? `<div class="notes">📝 ${escapeHtml(specs)}</div>` : ``}
+    ${notes ? `<div class="notes">📝 ${escapeHtml(notes)}</div>` : ``}
+  </div>
+
+  <div class="card-actions">
+    <a class="btn-location" href="${safeUrl(location)}" target="_blank"><i class="fa-solid fa-location-dot"></i> الموقع</a>
+    <a class="btn-photos" href="${safeUrl(photos)}" target="_blank"><i class="fa-solid fa-images"></i> الصور</a>
+    <a class="btn-whatsapp" href="https://wa.me/966534108666?text=السلام عليكم , انا مهتم%20بالأرض%20رقم%20${encodeURIComponent(id)}" target="_blank"><i class="fa-brands fa-whatsapp"></i> واتساب</a>
+    <button type="button" class="btn-copy" data-copy-text="${escapeHtml(copyText)}"><i class="fa-solid fa-copy"></i> نسخ</button>
   </div>
 </div>
 `;
 }
+
+document.addEventListener("click", function(e){
+  const btn = e.target.closest(".btn-copy[data-copy-text]");
+  if (!btn) return;
+  copyTextToClipboard(btn.dataset.copyText, btn);
+});
 
 async function buildCards(){
   const cards = document.getElementById("cards");

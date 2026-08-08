@@ -245,8 +245,17 @@
       </div>
 
       <div class="request-field">
-        <label for="r_budget">الميزانية التقريبية</label>
-        <input type="text" id="r_budget" placeholder="مثال: من 500 إلى 700 ألف ريال">
+        <label>الميزانية التقريبية <span style="font-weight:400; color:var(--muted); font-size:.8rem;">(أرقام فقط بالريال)</span></label>
+      </div>
+      <div class="request-row">
+        <div class="request-field">
+          <label for="r_budgetMin">من</label>
+          <input type="number" id="r_budgetMin" placeholder="مثال: 500000" min="0" inputmode="numeric">
+        </div>
+        <div class="request-field">
+          <label for="r_budgetMax">إلى</label>
+          <input type="number" id="r_budgetMax" placeholder="مثال: 700000" min="0" inputmode="numeric">
+        </div>
       </div>
 
       <div class="request-row">
@@ -361,7 +370,8 @@ document.getElementById("requestForm").addEventListener("submit", async function
     type: document.getElementById("r_type").value,
     locations: locations,
     area: document.getElementById("r_area").value.trim(),
-    budget: document.getElementById("r_budget").value.trim(),
+    budgetMin: document.getElementById("r_budgetMin").value.trim(),
+    budgetMax: document.getElementById("r_budgetMax").value.trim(),
     paymentMethod: document.getElementById("r_paymentMethod").value,
     bankName: document.getElementById("r_paymentMethod").value === "بنك" ? document.getElementById("r_bankName").value : "",
     notes: document.getElementById("r_notes").value.trim(),
