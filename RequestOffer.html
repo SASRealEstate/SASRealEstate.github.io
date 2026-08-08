@@ -209,6 +209,36 @@
         <input type="text" id="r_budget" placeholder="مثال: من 500 إلى 700 ألف ريال">
       </div>
 
+      <div class="request-row">
+        <div class="request-field">
+          <label for="r_paymentMethod">طريقة الدفع *</label>
+          <select id="r_paymentMethod" required>
+            <option value="">— اختر —</option>
+            <option value="كاش">كاش</option>
+            <option value="بنك">بنك (تمويل)</option>
+          </select>
+        </div>
+        <div class="request-field" id="bankNameField" style="display:none;">
+          <label for="r_bankName">اسم البنك</label>
+          <select id="r_bankName">
+            <option value="">— اختر —</option>
+            <option value="البنك الأهلي السعودي">البنك الأهلي السعودي</option>
+            <option value="مصرف الراجحي">مصرف الراجحي</option>
+            <option value="بنك الرياض">بنك الرياض</option>
+            <option value="البنك السعودي الفرنسي">البنك السعودي الفرنسي</option>
+            <option value="البنك السعودي البريطاني (ساب)">البنك السعودي البريطاني (ساب)</option>
+            <option value="البنك العربي الوطني">البنك العربي الوطني</option>
+            <option value="بنك الجزيرة">بنك الجزيرة</option>
+            <option value="البنك السعودي للاستثمار">البنك السعودي للاستثمار</option>
+            <option value="بنك البلاد">بنك البلاد</option>
+            <option value="مصرف الإنماء">مصرف الإنماء</option>
+            <option value="بنك STC">بنك STC</option>
+            <option value="بنك D360">بنك D360</option>
+            <option value="أخرى">أخرى</option>
+          </select>
+        </div>
+      </div>
+
       <div class="request-field">
         <label for="r_notes">ملاحظات إضافية</label>
         <textarea id="r_notes" placeholder="أي تفاصيل إضافية تساعدنا في إيجاد ما يناسبك"></textarea>
@@ -238,6 +268,12 @@
 <script>document.getElementById("footerYear").textContent = new Date().getFullYear();</script>
 
 <script>
+document.getElementById("r_paymentMethod").addEventListener("change", function(){
+  const bankField = document.getElementById("bankNameField");
+  bankField.style.display = this.value === "بنك" ? "flex" : "none";
+  if (this.value !== "بنك") document.getElementById("r_bankName").value = "";
+});
+
 document.getElementById("requestForm").addEventListener("submit", async function(event){
   event.preventDefault();
 
@@ -253,13 +289,15 @@ document.getElementById("requestForm").addEventListener("submit", async function
     location: document.getElementById("r_location").value.trim(),
     area: document.getElementById("r_area").value.trim(),
     budget: document.getElementById("r_budget").value.trim(),
+    paymentMethod: document.getElementById("r_paymentMethod").value,
+    bankName: document.getElementById("r_paymentMethod").value === "بنك" ? document.getElementById("r_bankName").value : "",
     notes: document.getElementById("r_notes").value.trim(),
     status: "جديد",
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   };
 
-  if (!data.name || !data.phone || !data.type){
-    statusMsg.textContent = "يرجى تعبئة الاسم ورقم الجوال ونوع العقار.";
+  if (!data.name || !data.phone || !data.type || !data.paymentMethod){
+    statusMsg.textContent = "يرجى تعبئة الاسم ورقم الجوال ونوع العقار وطريقة الدفع.";
     statusMsg.className = "request-status-msg err";
     return;
   }
@@ -276,6 +314,7 @@ document.getElementById("requestForm").addEventListener("submit", async function
   try{
     await db.collection("propertyRequests").add(data);
     document.getElementById("requestForm").reset();
+    document.getElementById("bankNameField").style.display = "none";
     statusMsg.textContent = "✔ تم استلام طلبك بنجاح، سنتواصل معك في أقرب وقت ممكن.";
     statusMsg.className = "request-status-msg ok";
   }catch(e){

@@ -551,7 +551,7 @@ button{ cursor:pointer; border:none; }
     <div id="requestsSection" style="display:none;">
 
       <div class="panel">
-        <h2><i class="fa-solid fa-inbox"></i> طلبات العملاء (<span id="requestsCount">0</span>)</h2>
+        <h2><i class="fa-solid fa-inbox"></i> طلبات العقار (<span id="requestsCount">0</span>)</h2>
 
         <div class="status-filter" id="requestStatusFilter"></div>
 
@@ -1044,7 +1044,7 @@ function renderModeTabs(){
     {key:"listings", label:"العروض", icon:"fa-building"},
     {key:"owners", label:"الملاك", icon:"fa-users"},
     {key:"brokers", label:"الوسطاء", icon:"fa-handshake"},
-    {key:"requests", label:"طلبات العملاء", icon:"fa-inbox"}
+    {key:"requests", label:"طلبات العقار", icon:"fa-inbox"}
   ];
   modes.forEach(m => {
     const btn = document.createElement("button");
@@ -2347,7 +2347,7 @@ function renderBrokersList(docs){
 
 document.getElementById("brokerSearchInput")?.addEventListener("input", () => renderBrokersList(lastBrokerDocs));
 
-/* ============ طلبات العملاء ============ */
+/* ============ طلبات العقار ============ */
 
 function listenToRequests(){
   if (unsubscribeRequests) { unsubscribeRequests(); unsubscribeRequests = null; }
@@ -2437,6 +2437,7 @@ function renderRequestsList(docs){
         ${d.location ? `<div class="owner-broker-line"><i class="fa-solid fa-location-dot"></i> ${d.location}</div>` : ``}
         ${d.area ? `<div class="owner-broker-line"><i class="fa-solid fa-vector-square"></i> ${d.area}</div>` : ``}
         ${d.budget ? `<div class="owner-broker-line"><i class="fa-solid fa-sack-dollar"></i> ${d.budget}</div>` : ``}
+        ${d.paymentMethod ? `<div class="owner-broker-line"><i class="fa-solid fa-money-bill-wave"></i> ${d.paymentMethod}${d.bankName ? " - " + d.bankName : ""}</div>` : ``}
         ${d.notes ? `<div class="owner-notes">📝 ${d.notes}</div>` : ``}
         ${dateStr ? `<div class="owner-notes" style="margin-top:4px;">🕒 ${dateStr}</div>` : ``}
       </div>

@@ -64,13 +64,21 @@ async function boot() {
 
   scene.add(group);
 
+  // Tracked locally rather than read back from `movement.isLocked` on demand:
+  // three.js's PointerLockControls dispatches its 'lock'/'unlock' events
+  // *before* updating its own internal `isLocked` flag, so re-querying that
+  // getter from inside the event callback sees a stale value. The boolean
+  // handed to onLockChange below is correct at the moment it's called —
+  // trust that instead of re-deriving it.
+  let isLocked = false;
+
   function updateHints() {
     if (movement.mode === 'aerial') {
       lockHint.hidden = true;
       aerialHint.hidden = false;
     } else {
       aerialHint.hidden = true;
-      lockHint.hidden = movement.isLocked;
+      lockHint.hidden = isLocked;
     }
   }
 
@@ -80,7 +88,7 @@ async function boot() {
     wallColliders,
     startPosition: findStartPosition(apartment),
     apartmentSize: { width: apartment.dimensions.width, depth: apartment.dimensions.depth },
-    onLockChange: updateHints,
+    onLockChange: (locked) => { isLocked = locked; updateHints(); },
     onModeChange: updateHints,
   });
   updateHints();
