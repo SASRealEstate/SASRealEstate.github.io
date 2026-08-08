@@ -8,18 +8,23 @@ export function createTextSprite(text, { fontSize = 48, color = '#26290f' } = {}
   const ctx = canvas.getContext('2d');
   const padding = 16;
 
+  ctx.direction = 'rtl';
   ctx.font = `600 ${fontSize}px sans-serif`;
   const textWidth = ctx.measureText(text).width;
 
   canvas.width = textWidth + padding * 2;
   canvas.height = fontSize + padding * 2;
 
+  // Canvas size changes reset the 2D context state, so direction/font/etc.
+  // must be re-applied after resizing.
+  ctx.direction = 'rtl';
   ctx.font = `600 ${fontSize}px sans-serif`;
   ctx.fillStyle = 'rgba(255,255,255,0.85)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = color;
   ctx.textBaseline = 'middle';
-  ctx.fillText(text, padding, canvas.height / 2);
+  ctx.textAlign = 'right';
+  ctx.fillText(text, canvas.width - padding, canvas.height / 2);
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;

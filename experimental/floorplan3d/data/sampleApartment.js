@@ -31,12 +31,12 @@ export const sampleApartment = {
   },
 
   rooms: [
-    { id: 'bedroom1', name: 'Bedroom 1', type: 'bedroom', bounds: { x: [0, 5], z: [0, 3.5] } },
-    { id: 'bedroom2', name: 'Bedroom 2', type: 'bedroom', bounds: { x: [5, 10], z: [0, 3.5] } },
-    { id: 'bath', name: 'Bathroom', type: 'bathroom', bounds: { x: [0, 3], z: [3.5, 5.75] } },
-    { id: 'kitchen', name: 'Kitchen', type: 'kitchen', bounds: { x: [0, 3], z: [5.75, 8] } },
-    { id: 'corridor', name: 'Corridor', type: 'corridor', bounds: { x: [3, 7.5], z: [3.5, 8] } },
-    { id: 'living', name: 'Living Room', type: 'living', bounds: { x: [7.5, 10], z: [3.5, 8] } },
+    { id: 'bedroom1', name: 'غرفة نوم 1', type: 'bedroom', bounds: { x: [0, 5], z: [0, 3.5] } },
+    { id: 'bedroom2', name: 'غرفة نوم 2', type: 'bedroom', bounds: { x: [5, 10], z: [0, 3.5] } },
+    { id: 'bath', name: 'حمام', type: 'bathroom', bounds: { x: [0, 3], z: [3.5, 5.75] } },
+    { id: 'kitchen', name: 'مطبخ', type: 'kitchen', bounds: { x: [0, 3], z: [5.75, 8] } },
+    { id: 'corridor', name: 'ممر', type: 'corridor', bounds: { x: [3, 7.5], z: [3.5, 8] } },
+    { id: 'living', name: 'غرفة المعيشة', type: 'living', bounds: { x: [7.5, 10], z: [3.5, 8] } },
   ],
 
   // Every wall is a straight segment from start to end. `id` is referenced

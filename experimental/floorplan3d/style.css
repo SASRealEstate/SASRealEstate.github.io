@@ -14,10 +14,15 @@ html, body {
   height: 100vh;
 }
 
-#overlay {
+/* `:not([hidden])` keeps these rules from overriding the browser's default
+   `[hidden] { display: none }` rule — without it, a plain `#id { display:flex }`
+   rule wins on specificity and the element stays visible (and, since it's
+   `position: fixed`, keeps intercepting clicks) even while `hidden`. */
+
+#overlay:not([hidden]) {
   position: fixed;
   top: 16px;
-  left: 16px;
+  right: 16px;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -31,7 +36,7 @@ html, body {
   pointer-events: none;
 }
 
-#disabled-message {
+#disabled-message:not([hidden]) {
   position: fixed;
   inset: 0;
   display: flex;
