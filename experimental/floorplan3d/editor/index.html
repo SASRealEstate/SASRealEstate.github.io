@@ -31,7 +31,13 @@
       <button data-tool="calibrate" class="tool-btn">معايرة المقياس</button>
     </div>
 
-    <p class="hint" id="tool-hint">اختر عنصرًا لتحديده، ثم اضغط Delete لحذفه. اسحب بزر الفأرة الأوسط أو مع Shift للتحريك، والعجلة للتكبير/التصغير.</p>
+    <p class="hint" id="tool-hint">اختر عنصرًا لتحديده. اسحب بزر الفأرة الأوسط أو مع Shift للتحريك، أو استخدم WASD، والعجلة للتكبير/التصغير.</p>
+
+    <div class="section selection-panel" id="selection-panel" hidden>
+      <div class="section-title">العنصر المحدد</div>
+      <p class="hint" id="selection-label"></p>
+      <button id="delete-selected-btn" class="action-btn danger">حذف العنصر المحدد</button>
+    </div>
 
     <div class="section">
       <div class="section-title">صورة الكروكي المرجعية</div>

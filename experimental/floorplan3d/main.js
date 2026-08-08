@@ -5,6 +5,7 @@ import { CUSTOM_APARTMENT_KEY } from './editor/state.js';
 
 const overlay = document.getElementById('overlay');
 const canvas = document.getElementById('scene-canvas');
+const lockHint = document.getElementById('lock-hint');
 
 if (SHOW_DEV_OVERLAY) {
   overlay.hidden = false;
@@ -31,25 +32,57 @@ function loadApartmentData() {
   return sampleApartment;
 }
 
+// Starts the player in the corridor if there is one (the room every other
+// room in a real apartment connects through), else the first room, else the
+// apartment's geometric center as a last resort.
+function findStartPosition(apartment) {
+  const room = apartment.rooms.find((r) => r.type === 'corridor') ?? apartment.rooms[0];
+  if (room) {
+    return {
+      x: (room.bounds.x[0] + room.bounds.x[1]) / 2,
+      z: (room.bounds.z[0] + room.bounds.z[1]) / 2,
+    };
+  }
+  return { x: apartment.dimensions.width / 2, z: apartment.dimensions.depth / 2 };
+}
+
 async function boot() {
-  const [{ createScene }] = await Promise.all([import('./renderer/createScene.js')]);
+  const [{ createScene }, { createFirstPersonControls }] = await Promise.all([
+    import('./renderer/createScene.js'),
+    import('./movement/firstPersonControls.js'),
+  ]);
 
   const apartment = loadApartmentData();
   const { group, wallColliders } = buildApartmentGeometry(apartment);
 
-  const { scene, camera, renderer, controls } = createScene(canvas, {
+  const { scene, camera, renderer } = createScene(canvas, {
     apartmentWidth: apartment.dimensions.width,
     apartmentDepth: apartment.dimensions.depth,
+    controls: 'none',
   });
 
   scene.add(group);
 
+  const movement = createFirstPersonControls({
+    camera,
+    domElement: renderer.domElement,
+    wallColliders,
+    startPosition: findStartPosition(apartment),
+    onLockChange: (locked) => {
+      lockHint.hidden = locked;
+    },
+  });
+
+  let lastTime = performance.now();
   renderer.setAnimationLoop(() => {
-    controls.update();
+    const now = performance.now();
+    const dt = Math.min((now - lastTime) / 1000, 0.1); // clamp to avoid a huge jump after a tab was backgrounded
+    lastTime = now;
+    movement.update(dt);
     renderer.render(scene, camera);
   });
 
   // Exposed for manual inspection in the dev console — this page doubles as
   // the developer/test interface for Step 1/2 work.
-  window.__floorplan3d = { apartment, wallColliders, scene, camera, renderer, controls };
+  window.__floorplan3d = { apartment, wallColliders, scene, camera, renderer, movement };
 }

@@ -1,4 +1,4 @@
-import { distance, snap, projectPointOntoSegment, findNearestWall, findNearestEndpoint } from './geometry.js';
+import { distance, snap, findNearestWall, findNearestEndpoint } from '../utils/geometry.js';
 import { openPopover } from './popover.js';
 import { ROOM_TYPES } from './state.js';
 
@@ -31,16 +31,22 @@ export class CanvasEditor {
     this.backgroundImage = null; // { img, x, z, metersPerPixel, opacity }
     this.tool = 'select';
     this.selected = null; // { kind, id }
+    this.selectionListeners = new Set();
     this.wallChainStart = null;
     this.roomDragStart = null;
     this.calibrationPoints = [];
     this.cursorWorld = null;
     this.isPanning = false;
+    this.panKeys = { w: false, a: false, s: false, d: false };
+    this._panLoopRunning = false;
 
     this._resize();
     window.addEventListener('resize', () => this._resize());
     this._bindEvents();
-    state.onChange(() => this.draw());
+    state.onChange(() => {
+      if (this.selected && !this._elementExists(this.selected)) this._setSelected(null);
+      else this.draw();
+    });
     this.draw();
   }
 
@@ -48,8 +54,29 @@ export class CanvasEditor {
     this.tool = tool;
     this.wallChainStart = null;
     this.calibrationPoints = [];
-    this.selected = null;
+    this._setSelected(null);
+  }
+
+  onSelectionChange(fn) {
+    this.selectionListeners.add(fn);
+    return () => this.selectionListeners.delete(fn);
+  }
+
+  deleteSelected() {
+    if (!this.selected) return;
+    this.state.removeElement(this.selected.kind, this.selected.id);
+    this._setSelected(null);
+  }
+
+  _setSelected(selection) {
+    this.selected = selection;
+    for (const fn of this.selectionListeners) fn(selection);
     this.draw();
+  }
+
+  _elementExists({ kind, id }) {
+    const collection = { room: 'rooms', wall: 'walls', door: 'doors', window: 'windows' }[kind];
+    return this.state.data[collection].some((item) => item.id === id);
   }
 
   setBackgroundImage(img) {
@@ -126,6 +153,7 @@ export class CanvasEditor {
     this.canvas.addEventListener('wheel', (e) => this._onWheel(e), { passive: false });
     this.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
     window.addEventListener('keydown', (e) => this._onKeyDown(e));
+    window.addEventListener('keyup', (e) => this._onKeyUp(e));
   }
 
   _onWheel(e) {
@@ -211,14 +239,55 @@ export class CanvasEditor {
   }
 
   _onKeyDown(e) {
+    if (this._isTypingInField()) return;
+
     if (e.key === 'Escape') {
       this.wallChainStart = null;
       this.calibrationPoints = [];
       this.draw();
-    } else if ((e.key === 'Delete' || e.key === 'Backspace') && this.selected && !this._isTypingInField()) {
-      this.state.removeElement(this.selected.kind, this.selected.id);
-      this.selected = null;
+      return;
     }
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+      this.deleteSelected();
+      return;
+    }
+    const panKey = { w: 'w', a: 'a', s: 's', d: 'd' }[e.key.toLowerCase()];
+    if (panKey) {
+      this.panKeys[panKey] = true;
+      this._startPanLoop();
+    }
+  }
+
+  _onKeyUp(e) {
+    const panKey = { w: 'w', a: 'a', s: 's', d: 'd' }[e.key.toLowerCase()];
+    if (panKey) this.panKeys[panKey] = false;
+  }
+
+  // Continuous keyboard panning (WASD), as an alternative to the
+  // Shift/middle-drag mouse pan. Runs only while a pan key is held.
+  _startPanLoop() {
+    if (this._panLoopRunning) return;
+    this._panLoopRunning = true;
+    let last = performance.now();
+    const PAN_SCREEN_SPEED = 600; // px/sec, independent of zoom level
+
+    const step = (now) => {
+      const anyKey = this.panKeys.w || this.panKeys.a || this.panKeys.s || this.panKeys.d;
+      if (!anyKey) {
+        this._panLoopRunning = false;
+        return;
+      }
+      const dt = (now - last) / 1000;
+      last = now;
+      const worldSpeed = PAN_SCREEN_SPEED / (this.view.scale * devicePixelRatio);
+      if (this.panKeys.w) this.view.originZ -= worldSpeed * dt;
+      if (this.panKeys.s) this.view.originZ += worldSpeed * dt;
+      if (this.panKeys.a) this.view.originX -= worldSpeed * dt;
+      if (this.panKeys.d) this.view.originX += worldSpeed * dt;
+      this.draw();
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
   }
 
   _isTypingInField() {
@@ -293,28 +362,30 @@ export class CanvasEditor {
   }
 
   _selectAt(world) {
+    let found = null;
     for (const door of this.state.data.doors) this._withOpeningPoint(door, (p) => {
-      if (distance(world, p) < 0.3) this.selected = { kind: 'door', id: door.id };
+      if (distance(world, p) < 0.3) found = { kind: 'door', id: door.id };
     });
     for (const win of this.state.data.windows) this._withOpeningPoint(win, (p) => {
-      if (distance(world, p) < 0.3) this.selected = { kind: 'window', id: win.id };
+      if (distance(world, p) < 0.3) found = { kind: 'window', id: win.id };
     });
-    if (this.selected) return;
 
-    const nearestWall = findNearestWall(this.state.data.walls, world, 0.25);
-    if (nearestWall) {
-      this.selected = { kind: 'wall', id: nearestWall.wall.id };
-      return;
+    if (!found) {
+      const nearestWall = findNearestWall(this.state.data.walls, world, 0.25);
+      if (nearestWall) found = { kind: 'wall', id: nearestWall.wall.id };
     }
 
-    for (const room of this.state.data.rooms) {
-      const { x, z } = room.bounds;
-      if (world.x >= x[0] && world.x <= x[1] && world.z >= z[0] && world.z <= z[1]) {
-        this.selected = { kind: 'room', id: room.id };
-        return;
+    if (!found) {
+      for (const room of this.state.data.rooms) {
+        const { x, z } = room.bounds;
+        if (world.x >= x[0] && world.x <= x[1] && world.z >= z[0] && world.z <= z[1]) {
+          found = { kind: 'room', id: room.id };
+          break;
+        }
       }
     }
-    this.selected = null;
+
+    this._setSelected(found);
   }
 
   _withOpeningPoint(opening, fn) {
@@ -340,6 +411,7 @@ export class CanvasEditor {
     this._drawWalls();
     this._drawOpenings();
     this._drawToolPreview();
+    this._drawScaleBar();
   }
 
   _drawBackgroundImage() {
@@ -469,5 +541,41 @@ export class CanvasEditor {
       ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
       ctx.fill();
     }
+  }
+
+  // Grid squares are already 1m (bold every 5m), but a labeled scale bar —
+  // like a map's — makes "how big is this" unambiguous at a glance and stays
+  // correct as the user zooms in/out, instead of relying on grid density alone.
+  _drawScaleBar() {
+    const { ctx, canvas } = this;
+    const dpr = devicePixelRatio;
+    const pxPerMeter = this.view.scale * dpr;
+
+    const niceMeters = [0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100];
+    let meters = niceMeters[0];
+    for (const candidate of niceMeters) {
+      if (candidate * pxPerMeter > 160) break;
+      meters = candidate;
+    }
+    const barWidth = meters * pxPerMeter;
+    const x0 = 20 * dpr;
+    const y0 = canvas.height - 24 * dpr;
+
+    ctx.strokeStyle = '#26290f';
+    ctx.lineWidth = 2 * dpr;
+    ctx.beginPath();
+    ctx.moveTo(x0, y0);
+    ctx.lineTo(x0 + barWidth, y0);
+    for (const capX of [x0, x0 + barWidth]) {
+      ctx.moveTo(capX, y0 - 5 * dpr);
+      ctx.lineTo(capX, y0 + 5 * dpr);
+    }
+    ctx.stroke();
+
+    ctx.fillStyle = '#26290f';
+    ctx.font = `${12 * dpr}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.direction = 'ltr';
+    ctx.fillText(`${meters} م`, x0 + barWidth / 2, y0 - 10 * dpr);
   }
 }

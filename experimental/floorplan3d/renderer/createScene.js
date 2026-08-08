@@ -2,11 +2,14 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 // Sets up the base THREE.js scene: renderer, camera, lighting, ground and
-// a resize handler. Movement in Step 1 is an orbiting inspection camera —
-// it exists only so the generated model can be viewed, and is expected to
-// be replaced by first-person walking controls in Step 2 (see the
-// movement/ folder placeholder described in experimental/README.md).
-export function createScene(canvas, { apartmentWidth, apartmentDepth }) {
+// a resize handler.
+//
+// `controls` picks the camera scheme:
+//  - 'orbit' (default) — inspection camera used by the 2D editor's live
+//    preview, where there's no pointer-lock/walking, just "look at the model".
+//  - 'none' — caller (the walkthrough page) wires up its own first-person
+//    controls from movement/firstPersonControls.js instead.
+export function createScene(canvas, { apartmentWidth, apartmentDepth, controls: controlsMode = 'orbit' }) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xf3f1ea);
 
@@ -24,13 +27,16 @@ export function createScene(canvas, { apartmentWidth, apartmentDepth }) {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   resizeToContainer();
 
-  const controls = new OrbitControls(camera, renderer.domElement);
-  controls.target.copy(center);
-  controls.enableDamping = true;
-  controls.maxPolarAngle = Math.PI / 2 - 0.02;
-  controls.minDistance = 2;
-  controls.maxDistance = Math.max(apartmentWidth, apartmentDepth) * 2;
-  controls.update();
+  let controls = null;
+  if (controlsMode === 'orbit') {
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.copy(center);
+    controls.enableDamping = true;
+    controls.maxPolarAngle = Math.PI / 2 - 0.02;
+    controls.minDistance = 2;
+    controls.maxDistance = Math.max(apartmentWidth, apartmentDepth) * 2;
+    controls.update();
+  }
 
   const ambientLight = new THREE.HemisphereLight(0xffffff, 0xcfc7ad, 0.75);
   scene.add(ambientLight);

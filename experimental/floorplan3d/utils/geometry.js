@@ -1,6 +1,6 @@
-// Small 2D geometry helpers shared by the editor's drawing tools.
-// All coordinates here are in world meters (X = east, Z = south), matching
-// the coordinate system used by data/sampleApartment.js and buildGeometry.js.
+// Small 2D geometry helpers shared across the feature (the editor's drawing
+// tools and the walkthrough's wall-collision code). All coordinates here are
+// in world meters (X = east, Z = south), matching data/sampleApartment.js.
 
 export function distance(a, b) {
   return Math.hypot(b.x - a.x, b.z - a.z);

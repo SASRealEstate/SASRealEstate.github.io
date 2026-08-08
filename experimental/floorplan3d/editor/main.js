@@ -16,7 +16,7 @@ state.onChange((data) => preview.update(data));
 
 // Tool buttons
 const toolHints = {
-  select: 'اختر عنصرًا لتحديده، ثم اضغط Delete لحذفه.',
+  select: 'اختر عنصرًا لتحديده، ثم اضغط زر الحذف أدناه أو مفتاح Delete.',
   wall: 'انقر لبدء جدار، وانقر مرة أخرى لإنهاء كل ضلع ومتابعة السلسلة. اضغط Escape لإنهائها. الزوايا تلتصق تلقائيًا بـ 90°.',
   room: 'اسحب لرسم مستطيل الغرفة، ثم أدخل اسمها ونوعها.',
   door: 'انقر بالقرب من أحد الجدران لإضافة باب هناك.',
@@ -59,6 +59,24 @@ state.onChange(syncDimensionInputs);
 for (const [input, key] of [[dimWidth, 'width'], [dimDepth, 'depth'], [dimHeight, 'wallHeight']]) {
   input.addEventListener('change', () => state.setDimensions({ [key]: Number(input.value) }));
 }
+
+// Selected-element panel + dedicated delete button (separate from Undo/Clear All)
+const KIND_LABELS = { room: 'غرفة', wall: 'جدار', door: 'باب', window: 'نافذة' };
+const selectionPanel = document.getElementById('selection-panel');
+const selectionLabel = document.getElementById('selection-label');
+function describeSelection(selection) {
+  if (!selection) return '';
+  if (selection.kind === 'room') {
+    const room = state.data.rooms.find((r) => r.id === selection.id);
+    return `غرفة — ${room?.name ?? ''}`;
+  }
+  return KIND_LABELS[selection.kind];
+}
+editor.onSelectionChange((selection) => {
+  selectionPanel.hidden = !selection;
+  selectionLabel.textContent = describeSelection(selection);
+});
+document.getElementById('delete-selected-btn').addEventListener('click', () => editor.deleteSelected());
 
 // Undo / clear
 document.getElementById('undo-btn').addEventListener('click', () => state.undo());

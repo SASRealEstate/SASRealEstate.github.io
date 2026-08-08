@@ -53,3 +53,24 @@ html, body {
   padding: 2px 6px;
   border-radius: 4px;
 }
+
+/* `pointer-events: none` so the click that dismisses this hint (by
+   requesting pointer lock) lands on the canvas underneath, not this div. */
+#lock-hint:not([hidden]) {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  color: #fff;
+  background: rgba(38, 41, 15, 0.55);
+  pointer-events: none;
+  font-size: 15px;
+}
+
+#lock-hint strong {
+  font-size: 1.2rem;
+}
