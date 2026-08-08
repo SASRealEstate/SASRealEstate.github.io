@@ -82,6 +82,42 @@
   .request-row{ grid-template-columns:1fr; }
 }
 
+.location-row{
+  display:flex;
+  gap:8px;
+  margin-bottom:8px;
+}
+
+.location-row input{ flex:1; }
+
+.btn-remove-location{
+  flex:none;
+  border:none;
+  border-radius:9px;
+  background:var(--danger);
+  color:#fff;
+  padding:0 14px;
+  cursor:pointer;
+}
+
+.btn-add-location{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  background:none;
+  border:1px dashed var(--olive);
+  color:var(--olive-dark);
+  border-radius:999px;
+  padding:8px 16px;
+  font-size:.85rem;
+  font-weight:700;
+  font-family:inherit;
+  cursor:pointer;
+  margin-top:4px;
+}
+
+.btn-add-location:hover{ background:var(--cream); }
+
 .btn-submit-request{
   display:flex;
   align-items:center;
@@ -158,8 +194,8 @@
     <form id="requestForm">
       <div class="request-row">
         <div class="request-field">
-          <label for="r_name">الاسم *</label>
-          <input type="text" id="r_name" required>
+          <label for="r_name">الاسم</label>
+          <input type="text" id="r_name">
         </div>
         <div class="request-field">
           <label for="r_phone">رقم الجوال *</label>
@@ -168,8 +204,8 @@
       </div>
 
       <div class="request-field">
-        <label for="r_type">نوع العقار *</label>
-        <select id="r_type" required>
+        <label for="r_type">نوع العقار</label>
+        <select id="r_type">
           <option value="">— اختر —</option>
           <option value="بدروم">بدروم</option>
           <option value="شقة">شقة</option>
@@ -193,15 +229,19 @@
         </select>
       </div>
 
-      <div class="request-row">
-        <div class="request-field">
-          <label for="r_location">الموقع المفضل</label>
-          <input type="text" id="r_location" placeholder="مثال: حي النرجس - جدة">
+      <div class="request-field">
+        <label>الموقع المفضل (مدينة / حي)</label>
+        <div id="locationsContainer">
+          <div class="location-row">
+            <input type="text" class="location-input" placeholder="مثال: حي النرجس - جدة">
+          </div>
         </div>
-        <div class="request-field">
-          <label for="r_area">المساحة المطلوبة</label>
-          <input type="text" id="r_area" placeholder="مثال: 400 م تقريبًا">
-        </div>
+        <button type="button" id="addLocationBtn" class="btn-add-location"><i class="fa-solid fa-plus"></i> إضافة موقع جديد</button>
+      </div>
+
+      <div class="request-field">
+        <label for="r_area">المساحة المطلوبة</label>
+        <input type="text" id="r_area" placeholder="مثال: 400 م تقريبًا">
       </div>
 
       <div class="request-field">
@@ -211,8 +251,8 @@
 
       <div class="request-row">
         <div class="request-field">
-          <label for="r_paymentMethod">طريقة الدفع *</label>
-          <select id="r_paymentMethod" required>
+          <label for="r_paymentMethod">طريقة الدفع</label>
+          <select id="r_paymentMethod">
             <option value="">— اختر —</option>
             <option value="كاش">كاش</option>
             <option value="بنك">بنك (تمويل)</option>
@@ -274,6 +314,34 @@ document.getElementById("r_paymentMethod").addEventListener("change", function()
   if (this.value !== "بنك") document.getElementById("r_bankName").value = "";
 });
 
+function addLocationRow(){
+  const container = document.getElementById("locationsContainer");
+  const row = document.createElement("div");
+  row.className = "location-row";
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "location-input";
+  input.placeholder = "مثال: حي الروضة - الرياض";
+  row.appendChild(input);
+
+  const removeBtn = document.createElement("button");
+  removeBtn.type = "button";
+  removeBtn.className = "btn-remove-location";
+  removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+  removeBtn.addEventListener("click", () => row.remove());
+  row.appendChild(removeBtn);
+
+  container.appendChild(row);
+}
+
+document.getElementById("addLocationBtn").addEventListener("click", addLocationRow);
+
+function resetLocationsContainer(){
+  const container = document.getElementById("locationsContainer");
+  container.innerHTML = `<div class="location-row"><input type="text" class="location-input" placeholder="مثال: حي النرجس - جدة"></div>`;
+}
+
 document.getElementById("requestForm").addEventListener("submit", async function(event){
   event.preventDefault();
 
@@ -282,11 +350,16 @@ document.getElementById("requestForm").addEventListener("submit", async function
   statusMsg.className = "request-status-msg";
   statusMsg.textContent = "";
 
+  const phone = document.getElementById("r_phone").value.trim();
+  const locations = Array.from(document.querySelectorAll(".location-input"))
+    .map(el => el.value.trim())
+    .filter(Boolean);
+
   const data = {
     name: document.getElementById("r_name").value.trim(),
-    phone: document.getElementById("r_phone").value.trim(),
+    phone: phone,
     type: document.getElementById("r_type").value,
-    location: document.getElementById("r_location").value.trim(),
+    locations: locations,
     area: document.getElementById("r_area").value.trim(),
     budget: document.getElementById("r_budget").value.trim(),
     paymentMethod: document.getElementById("r_paymentMethod").value,
@@ -296,8 +369,8 @@ document.getElementById("requestForm").addEventListener("submit", async function
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   };
 
-  if (!data.name || !data.phone || !data.type || !data.paymentMethod){
-    statusMsg.textContent = "يرجى تعبئة الاسم ورقم الجوال ونوع العقار وطريقة الدفع.";
+  if (!data.phone){
+    statusMsg.textContent = "يرجى تعبئة رقم الجوال.";
     statusMsg.className = "request-status-msg err";
     return;
   }
@@ -308,13 +381,28 @@ document.getElementById("requestForm").addEventListener("submit", async function
     return;
   }
 
+  const phoneKey = data.phone.replace(/\D/g, "");
+  data.phoneKey = phoneKey;
+
   submitBtn.disabled = true;
   submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جارٍ الإرسال...';
 
   try{
-    await db.collection("propertyRequests").add(data);
+    const customerData = {
+      phone: data.phone,
+      lastRequestAt: firebase.firestore.FieldValue.serverTimestamp(),
+      requestCount: firebase.firestore.FieldValue.increment(1)
+    };
+    if (data.name) customerData.name = data.name;
+
+    await Promise.all([
+      db.collection("propertyRequests").add(data),
+      db.collection("customers").doc(phoneKey).set(customerData, { merge: true })
+    ]);
+
     document.getElementById("requestForm").reset();
     document.getElementById("bankNameField").style.display = "none";
+    resetLocationsContainer();
     statusMsg.textContent = "✔ تم استلام طلبك بنجاح، سنتواصل معك في أقرب وقت ممكن.";
     statusMsg.className = "request-status-msg ok";
   }catch(e){

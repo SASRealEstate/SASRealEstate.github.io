@@ -945,6 +945,7 @@ let brokerPropertiesIndex = {};
 let unsubscribeRequests = null;
 let lastRequestDocs = [];
 let requestStatusFilter = "all";
+let customersIndex = {};
 
 function cat(){ return CATEGORIES[currentCategory]; }
 
@@ -1077,6 +1078,7 @@ async function switchMode(mode){
   }
   if (mode === "requests"){
     renderRequestStatusFilter();
+    await loadCustomersIndex();
     listenToRequests();
   }
 }
@@ -2349,6 +2351,17 @@ document.getElementById("brokerSearchInput")?.addEventListener("input", () => re
 
 /* ============ طلبات العقار ============ */
 
+async function loadCustomersIndex(){
+  if (!window.db) return;
+  try{
+    const snap = await db.collection("customers").get();
+    customersIndex = {};
+    snap.docs.forEach(doc => { customersIndex[doc.id] = doc.data(); });
+  }catch(e){
+    console.warn("تعذر تحميل بيانات العملاء", e);
+  }
+}
+
 function listenToRequests(){
   if (unsubscribeRequests) { unsubscribeRequests(); unsubscribeRequests = null; }
   if (!window.db) return;
@@ -2357,7 +2370,7 @@ function listenToRequests(){
     lastRequestDocs = snap.docs;
     renderRequestsList(lastRequestDocs);
   }, err => {
-    console.error("خطأ في تحميل طلبات العملاء", err);
+    console.error("خطأ في تحميل طلبات العقار", err);
   });
 }
 
@@ -2428,18 +2441,21 @@ function renderRequestsList(docs){
     card.className = "owner-card";
 
     const dateStr = d.createdAt?.toDate ? d.createdAt.toDate().toLocaleString("ar-SA") : "";
+    const phoneKey = d.phoneKey || (d.phone || "").replace(/\D/g, "");
+    const customer = customersIndex[phoneKey];
+    const locations = Array.isArray(d.locations) ? d.locations : (d.location ? [d.location] : []);
 
     card.innerHTML = `
       <div class="owner-info">
         <h3>${d.name || "بدون اسم"} <span class="broker-tag" style="background:${isContacted ? 'var(--green)' : 'var(--gold)'};">${d.status || "جديد"}</span></h3>
-        ${d.phone ? `<div class="owner-phone"><a href="https://wa.me/966${d.phone.replace(/^0/,"")}" target="_blank"><i class="fa-brands fa-whatsapp"></i> ${d.phone}</a></div>` : ``}
-        <div class="owner-broker-line"><i class="fa-solid fa-tag"></i> ${d.type || "-"}</div>
-        ${d.location ? `<div class="owner-broker-line"><i class="fa-solid fa-location-dot"></i> ${d.location}</div>` : ``}
+        <div class="owner-broker-line" style="color:var(--olive-dark); font-weight:700;"><i class="fa-solid fa-clock"></i> تاريخ الطلب: ${dateStr || "غير معروف"}</div>
+        ${d.phone ? `<div class="owner-phone"><a href="https://wa.me/966${d.phone.replace(/^0/,"")}" target="_blank"><i class="fa-brands fa-whatsapp"></i> ${d.phone}</a>${customer && customer.requestCount > 1 ? ` <span class="broker-tag" style="background:var(--blue);">عميل سابق - ${customer.requestCount} طلبات</span>` : ``}</div>` : ``}
+        ${d.type ? `<div class="owner-broker-line"><i class="fa-solid fa-tag"></i> ${d.type}</div>` : ``}
+        ${locations.length ? `<div class="owner-broker-line"><i class="fa-solid fa-location-dot"></i> ${locations.join(" - ")}</div>` : ``}
         ${d.area ? `<div class="owner-broker-line"><i class="fa-solid fa-vector-square"></i> ${d.area}</div>` : ``}
         ${d.budget ? `<div class="owner-broker-line"><i class="fa-solid fa-sack-dollar"></i> ${d.budget}</div>` : ``}
         ${d.paymentMethod ? `<div class="owner-broker-line"><i class="fa-solid fa-money-bill-wave"></i> ${d.paymentMethod}${d.bankName ? " - " + d.bankName : ""}</div>` : ``}
         ${d.notes ? `<div class="owner-notes">📝 ${d.notes}</div>` : ``}
-        ${dateStr ? `<div class="owner-notes" style="margin-top:4px;">🕒 ${dateStr}</div>` : ``}
       </div>
       <div class="row-actions">
         <button class="btn-edit" data-action="toggle" title="${isContacted ? 'إعادة تعيين كجديد' : 'تحديد كتم التواصل'}"><i class="fa-solid ${isContacted ? 'fa-rotate-left' : 'fa-check'}"></i></button>
