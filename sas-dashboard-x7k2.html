@@ -555,8 +555,55 @@ button{ cursor:pointer; border:none; }
 
         <div class="status-filter" id="requestStatusFilter"></div>
 
+        <div style="margin-bottom:14px; max-width:280px;">
+          <label style="display:block; font-size:.82rem; font-weight:700; color:var(--olive-dark); margin-bottom:6px;">فرز حسب نوع العقار</label>
+          <select id="requestTypeFilter"></select>
+        </div>
+
         <div id="requestsList"></div>
         <div id="requestsEmptyState" class="empty-state" style="display:none;">لا توجد طلبات بعد.</div>
+      </div>
+
+    </div>
+
+    <div id="bankRepsSection" style="display:none;">
+
+      <div class="panel">
+        <h2><i class="fa-solid fa-user-tie"></i> <span id="bankRepFormTitle">إضافة ممثل بنك</span></h2>
+
+        <form id="bankRepForm" onsubmit="return saveBankRep(event)">
+          <div class="form-grid">
+            <div class="field">
+              <label for="br_bankName">اسم البنك *</label>
+              <select id="br_bankName" required></select>
+            </div>
+            <div class="field">
+              <label for="br_repName">اسم الممثل</label>
+              <input type="text" id="br_repName" placeholder="اسم الممثل">
+            </div>
+            <div class="field">
+              <label for="br_repEmail">البريد الإلكتروني *</label>
+              <input type="email" id="br_repEmail" required placeholder="example@bank.com">
+            </div>
+            <div class="field">
+              <label for="br_repPhone">جوال الممثل (اختياري)</label>
+              <input type="tel" id="br_repPhone" placeholder="05xxxxxxxx">
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-save"><i class="fa-solid fa-floppy-disk"></i> <span id="bankRepSaveBtnText">حفظ</span></button>
+            <button type="button" class="btn-cancel" id="bankRepCancelEditBtn" style="display:none;" onclick="resetBankRepForm()">إلغاء التعديل</button>
+          </div>
+
+          <div id="bankRepFormStatus" class="status-msg"></div>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h2><i class="fa-solid fa-building-columns"></i> ممثلو البنوك (<span id="bankRepsCount">0</span>)</h2>
+        <div id="bankRepsList"></div>
+        <div id="bankRepsEmptyState" class="empty-state" style="display:none;">لا يوجد ممثلون بعد.</div>
       </div>
 
     </div>
@@ -956,7 +1003,28 @@ let brokerPropertiesIndex = {};
 let unsubscribeRequests = null;
 let lastRequestDocs = [];
 let requestStatusFilter = "all";
+let requestTypeFilter = "all";
 let customersIndex = {};
+let unsubscribeBankReps = null;
+let lastBankRepDocs = [];
+let editingBankRepId = null;
+let allBankReps = [];
+
+const BANKS_LIST = [
+  "البنك الأهلي السعودي",
+  "مصرف الراجحي",
+  "بنك الرياض",
+  "البنك السعودي الفرنسي",
+  "البنك السعودي البريطاني (ساب)",
+  "البنك العربي الوطني",
+  "بنك الجزيرة",
+  "البنك السعودي للاستثمار",
+  "بنك البلاد",
+  "مصرف الإنماء",
+  "بنك STC",
+  "بنك D360",
+  "أخرى"
+];
 
 function cat(){ return CATEGORIES[currentCategory]; }
 
@@ -1056,7 +1124,8 @@ function renderModeTabs(){
     {key:"listings", label:"العروض", icon:"fa-building"},
     {key:"owners", label:"الملاك", icon:"fa-users"},
     {key:"brokers", label:"الوسطاء", icon:"fa-handshake"},
-    {key:"requests", label:"طلبات العقار", icon:"fa-inbox"}
+    {key:"requests", label:"طلبات العقار", icon:"fa-inbox"},
+    {key:"bankReps", label:"ممثلو البنوك", icon:"fa-building-columns"}
   ];
   modes.forEach(m => {
     const btn = document.createElement("button");
@@ -1075,6 +1144,7 @@ async function switchMode(mode){
   document.getElementById("ownersSection").style.display = mode === "owners" ? "block" : "none";
   document.getElementById("brokersSection").style.display = mode === "brokers" ? "block" : "none";
   document.getElementById("requestsSection").style.display = mode === "requests" ? "block" : "none";
+  document.getElementById("bankRepsSection").style.display = mode === "bankReps" ? "block" : "none";
   if (mode === "owners"){
     renderOwnerCategoryFilter();
     await Promise.all([loadAllOwners(), loadLinkIndexes()]);
@@ -1090,7 +1160,12 @@ async function switchMode(mode){
   if (mode === "requests"){
     renderRequestStatusFilter();
     await loadCustomersIndex();
+    await loadBankReps();
     listenToRequests();
+  }
+  if (mode === "bankReps"){
+    resetBankRepForm();
+    listenToBankReps();
   }
 }
 
@@ -2434,10 +2509,62 @@ function deleteRequest(docId){
   });
 }
 
+function renderRequestTypeFilter(docs){
+  const select = document.getElementById("requestTypeFilter");
+  const types = Array.from(new Set(docs.map(doc => doc.data().type).filter(Boolean))).sort((a,b) => a.localeCompare(b, "ar"));
+  const previousValue = requestTypeFilter;
+
+  select.innerHTML = `<option value="all">كل الأنواع</option>` +
+    types.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
+
+  if (types.includes(previousValue) || previousValue === "all"){
+    select.value = previousValue;
+  } else {
+    requestTypeFilter = "all";
+    select.value = "all";
+  }
+}
+
+document.getElementById("requestTypeFilter").addEventListener("change", function(){
+  requestTypeFilter = this.value;
+  renderRequestsList(lastRequestDocs);
+});
+
+function buildFinancingHTML(f){
+  if (!f) return "";
+  const rows = [];
+  if (f.idNumber) rows.push(`رقم الهوية: ${escapeHtml(f.idNumber)}`);
+  if (f.dobGregorian) rows.push(`تاريخ الميلاد: ${escapeHtml(f.dobGregorian)}${f.age != null ? ` (العمر: ${escapeHtml(f.age)} سنة)` : ""}`);
+  if (f.employerType) rows.push(`جهة العمل: ${escapeHtml(f.employerType)}${f.govType ? " - " + escapeHtml(f.govType) : ""}`);
+  if (f.employmentStatus) rows.push(`الحالة الوظيفية: ${escapeHtml(f.employmentStatus)}`);
+  if (f.basicSalary) rows.push(`الراتب الأساسي: ${Number(f.basicSalary).toLocaleString()} ريال`);
+  if (f.allowances) rows.push(`البدلات: ${Number(f.allowances).toLocaleString()} ريال`);
+  if (f.pensionSalary) rows.push(`راتب التقاعد: ${Number(f.pensionSalary).toLocaleString()} ريال`);
+  if (f.serviceYears) rows.push(`سنوات الخدمة: ${escapeHtml(f.serviceYears)}`);
+  if (f.hasObligations) rows.push(`التزامات: ${escapeHtml(f.hasObligations)}${f.obligationsAmount ? ` (يُصفّى ${Number(f.obligationsAmount).toLocaleString()} ريال)` : ""}`);
+  if (f.salaryBank) rows.push(`بنك الراتب: ${escapeHtml(f.salaryBank)}`);
+  if (f.housingSupport) rows.push(`مستحق للدعم السكني: ${escapeHtml(f.housingSupport)}`);
+
+  if (!rows.length) return "";
+
+  return `
+    <div style="margin-top:10px; padding:12px 14px; background:var(--cream); border:1px solid var(--line); border-radius:10px;">
+      <div style="font-weight:700; color:var(--olive-dark); margin-bottom:6px; font-size:.85rem;"><i class="fa-solid fa-building-columns"></i> بيانات التمويل البنكي</div>
+      ${rows.map(r => `<div style="font-size:.82rem; color:var(--ink); margin-bottom:3px;">${r}</div>`).join("")}
+    </div>
+  `;
+}
+
 function renderRequestsList(docs){
-  const filtered = requestStatusFilter === "all"
+  renderRequestTypeFilter(docs);
+
+  let filtered = requestStatusFilter === "all"
     ? docs
     : docs.filter(doc => (doc.data().status || "جديد") === requestStatusFilter);
+
+  if (requestTypeFilter !== "all"){
+    filtered = filtered.filter(doc => doc.data().type === requestTypeFilter);
+  }
 
   document.getElementById("requestsCount").textContent = filtered.length;
 
@@ -2486,6 +2613,7 @@ function renderRequestsList(docs){
     const safePaymentMethod = escapeHtml(d.paymentMethod);
     const safeBankName = escapeHtml(d.bankName);
     const safeNotes = escapeHtml(d.notes);
+    const financingHTML = buildFinancingHTML(d.financing);
 
     card.innerHTML = `
       <div class="owner-info">
@@ -2499,6 +2627,8 @@ function renderRequestsList(docs){
         ${safeBudget ? `<div class="owner-broker-line"><i class="fa-solid fa-sack-dollar"></i> ${safeBudget}</div>` : ``}
         ${safePaymentMethod ? `<div class="owner-broker-line"><i class="fa-solid fa-money-bill-wave"></i> ${safePaymentMethod}${safeBankName ? " - " + safeBankName : ""}</div>` : ``}
         ${safeNotes ? `<div class="owner-notes">📝 ${safeNotes}</div>` : ``}
+        ${financingHTML}
+        ${d.sentToBanksAt ? `<div class="owner-broker-line" style="color:var(--green); font-weight:700;"><i class="fa-solid fa-check-double"></i> تم الإرسال إلى البنوك${d.sentToBanksAt.toDate ? " - " + d.sentToBanksAt.toDate().toLocaleString("ar-SA") : ""}</div>` : ``}
         <div style="margin-top:10px;">
           <label style="font-size:.78rem; color:var(--muted); display:block; margin-bottom:4px;">حالة المتابعة</label>
           <select class="request-status-select" style="padding:8px 12px; border-radius:8px; border:1px solid var(--line); font-family:inherit; font-weight:700; background:#fff; color:var(--ink);">
@@ -2507,13 +2637,208 @@ function renderRequestsList(docs){
         </div>
       </div>
       <div class="row-actions">
+        ${d.financing ? `<button class="btn-edit" data-action="sendBanks" title="إرسال إلى البنوك"><i class="fa-solid fa-paper-plane"></i></button>` : ``}
         <button class="btn-delete" data-action="delete"><i class="fa-solid fa-trash"></i></button>
       </div>
     `;
     card.querySelector('.request-status-select').addEventListener("change", (e) => markRequestStatus(doc.id, e.target.value));
     card.querySelector('[data-action="delete"]').addEventListener("click", () => deleteRequest(doc.id));
+    card.querySelector('[data-action="sendBanks"]')?.addEventListener("click", () => sendRequestToBanks(doc.id, d));
     listWrap.appendChild(card);
   });
+}
+
+/* ============ ممثلو البنوك ============ */
+
+function renderBankNameOptions(){
+  const select = document.getElementById("br_bankName");
+  select.innerHTML = `<option value="">— اختر —</option>` + BANKS_LIST.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join("");
+}
+
+async function loadBankReps(){
+  if (!window.db) return;
+  try{
+    const snap = await db.collection("bankReps").get();
+    allBankReps = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  }catch(e){
+    console.warn("تعذر تحميل ممثلي البنوك", e);
+  }
+}
+
+function listenToBankReps(){
+  if (unsubscribeBankReps) { unsubscribeBankReps(); unsubscribeBankReps = null; }
+  if (!window.db) return;
+  renderBankNameOptions();
+
+  unsubscribeBankReps = db.collection("bankReps").onSnapshot(snap => {
+    lastBankRepDocs = snap.docs;
+    allBankReps = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    renderBankRepsList(lastBankRepDocs);
+  }, err => {
+    console.error("خطأ في تحميل ممثلي البنوك", err);
+  });
+}
+
+function resetBankRepForm(){
+  editingBankRepId = null;
+  document.getElementById("bankRepForm").reset();
+  renderBankNameOptions();
+  document.getElementById("bankRepFormTitle").textContent = "إضافة ممثل بنك";
+  document.getElementById("bankRepSaveBtnText").textContent = "حفظ";
+  document.getElementById("bankRepCancelEditBtn").style.display = "none";
+  document.getElementById("bankRepFormStatus").textContent = "";
+}
+
+async function saveBankRep(event){
+  event.preventDefault();
+  const statusEl = document.getElementById("bankRepFormStatus");
+  statusEl.className = "status-msg";
+  statusEl.textContent = "";
+
+  const data = {
+    bankName: document.getElementById("br_bankName").value,
+    repName: document.getElementById("br_repName").value.trim(),
+    repEmail: document.getElementById("br_repEmail").value.trim(),
+    repPhone: document.getElementById("br_repPhone").value.trim()
+  };
+
+  if (!data.bankName || !data.repEmail){
+    statusEl.textContent = "اسم البنك والبريد الإلكتروني مطلوبان";
+    statusEl.className = "status-msg err";
+    return false;
+  }
+
+  try{
+    if (editingBankRepId){
+      await db.collection("bankReps").doc(editingBankRepId).update(data);
+    } else {
+      await db.collection("bankReps").add(data);
+    }
+    statusEl.textContent = "تم الحفظ بنجاح ✔";
+    statusEl.className = "status-msg ok";
+    resetBankRepForm();
+  }catch(e){
+    statusEl.textContent = "حدث خطأ أثناء الحفظ: " + e.message;
+    statusEl.className = "status-msg err";
+    console.error(e);
+  }
+  return false;
+}
+
+function editBankRep(docId, data){
+  editingBankRepId = docId;
+  renderBankNameOptions();
+  document.getElementById("br_bankName").value = data.bankName || "";
+  document.getElementById("br_repName").value = data.repName || "";
+  document.getElementById("br_repEmail").value = data.repEmail || "";
+  document.getElementById("br_repPhone").value = data.repPhone || "";
+  document.getElementById("bankRepFormTitle").textContent = "تعديل ممثل بنك";
+  document.getElementById("bankRepSaveBtnText").textContent = "حفظ التعديلات";
+  document.getElementById("bankRepCancelEditBtn").style.display = "inline-block";
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function deleteBankRep(docId){
+  if (!confirm("سيتم حذف هذا الممثل نهائيًا. متابعة؟")) return;
+  db.collection("bankReps").doc(docId).delete().catch(e => {
+    alert("حدث خطأ أثناء الحذف: " + e.message);
+    console.error(e);
+  });
+}
+
+function renderBankRepsList(docs){
+  document.getElementById("bankRepsCount").textContent = docs.length;
+  const listWrap = document.getElementById("bankRepsList");
+  const emptyState = document.getElementById("bankRepsEmptyState");
+  listWrap.innerHTML = "";
+
+  if (docs.length === 0){
+    emptyState.style.display = "block";
+    return;
+  }
+  emptyState.style.display = "none";
+
+  const sorted = [...docs].sort((a,b) => (a.data().bankName || "").localeCompare(b.data().bankName || "", "ar"));
+
+  sorted.forEach(doc => {
+    const d = doc.data();
+    const card = document.createElement("div");
+    card.className = "owner-card";
+    const repPhoneDigits = (d.repPhone || "").replace(/[^\d]/g, "").replace(/^0/, "");
+
+    card.innerHTML = `
+      <div class="owner-info">
+        <h3>${escapeHtml(d.bankName)}</h3>
+        ${d.repName ? `<div class="owner-broker-line"><i class="fa-solid fa-user"></i> ${escapeHtml(d.repName)}</div>` : ``}
+        <div class="owner-broker-line"><i class="fa-solid fa-envelope"></i> ${escapeHtml(d.repEmail)}</div>
+        ${d.repPhone ? `<div class="owner-phone"><a href="https://wa.me/966${repPhoneDigits}" target="_blank"><i class="fa-brands fa-whatsapp"></i> ${escapeHtml(d.repPhone)}</a></div>` : ``}
+      </div>
+      <div class="row-actions">
+        <button class="btn-edit" data-action="edit"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn-delete" data-action="delete"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    `;
+    card.querySelector('[data-action="edit"]').addEventListener("click", () => editBankRep(doc.id, d));
+    card.querySelector('[data-action="delete"]').addEventListener("click", () => deleteBankRep(doc.id));
+    listWrap.appendChild(card);
+  });
+}
+
+/* ============ إرسال طلبات التمويل إلى البنوك ============ */
+
+async function sendRequestToBanks(docId, d){
+  if (!allBankReps.length){
+    alert("لا يوجد ممثلو بنوك مضافون بعد. أضفهم من تبويب \"ممثلو البنوك\" أولًا.");
+    return;
+  }
+
+  const recipients = allBankReps.map(r => r.repEmail).filter(Boolean);
+  if (!confirm(`سيتم إرسال بيانات هذا الطلب (بدون رقم الجوال) إلى ${recipients.length} بنك. متابعة؟`)) return;
+
+  const f = d.financing || {};
+  const emailData = {
+    requestNumber: d.requestNumber || docId,
+    name: d.name || "",
+    propertyType: d.type || "",
+    locations: Array.isArray(d.locations) ? d.locations.join(" - ") : "",
+    area: d.area || "",
+    budgetMin: d.budgetMin || "",
+    budgetMax: d.budgetMax || "",
+    idNumber: f.idNumber || "",
+    dobGregorian: f.dobGregorian || "",
+    age: f.age != null ? f.age : "",
+    employerType: f.employerType || "",
+    govType: f.govType || "",
+    employmentStatus: f.employmentStatus || "",
+    basicSalary: f.basicSalary || "",
+    allowances: f.allowances || "",
+    pensionSalary: f.pensionSalary || "",
+    serviceYears: f.serviceYears || "",
+    hasObligations: f.hasObligations || "",
+    obligationsAmount: f.obligationsAmount || "",
+    salaryBank: f.salaryBank || "",
+    housingSupport: f.housingSupport || ""
+  };
+
+  try{
+    const res = await fetch(PHOTO_UPLOAD_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: "sendToBanks", recipients, data: emailData })
+    });
+    const result = await res.json();
+    if (result.success){
+      await db.collection("propertyRequests").doc(docId).update({
+        sentToBanksAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      alert(`تم الإرسال بنجاح إلى ${result.sentCount} من ${result.totalRecipients} بنك`);
+    } else {
+      alert("تعذر الإرسال: " + (result.error || "خطأ غير معروف"));
+    }
+  }catch(e){
+    alert("تعذر الاتصال بخدمة الإرسال: " + e.message);
+    console.error(e);
+  }
 }
 
 </script>
