@@ -2793,15 +2793,12 @@ async function sendRequestToBanks(docId, d){
   }
 
   const recipients = allBankReps.map(r => r.repEmail).filter(Boolean);
-  if (!confirm(`سيتم إرسال بيانات هذا الطلب (بدون رقم الجوال) إلى ${recipients.length} بنك. متابعة؟`)) return;
+  if (!confirm(`سيتم إرسال بيانات هذا الطلب (بدون الاسم ورقم الجوال) إلى ${recipients.length} بنك. متابعة؟`)) return;
 
   const f = d.financing || {};
   const emailData = {
     requestNumber: d.requestNumber || docId,
-    name: d.name || "",
     propertyType: d.type || "",
-    locations: Array.isArray(d.locations) ? d.locations.join(" - ") : "",
-    area: d.area || "",
     budgetMin: d.budgetMin || "",
     budgetMax: d.budgetMax || "",
     idNumber: f.idNumber || "",

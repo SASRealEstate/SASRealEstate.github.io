@@ -400,6 +400,7 @@
             <input type="number" id="f_allowances" min="0" placeholder="بالريال">
           </div>
         </div>
+        <div id="f_salarySumDisplay" style="display:none; font-weight:700; color:var(--olive-dark); margin:-8px 0 18px;"></div>
 
         <div class="request-field" id="f_pensionSalaryField" style="display:none;">
           <label for="f_pensionSalary">راتب التقاعد</label>
@@ -553,7 +554,7 @@ function populateHijriSelects(){
   }
   HIJRI_MONTHS.forEach((name, idx) => {
     const opt = document.createElement("option");
-    opt.value = idx + 1; opt.textContent = name;
+    opt.value = idx + 1; opt.textContent = (idx + 1) + " - " + name;
     monthSelect.appendChild(opt);
   });
   const currentHijriYear = 1447;
@@ -588,7 +589,24 @@ document.getElementById("f_employmentStatus").addEventListener("change", functio
   document.getElementById("f_pensionSalaryField").style.display = isRetired ? "flex" : "none";
   if (!isActive){ document.getElementById("f_basicSalary").value = ""; document.getElementById("f_allowances").value = ""; }
   if (!isRetired) document.getElementById("f_pensionSalary").value = "";
+  updateSalarySum();
 });
+
+function updateSalarySum(){
+  const sumDisplay = document.getElementById("f_salarySumDisplay");
+  const basic = parseFloat(document.getElementById("f_basicSalary").value);
+  const allowances = parseFloat(document.getElementById("f_allowances").value);
+  if (!isNaN(basic) || !isNaN(allowances)){
+    const total = (isNaN(basic) ? 0 : basic) + (isNaN(allowances) ? 0 : allowances);
+    sumDisplay.textContent = `إجمالي الراتب: ${total.toLocaleString("ar")} ريال`;
+    sumDisplay.style.display = "block";
+  } else {
+    sumDisplay.textContent = "";
+    sumDisplay.style.display = "none";
+  }
+}
+document.getElementById("f_basicSalary").addEventListener("input", updateSalarySum);
+document.getElementById("f_allowances").addEventListener("input", updateSalarySum);
 
 document.getElementById("f_hasObligations").addEventListener("change", function(){
   const yes = this.value === "نعم";
