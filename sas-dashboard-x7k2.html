@@ -2389,12 +2389,20 @@ function listenToRequests(){
   });
 }
 
+const REQUEST_STATUSES = [
+  {key:"جديد", label:"جديد", color:"var(--gold)"},
+  {key:"تم التواصل", label:"تم التواصل", color:"var(--blue)"},
+  {key:"قيد المتابعة", label:"قيد المتابعة", color:"#8a5cb8"},
+  {key:"بانتظار عرض مناسب", label:"بانتظار عرض مناسب", color:"#c77d1f"},
+  {key:"مغلق - ناجح", label:"مغلق - ناجح", color:"var(--green)"},
+  {key:"مغلق - غير ناجح", label:"مغلق - غير ناجح", color:"var(--danger)"}
+];
+
 function renderRequestStatusFilter(){
   const wrap = document.getElementById("requestStatusFilter");
   const options = [
     {key:"all", label:"الكل"},
-    {key:"جديد", label:"جديد"},
-    {key:"تم التواصل", label:"تم التواصل"}
+    ...REQUEST_STATUSES.map(s => ({key:s.key, label:s.label}))
   ];
   wrap.innerHTML = "";
   options.forEach(opt => {
@@ -2451,7 +2459,6 @@ function renderRequestsList(docs){
 
   sorted.forEach(doc => {
     const d = doc.data();
-    const isContacted = d.status === "تم التواصل";
     const card = document.createElement("div");
     card.className = "owner-card";
 
@@ -2459,9 +2466,11 @@ function renderRequestsList(docs){
     const phoneKey = d.phoneKey || (d.phone || "").replace(/\D/g, "");
     const customer = customersIndex[phoneKey];
     const locations = Array.isArray(d.locations) ? d.locations : (d.location ? [d.location] : []);
+    const statusConfig = REQUEST_STATUSES.find(s => s.key === d.status) || REQUEST_STATUSES[0];
 
+    const safeRequestNumber = escapeHtml(d.requestNumber || doc.id);
     const safeName = escapeHtml(d.name) || "بدون اسم";
-    const safeStatus = escapeHtml(d.status) || "جديد";
+    const safeCapacity = escapeHtml(d.capacity);
     const safePhone = escapeHtml(d.phone);
     const safePhoneDigits = (d.phone || "").replace(/[^\d]/g, "").replace(/^0/, "");
     const safeType = escapeHtml(d.type);
@@ -2480,22 +2489,28 @@ function renderRequestsList(docs){
 
     card.innerHTML = `
       <div class="owner-info">
-        <h3>${safeName} <span class="broker-tag" style="background:${isContacted ? 'var(--green)' : 'var(--gold)'};">${safeStatus}</span></h3>
+        <h3>طلب #${safeRequestNumber} - ${safeName} <span class="broker-tag" style="background:${statusConfig.color};">${statusConfig.label}</span></h3>
         <div class="owner-broker-line" style="color:var(--olive-dark); font-weight:700;"><i class="fa-solid fa-clock"></i> تاريخ الطلب: ${dateStr || "غير معروف"}</div>
         ${d.phone ? `<div class="owner-phone"><a href="https://wa.me/966${safePhoneDigits}" target="_blank"><i class="fa-brands fa-whatsapp"></i> ${safePhone}</a>${customer && customer.requestCount > 1 ? ` <span class="broker-tag" style="background:var(--blue);">عميل سابق - ${customer.requestCount} طلبات</span>` : ``}</div>` : ``}
+        ${safeCapacity ? `<div class="owner-broker-line"><i class="fa-solid fa-user-tag"></i> الصفة: ${safeCapacity}</div>` : ``}
         ${safeType ? `<div class="owner-broker-line"><i class="fa-solid fa-tag"></i> ${safeType}</div>` : ``}
         ${safeLocations ? `<div class="owner-broker-line"><i class="fa-solid fa-location-dot"></i> ${safeLocations}</div>` : ``}
-        ${safeArea ? `<div class="owner-broker-line"><i class="fa-solid fa-vector-square"></i> ${safeArea}</div>` : ``}
+        ${safeArea ? `<div class="owner-broker-line"><i class="fa-solid fa-vector-square"></i> ${safeArea} م²</div>` : ``}
         ${safeBudget ? `<div class="owner-broker-line"><i class="fa-solid fa-sack-dollar"></i> ${safeBudget}</div>` : ``}
         ${safePaymentMethod ? `<div class="owner-broker-line"><i class="fa-solid fa-money-bill-wave"></i> ${safePaymentMethod}${safeBankName ? " - " + safeBankName : ""}</div>` : ``}
         ${safeNotes ? `<div class="owner-notes">📝 ${safeNotes}</div>` : ``}
+        <div style="margin-top:10px;">
+          <label style="font-size:.78rem; color:var(--muted); display:block; margin-bottom:4px;">حالة المتابعة</label>
+          <select class="request-status-select" style="padding:8px 12px; border-radius:8px; border:1px solid var(--line); font-family:inherit; font-weight:700; background:#fff; color:var(--ink);">
+            ${REQUEST_STATUSES.map(s => `<option value="${s.key}" ${d.status === s.key ? 'selected' : ''}>${s.label}</option>`).join('')}
+          </select>
+        </div>
       </div>
       <div class="row-actions">
-        <button class="btn-edit" data-action="toggle" title="${isContacted ? 'إعادة تعيين كجديد' : 'تحديد كتم التواصل'}"><i class="fa-solid ${isContacted ? 'fa-rotate-left' : 'fa-check'}"></i></button>
         <button class="btn-delete" data-action="delete"><i class="fa-solid fa-trash"></i></button>
       </div>
     `;
-    card.querySelector('[data-action="toggle"]').addEventListener("click", () => markRequestStatus(doc.id, isContacted ? "جديد" : "تم التواصل"));
+    card.querySelector('.request-status-select').addEventListener("change", (e) => markRequestStatus(doc.id, e.target.value));
     card.querySelector('[data-action="delete"]').addEventListener("click", () => deleteRequest(doc.id));
     listWrap.appendChild(card);
   });

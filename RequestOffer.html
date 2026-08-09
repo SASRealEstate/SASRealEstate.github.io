@@ -90,6 +90,26 @@
 
 .location-row input{ flex:1; }
 
+.input-with-suffix{
+  display:flex;
+  gap:8px;
+}
+
+.input-with-suffix input{ flex:1; }
+
+.input-with-suffix .suffix{
+  display:flex;
+  align-items:center;
+  padding:0 16px;
+  background:var(--cream);
+  border:1px solid var(--line);
+  border-radius:9px;
+  color:var(--muted);
+  font-weight:700;
+  font-size:.9rem;
+  white-space:nowrap;
+}
+
 .btn-remove-location{
   flex:none;
   border:none;
@@ -187,7 +207,7 @@
 <div class="request-wrap">
 
   <div class="notice">
-    📌 هذا النموذج مخصص لطلبات شراء العقارات والأراضي فقط. لطلبات الإيجار، يرجى تصفح <a href="Rent.html">قائمة الشقق للإيجار</a>.
+    📌 هذا النموذج مخصص لطلبات شراء العقارات والأراضي، بالإضافة إلى طلبات استئجار المحلات التجارية. لبقية طلبات الإيجار، يرجى تصفح <a href="Rent.html">قائمة الشقق للإيجار</a>.
   </div>
 
   <div class="request-form-panel">
@@ -201,6 +221,15 @@
           <label for="r_phone">رقم الجوال *</label>
           <input type="tel" id="r_phone" placeholder="05xxxxxxxx" required>
         </div>
+      </div>
+
+      <div class="request-field">
+        <label for="r_capacity">الصفة</label>
+        <select id="r_capacity">
+          <option value="">— اختر —</option>
+          <option value="مشتري">مشتري</option>
+          <option value="وسيط">وسيط</option>
+        </select>
       </div>
 
       <div class="request-field">
@@ -222,6 +251,7 @@
           <option value="منزل شعبي">منزل شعبي</option>
           <option value="عمارة سكنية">عمارة سكنية</option>
           <option value="مجمع سكني">مجمع سكني</option>
+          <option value="محل تجاري للإيجار">محل تجاري للإيجار</option>
           <option value="أرض تجارية">أرض تجارية</option>
           <option value="أرض سكنية">أرض سكنية</option>
           <option value="أرض زراعية">أرض زراعية</option>
@@ -240,8 +270,11 @@
       </div>
 
       <div class="request-field">
-        <label for="r_area">المساحة المطلوبة</label>
-        <input type="text" id="r_area" placeholder="مثال: 400 م تقريبًا">
+        <label for="r_area">المساحة المطلوبة <span style="font-weight:400; color:var(--muted); font-size:.8rem;">(أرقام فقط)</span></label>
+        <div class="input-with-suffix">
+          <input type="number" id="r_area" placeholder="مثال: 400" min="0">
+          <span class="suffix">م²</span>
+        </div>
       </div>
 
       <div class="request-field">
@@ -351,6 +384,16 @@ function resetLocationsContainer(){
   container.innerHTML = `<div class="location-row"><input type="text" class="location-input" placeholder="مثال: حي النرجس - جدة"></div>`;
 }
 
+async function getNextRequestNumber(){
+  const counterRef = db.collection("counters").doc("propertyRequests");
+  return db.runTransaction(async (tx) => {
+    const snap = await tx.get(counterRef);
+    const next = (snap.exists ? (snap.data().count || 0) : 0) + 1;
+    tx.set(counterRef, { count: next }, { merge: true });
+    return next;
+  });
+}
+
 document.getElementById("requestForm").addEventListener("submit", async function(event){
   event.preventDefault();
 
@@ -367,6 +410,7 @@ document.getElementById("requestForm").addEventListener("submit", async function
   const data = {
     name: document.getElementById("r_name").value.trim(),
     phone: phone,
+    capacity: document.getElementById("r_capacity").value,
     type: document.getElementById("r_type").value,
     locations: locations,
     area: document.getElementById("r_area").value.trim(),
@@ -398,6 +442,9 @@ document.getElementById("requestForm").addEventListener("submit", async function
   submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جارٍ الإرسال...';
 
   try{
+    const requestNumber = await getNextRequestNumber();
+    data.requestNumber = requestNumber;
+
     const customerData = {
       phone: data.phone,
       lastRequestAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -406,14 +453,14 @@ document.getElementById("requestForm").addEventListener("submit", async function
     if (data.name) customerData.name = data.name;
 
     await Promise.all([
-      db.collection("propertyRequests").add(data),
+      db.collection("propertyRequests").doc(String(requestNumber)).set(data),
       db.collection("customers").doc(phoneKey).set(customerData, { merge: true })
     ]);
 
     document.getElementById("requestForm").reset();
     document.getElementById("bankNameField").style.display = "none";
     resetLocationsContainer();
-    statusMsg.textContent = "✔ تم استلام طلبك بنجاح، سنتواصل معك في أقرب وقت ممكن.";
+    statusMsg.textContent = `✔ تم استلام طلبك بنجاح - رقم الطلب: #${requestNumber}. سنتواصل معك في أقرب وقت ممكن.`;
     statusMsg.className = "request-status-msg ok";
   }catch(e){
     statusMsg.textContent = "حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى أو التواصل معنا مباشرة عبر واتساب.";
