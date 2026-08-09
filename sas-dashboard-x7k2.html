@@ -2828,7 +2828,11 @@ async function sendRequestToBanks(docId, d){
       await db.collection("propertyRequests").doc(docId).update({
         sentToBanksAt: firebase.firestore.FieldValue.serverTimestamp()
       });
-      alert(`تم الإرسال بنجاح إلى ${result.sentCount} من ${result.totalRecipients} بنك`);
+      let msg = `تم الإرسال بنجاح إلى ${result.sentCount} من ${result.totalRecipients} بنك`;
+      if (result.sentCount < result.totalRecipients && Array.isArray(result.errors) && result.errors.length){
+        msg += "\n\nتفاصيل الأخطاء:\n" + result.errors.join("\n");
+      }
+      alert(msg);
     } else {
       alert("تعذر الإرسال: " + (result.error || "خطأ غير معروف"));
     }
