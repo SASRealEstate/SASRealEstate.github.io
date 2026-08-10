@@ -83,12 +83,18 @@
 }
 
 .location-row{
-  display:flex;
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr auto;
   gap:8px;
   margin-bottom:8px;
 }
 
-.location-row input{ flex:1; }
+@media (max-width:600px){
+  .location-row{ grid-template-columns:1fr; }
+}
+
+.location-row select,
+.location-row input{ width:100%; }
 
 .input-with-suffix{
   display:flex;
@@ -260,12 +266,8 @@
       </div>
 
       <div class="request-field">
-        <label>الموقع المفضل (مدينة / حي)</label>
-        <div id="locationsContainer">
-          <div class="location-row">
-            <input type="text" class="location-input" placeholder="مثال: حي النرجس - جدة">
-          </div>
-        </div>
+        <label>الموقع المفضل (المنطقة / المدينة / الحي)</label>
+        <div id="locationsContainer"></div>
         <button type="button" id="addLocationBtn" class="btn-add-location"><i class="fa-solid fa-plus"></i> إضافة موقع جديد</button>
       </div>
 
@@ -642,33 +644,71 @@ document.getElementById("f_hasObligations").addEventListener("change", function(
   if (!yes) document.getElementById("f_obligationsAmount").value = "";
 });
 
-function addLocationRow(){
-  const container = document.getElementById("locationsContainer");
+const REGIONS_CITIES = {
+  "منطقة الرياض": ["الرياض","الدرعية","الخرج","الدوادمي","المجمعة","الزلفي","وادي الدواسر","الأفلاج","القويعية","حوطة بني تميم","عفيف","ضرما","المزاحمية","رماح","ثادق","حريملاء","شقراء","السليل","الحريق","مرات"],
+  "منطقة مكة المكرمة": ["مكة المكرمة","جدة","الطائف","رابغ","خليص","الكامل","الجموم","الليث","القنفذة","تربة","رنية","ميسان","أضم","العرضية","بحرة"],
+  "منطقة المدينة المنورة": ["المدينة المنورة","ينبع","العلا","بدر","خيبر","المهد","الحناكية","العيص"],
+  "المنطقة الشرقية": ["الدمام","الخبر","الظهران","الأحساء","الجبيل","القطيف","الخفجي","حفر الباطن","النعيرية","بقيق","رأس تنورة","العديد"],
+  "منطقة عسير": ["أبها","خميس مشيط","بيشة","النماص","محايل عسير","سراة عبيدة","رجال ألمع","تنومة","ظهران الجنوب","أحد رفيدة","بلقرن","تثليث","البرك","المجاردة"],
+  "منطقة تبوك": ["تبوك","الوجه","ضباء","تيماء","أملج","حقل"],
+  "منطقة القصيم": ["بريدة","عنيزة","الرس","البكيرية","البدائع","رياض الخبراء","عيون الجواء","الأسياح","النبهانية","ضرية","الشماسية","المذنب","عقلة الصقور"],
+  "منطقة حائل": ["حائل","بقعاء","الغزالة","الشنان","الشملي","موقق","الحائط"],
+  "منطقة الحدود الشمالية": ["عرعر","رفحاء","طريف"],
+  "منطقة جازان": ["جازان","صبيا","أبو عريش","صامطة","بيش","الدرب","أحد المسارحة","العارضة","فيفا","الريث","هروب","ضمد","العيدابي","الطوال","الحرث"],
+  "منطقة نجران": ["نجران","شرورة","حبونا","بدر الجنوب","يدمة","ثار","خباش"],
+  "منطقة الباحة": ["الباحة","بلجرشي","المندق","المخواة","قلوة","العقيق","القرى","غامد الزناد"],
+  "منطقة الجوف": ["سكاكا","القريات","دومة الجندل","طبرجل"]
+};
+
+function createLocationRow(){
   const row = document.createElement("div");
   row.className = "location-row";
 
-  const input = document.createElement("input");
-  input.type = "text";
-  input.className = "location-input";
-  input.placeholder = "مثال: حي الروضة - الرياض";
-  row.appendChild(input);
+  const regionSelect = document.createElement("select");
+  regionSelect.className = "location-region";
+  regionSelect.innerHTML = '<option value="">المنطقة</option>' +
+    Object.keys(REGIONS_CITIES).map(r => `<option value="${r}">${r}</option>`).join("");
+
+  const citySelect = document.createElement("select");
+  citySelect.className = "location-city";
+  citySelect.innerHTML = '<option value="">المدينة</option>';
+
+  const neighborhoodInput = document.createElement("input");
+  neighborhoodInput.type = "text";
+  neighborhoodInput.className = "location-neighborhood";
+  neighborhoodInput.placeholder = "الحي (اختياري)";
+
+  regionSelect.addEventListener("change", function(){
+    const cities = REGIONS_CITIES[this.value] || [];
+    citySelect.innerHTML = '<option value="">المدينة</option>' +
+      cities.map(c => `<option value="${c}">${c}</option>`).join("");
+  });
 
   const removeBtn = document.createElement("button");
   removeBtn.type = "button";
   removeBtn.className = "btn-remove-location";
   removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
   removeBtn.addEventListener("click", () => row.remove());
-  row.appendChild(removeBtn);
 
-  container.appendChild(row);
+  row.appendChild(regionSelect);
+  row.appendChild(citySelect);
+  row.appendChild(neighborhoodInput);
+  row.appendChild(removeBtn);
+  return row;
+}
+
+function addLocationRow(){
+  document.getElementById("locationsContainer").appendChild(createLocationRow());
 }
 
 document.getElementById("addLocationBtn").addEventListener("click", addLocationRow);
 
 function resetLocationsContainer(){
   const container = document.getElementById("locationsContainer");
-  container.innerHTML = `<div class="location-row"><input type="text" class="location-input" placeholder="مثال: حي النرجس - جدة"></div>`;
+  container.innerHTML = "";
+  container.appendChild(createLocationRow());
 }
+resetLocationsContainer();
 
 async function getNextRequestNumber(){
   const counterRef = db.collection("counters").doc("propertyRequests");
@@ -689,8 +729,14 @@ document.getElementById("requestForm").addEventListener("submit", async function
   statusMsg.textContent = "";
 
   const phone = document.getElementById("r_phone").value.trim();
-  const locations = Array.from(document.querySelectorAll(".location-input"))
-    .map(el => el.value.trim())
+  const locations = Array.from(document.querySelectorAll("#locationsContainer .location-row"))
+    .map(row => {
+      const region = row.querySelector(".location-region").value;
+      const city = row.querySelector(".location-city").value;
+      const neighborhood = row.querySelector(".location-neighborhood").value.trim();
+      const parts = [region, city, neighborhood].filter(Boolean);
+      return parts.join(" - ");
+    })
     .filter(Boolean);
 
   const data = {
