@@ -90,6 +90,10 @@
   margin-bottom:8px;
 }
 
+.obligation-row{
+  grid-template-columns:1fr 1fr 1fr 1fr auto;
+}
+
 @media (max-width:600px){
   .location-row{ grid-template-columns:1fr; }
 }
@@ -431,11 +435,6 @@
         <div id="f_obligationsBlock" style="display:none;">
           <div id="obligationsContainer"></div>
           <button type="button" id="addObligationBtn" class="btn-add-location"><i class="fa-solid fa-plus"></i> إضافة التزام جديد</button>
-
-          <div class="request-field" style="margin-top:10px;">
-            <label for="f_earlyRepayment">قيمة السداد المبكر <span style="font-weight:400; color:var(--muted); font-size:.8rem;">(إن وجد)</span></label>
-            <input type="number" id="f_earlyRepayment" min="0" placeholder="بالريال">
-          </div>
         </div>
 
         <div class="request-field">
@@ -643,7 +642,7 @@ document.getElementById("f_allowances").addEventListener("input", updateSalarySu
 
 function createObligationRow(){
   const row = document.createElement("div");
-  row.className = "location-row";
+  row.className = "location-row obligation-row";
 
   const descInput = document.createElement("input");
   descInput.type = "text";
@@ -662,6 +661,12 @@ function createObligationRow(){
   monthsInput.className = "obligation-months";
   monthsInput.placeholder = "المدة المتبقية (أشهر)";
 
+  const earlyRepaymentInput = document.createElement("input");
+  earlyRepaymentInput.type = "number";
+  earlyRepaymentInput.min = "0";
+  earlyRepaymentInput.className = "obligation-earlyRepayment";
+  earlyRepaymentInput.placeholder = "قيمة السداد المبكر (ريال)";
+
   const removeBtn = document.createElement("button");
   removeBtn.type = "button";
   removeBtn.className = "btn-remove-location";
@@ -671,6 +676,7 @@ function createObligationRow(){
   row.appendChild(descInput);
   row.appendChild(installmentInput);
   row.appendChild(monthsInput);
+  row.appendChild(earlyRepaymentInput);
   row.appendChild(removeBtn);
   return row;
 }
@@ -690,11 +696,7 @@ function resetObligationsContainer(){
 document.getElementById("f_hasObligations").addEventListener("change", function(){
   const yes = this.value === "نعم";
   document.getElementById("f_obligationsBlock").style.display = yes ? "block" : "none";
-  if (yes){
-    resetObligationsContainer();
-  } else {
-    document.getElementById("f_earlyRepayment").value = "";
-  }
+  if (yes) resetObligationsContainer();
 });
 
 const REGIONS_CITIES = {
@@ -820,9 +822,10 @@ document.getElementById("requestForm").addEventListener("submit", async function
       .map(row => ({
         description: row.querySelector(".obligation-desc").value.trim(),
         monthlyInstallment: row.querySelector(".obligation-installment").value.trim(),
-        remainingMonths: row.querySelector(".obligation-months").value.trim()
+        remainingMonths: row.querySelector(".obligation-months").value.trim(),
+        earlyRepayment: row.querySelector(".obligation-earlyRepayment").value.trim()
       }))
-      .filter(o => o.description || o.monthlyInstallment || o.remainingMonths);
+      .filter(o => o.description || o.monthlyInstallment || o.remainingMonths || o.earlyRepayment);
 
     data.financing = {
       idNumber: document.getElementById("f_idNumber").value.trim(),
@@ -839,7 +842,6 @@ document.getElementById("requestForm").addEventListener("submit", async function
       pensionSalary: employmentStatus === "متقاعد" ? document.getElementById("f_pensionSalary").value.trim() : "",
       netSalary: document.getElementById("f_netSalary").value.trim(),
       serviceYears: document.getElementById("f_serviceYears").value.trim(),
-      earlyRepayment: hasObligations === "نعم" ? document.getElementById("f_earlyRepayment").value.trim() : "",
       hasObligations: hasObligations,
       obligations: hasObligations === "نعم" ? obligations : [],
       salaryBank: document.getElementById("f_salaryBank").value,

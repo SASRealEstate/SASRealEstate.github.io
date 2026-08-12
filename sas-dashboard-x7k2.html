@@ -2545,10 +2545,6 @@ function buildFinancingHTML(f){
   if (f.pensionSalary) rows.push(`راتب التقاعد: ${Number(f.pensionSalary).toLocaleString()} ريال`);
   if (f.netSalary) rows.push(`الراتب الذي ينزل في البنك: ${Number(f.netSalary).toLocaleString()} ريال`);
   if (f.serviceYears) rows.push(`سنوات الخدمة: ${escapeHtml(f.serviceYears)}`);
-  if (f.earlyRepayment) {
-    const erNum = Number(f.earlyRepayment);
-    rows.push(`قيمة السداد المبكر: ${isNaN(erNum) ? escapeHtml(f.earlyRepayment) : erNum.toLocaleString() + " ريال"}`);
-  }
   if (f.hasObligations) rows.push(`التزامات: ${escapeHtml(f.hasObligations)}`);
   if (Array.isArray(f.obligations)){
     f.obligations.forEach((o, idx) => {
@@ -2556,6 +2552,7 @@ function buildFinancingHTML(f){
       if (o.description) parts.push(escapeHtml(o.description));
       if (o.monthlyInstallment) parts.push(`قسط شهري: ${Number(o.monthlyInstallment).toLocaleString()} ريال`);
       if (o.remainingMonths) parts.push(`المدة المتبقية: ${escapeHtml(o.remainingMonths)} شهر`);
+      if (o.earlyRepayment) parts.push(`قيمة السداد المبكر: ${Number(o.earlyRepayment).toLocaleString()} ريال`);
       if (parts.length) rows.push(`— الالتزام ${idx + 1}: ${parts.join(" - ")}`);
     });
   } else if (f.obligationsAmount) {
@@ -2835,7 +2832,6 @@ async function sendRequestToBanks(docId, d){
     pensionSalary: f.pensionSalary || "",
     netSalary: f.netSalary || "",
     serviceYears: f.serviceYears || "",
-    earlyRepayment: f.earlyRepayment || "",
     hasObligations: f.hasObligations || "",
     obligations: Array.isArray(f.obligations) ? f.obligations : [],
     salaryBank: f.salaryBank || "",
