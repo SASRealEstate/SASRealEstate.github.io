@@ -267,7 +267,7 @@
       </div>
 
       <div class="request-field">
-        <label>الموقع المفضل (المنطقة / المدينة / الحي)</label>
+        <label>موقع العقار (المنطقة / المدينة / الحي)</label>
         <div id="locationsContainer"></div>
         <button type="button" id="addLocationBtn" class="btn-add-location"><i class="fa-solid fa-plus"></i> إضافة موقع جديد</button>
       </div>
@@ -311,45 +311,13 @@
       <div id="financingQuestionnaire" style="display:none; border-top:2px dashed var(--olive); margin-top:6px; padding-top:20px;">
         <h3 style="color:var(--olive-dark); margin:0 0 16px; font-size:1.05rem;">بيانات إضافية للتمويل البنكي</h3>
 
-        <div class="request-field" id="bankNameField">
-          <label for="r_bankName">اسم البنك</label>
-          <select id="r_bankName">
-            <option value="">— اختر —</option>
-            <option value="البنك الأهلي السعودي">البنك الأهلي السعودي</option>
-            <option value="مصرف الراجحي">مصرف الراجحي</option>
-            <option value="بنك الرياض">بنك الرياض</option>
-            <option value="البنك السعودي الفرنسي">البنك السعودي الفرنسي</option>
-            <option value="البنك السعودي البريطاني (ساب)">البنك السعودي البريطاني (ساب)</option>
-            <option value="البنك العربي الوطني">البنك العربي الوطني</option>
-            <option value="بنك الجزيرة">بنك الجزيرة</option>
-            <option value="البنك السعودي للاستثمار">البنك السعودي للاستثمار</option>
-            <option value="بنك البلاد">بنك البلاد</option>
-            <option value="مصرف الإنماء">مصرف الإنماء</option>
-            <option value="بنك STC">بنك STC</option>
-            <option value="بنك D360">بنك D360</option>
-            <option value="أخرى">أخرى</option>
-          </select>
-        </div>
-
         <div class="request-field">
           <label for="f_idNumber">رقم الهوية</label>
           <input type="text" id="f_idNumber" inputmode="numeric" placeholder="مثال: 1xxxxxxxxx">
         </div>
 
+        <div class="request-field"><label>تاريخ الميلاد (هجري)</label></div>
         <div class="request-row">
-          <div class="request-field">
-            <label for="f_calendarType">تاريخ الميلاد - نوع التقويم</label>
-            <select id="f_calendarType">
-              <option value="gregorian">ميلادي</option>
-              <option value="hijri">هجري</option>
-            </select>
-          </div>
-          <div class="request-field" id="f_dobGregorianField">
-            <label for="f_dobGregorian">التاريخ</label>
-            <input type="date" id="f_dobGregorian">
-          </div>
-        </div>
-        <div class="request-row" id="f_dobHijriField" style="display:none;">
           <div class="request-field">
             <label for="f_dobHijriDay">اليوم</label>
             <select id="f_dobHijriDay"><option value="">يوم</option></select>
@@ -452,12 +420,8 @@
         </div>
 
         <div class="request-field">
-          <label for="f_earlyRepayment">السداد المبكر؟</label>
-          <select id="f_earlyRepayment">
-            <option value="">— اختر —</option>
-            <option value="نعم">نعم</option>
-            <option value="لا">لا</option>
-          </select>
+          <label for="f_earlyRepayment">قيمة السداد المبكر <span style="font-weight:400; color:var(--muted); font-size:.8rem;">(إن وجد)</span></label>
+          <input type="number" id="f_earlyRepayment" min="0" placeholder="بالريال">
         </div>
 
         <div class="request-field">
@@ -470,55 +434,8 @@
         </div>
 
         <div id="f_obligationsBlock" style="display:none;">
-          <p class="hint" style="margin:-4px 0 10px;">يرجى ذكر القسط الشهري والمدة المتبقية بالأشهر لكل التزام (اترك الفارغ إن لم يوجد)</p>
-
-          <div class="request-field"><label>الالتزام الأول</label></div>
-          <div class="request-row">
-            <div class="request-field">
-              <label for="f_obligation1Desc">نوع الالتزام</label>
-              <input type="text" id="f_obligation1Desc" placeholder="مثال: قرض شخصي">
-            </div>
-            <div class="request-field">
-              <label for="f_obligation1Installment">القسط الشهري</label>
-              <input type="number" id="f_obligation1Installment" min="0" placeholder="بالريال">
-            </div>
-            <div class="request-field">
-              <label for="f_obligation1Months">المدة المتبقية (أشهر)</label>
-              <input type="number" id="f_obligation1Months" min="0">
-            </div>
-          </div>
-
-          <div class="request-field"><label>الالتزام الثاني</label></div>
-          <div class="request-row">
-            <div class="request-field">
-              <label for="f_obligation2Desc">نوع الالتزام</label>
-              <input type="text" id="f_obligation2Desc" placeholder="مثال: بطاقة ائتمانية">
-            </div>
-            <div class="request-field">
-              <label for="f_obligation2Installment">القسط الشهري</label>
-              <input type="number" id="f_obligation2Installment" min="0" placeholder="بالريال">
-            </div>
-            <div class="request-field">
-              <label for="f_obligation2Months">المدة المتبقية (أشهر)</label>
-              <input type="number" id="f_obligation2Months" min="0">
-            </div>
-          </div>
-
-          <div class="request-field"><label>الالتزام الثالث</label></div>
-          <div class="request-row">
-            <div class="request-field">
-              <label for="f_obligation3Desc">نوع الالتزام</label>
-              <input type="text" id="f_obligation3Desc" placeholder="مثال: تمويل سيارة">
-            </div>
-            <div class="request-field">
-              <label for="f_obligation3Installment">القسط الشهري</label>
-              <input type="number" id="f_obligation3Installment" min="0" placeholder="بالريال">
-            </div>
-            <div class="request-field">
-              <label for="f_obligation3Months">المدة المتبقية (أشهر)</label>
-              <input type="number" id="f_obligation3Months" min="0">
-            </div>
-          </div>
+          <div id="obligationsContainer"></div>
+          <button type="button" id="addObligationBtn" class="btn-add-location"><i class="fa-solid fa-plus"></i> إضافة التزام جديد</button>
         </div>
 
         <div class="request-field">
@@ -577,7 +494,6 @@
 <script>
 document.getElementById("r_paymentMethod").addEventListener("change", function(){
   const isBank = this.value === "بنك";
-  if (!isBank) document.getElementById("r_bankName").value = "";
   document.getElementById("financingQuestionnaire").style.display = isBank ? "block" : "none";
 });
 
@@ -600,28 +516,6 @@ function hijriToGregorian(hy, hm, hd){
   return new Date(year, month - 1, day, 12);
 }
 
-function gregorianToHijri(gDate){
-  const day = gDate.getDate();
-  const month = gDate.getMonth() + 1;
-  const year = gDate.getFullYear();
-
-  const jdn = Math.floor((1461 * (year + 4800 + Math.floor((month - 14) / 12))) / 4) +
-    Math.floor((367 * (month - 2 - 12 * Math.floor((month - 14) / 12))) / 12) -
-    Math.floor((3 * Math.floor((year + 4900 + Math.floor((month - 14) / 12)) / 100)) / 4) +
-    day - 32075;
-
-  let l = jdn - 1948442 + 10632;
-  const n = Math.floor((l - 1) / 10631);
-  l = l - 10631 * n + 354;
-  const j = Math.floor((10985 - l) / 5316) * Math.floor((50 * l) / 17719) + Math.floor(l / 5670) * Math.floor((43 * l) / 15238);
-  l = l - Math.floor((30 - j) / 15) * Math.floor((17719 * j) / 50) - Math.floor(j / 16) * Math.floor((15238 * j) / 43) + 29;
-  const hMonth = Math.floor((24 * l) / 709);
-  const hDay = l - Math.floor((709 * hMonth) / 24);
-  const hYear = 30 * n + j - 30;
-
-  return { year: hYear, month: hMonth, day: hDay };
-}
-
 function calculateAge(dobDate){
   const today = new Date();
   let age = today.getFullYear() - dobDate.getFullYear();
@@ -631,18 +525,14 @@ function calculateAge(dobDate){
 }
 
 function getComputedDob(){
-  const calendarType = document.getElementById("f_calendarType").value;
-  let dobDate = null;
-  if (calendarType === "gregorian"){
-    const val = document.getElementById("f_dobGregorian").value;
-    if (val) dobDate = new Date(val + "T12:00:00");
-  } else {
-    const d = parseInt(document.getElementById("f_dobHijriDay").value);
-    const m = parseInt(document.getElementById("f_dobHijriMonth").value);
-    const y = parseInt(document.getElementById("f_dobHijriYear").value);
-    if (d && m && y) dobDate = hijriToGregorian(y, m, d);
+  const d = parseInt(document.getElementById("f_dobHijriDay").value);
+  const m = parseInt(document.getElementById("f_dobHijriMonth").value);
+  const y = parseInt(document.getElementById("f_dobHijriYear").value);
+  if (d && m && y){
+    const dobDate = hijriToGregorian(y, m, d);
+    return !isNaN(dobDate.getTime()) ? dobDate : null;
   }
-  return (dobDate && !isNaN(dobDate.getTime())) ? dobDate : null;
+  return null;
 }
 
 function updateAgeDisplay(){
@@ -650,14 +540,8 @@ function updateAgeDisplay(){
   const dobDate = getComputedDob();
   if (dobDate){
     const age = calculateAge(dobDate);
-    const calendarType = document.getElementById("f_calendarType").value;
-    if (calendarType === "gregorian"){
-      const h = gregorianToHijri(dobDate);
-      display.textContent = `العمر: ${age} سنة (بالهجري: ${h.day}-${h.month}-${h.year}هـ)`;
-    } else {
-      const gregorianStr = dobDate.toISOString().slice(0,10);
-      display.textContent = `العمر: ${age} سنة (بالميلادي: ${gregorianStr})`;
-    }
+    const gregorianStr = dobDate.toISOString().slice(0,10);
+    display.textContent = `العمر: ${age} سنة (بالميلادي: ${gregorianStr})`;
   } else {
     display.textContent = "";
   }
@@ -708,13 +592,6 @@ function getComputedAppointmentDate(){
   return null;
 }
 
-document.getElementById("f_calendarType").addEventListener("change", function(){
-  const isHijri = this.value === "hijri";
-  document.getElementById("f_dobGregorianField").style.display = isHijri ? "none" : "flex";
-  document.getElementById("f_dobHijriField").style.display = isHijri ? "grid" : "none";
-  updateAgeDisplay();
-});
-document.getElementById("f_dobGregorian").addEventListener("change", updateAgeDisplay);
 document.getElementById("f_dobHijriDay").addEventListener("change", updateAgeDisplay);
 document.getElementById("f_dobHijriMonth").addEventListener("change", updateAgeDisplay);
 document.getElementById("f_dobHijriYear").addEventListener("change", updateAgeDisplay);
@@ -764,18 +641,56 @@ function updateSalarySum(){
 document.getElementById("f_basicSalary").addEventListener("input", updateSalarySum);
 document.getElementById("f_allowances").addEventListener("input", updateSalarySum);
 
-const OBLIGATION_FIELD_IDS = [
-  "f_obligation1Desc","f_obligation1Installment","f_obligation1Months",
-  "f_obligation2Desc","f_obligation2Installment","f_obligation2Months",
-  "f_obligation3Desc","f_obligation3Installment","f_obligation3Months"
-];
+function createObligationRow(){
+  const row = document.createElement("div");
+  row.className = "location-row";
+
+  const descInput = document.createElement("input");
+  descInput.type = "text";
+  descInput.className = "obligation-desc";
+  descInput.placeholder = "نوع الالتزام (مثال: قرض شخصي)";
+
+  const installmentInput = document.createElement("input");
+  installmentInput.type = "number";
+  installmentInput.min = "0";
+  installmentInput.className = "obligation-installment";
+  installmentInput.placeholder = "القسط الشهري (ريال)";
+
+  const monthsInput = document.createElement("input");
+  monthsInput.type = "number";
+  monthsInput.min = "0";
+  monthsInput.className = "obligation-months";
+  monthsInput.placeholder = "المدة المتبقية (أشهر)";
+
+  const removeBtn = document.createElement("button");
+  removeBtn.type = "button";
+  removeBtn.className = "btn-remove-location";
+  removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+  removeBtn.addEventListener("click", () => row.remove());
+
+  row.appendChild(descInput);
+  row.appendChild(installmentInput);
+  row.appendChild(monthsInput);
+  row.appendChild(removeBtn);
+  return row;
+}
+
+function addObligationRow(){
+  document.getElementById("obligationsContainer").appendChild(createObligationRow());
+}
+
+document.getElementById("addObligationBtn").addEventListener("click", addObligationRow);
+
+function resetObligationsContainer(){
+  const container = document.getElementById("obligationsContainer");
+  container.innerHTML = "";
+  container.appendChild(createObligationRow());
+}
 
 document.getElementById("f_hasObligations").addEventListener("change", function(){
   const yes = this.value === "نعم";
   document.getElementById("f_obligationsBlock").style.display = yes ? "block" : "none";
-  if (!yes){
-    OBLIGATION_FIELD_IDS.forEach(id => { document.getElementById(id).value = ""; });
-  }
+  if (yes) resetObligationsContainer();
 });
 
 const REGIONS_CITIES = {
@@ -883,7 +798,6 @@ document.getElementById("requestForm").addEventListener("submit", async function
     budgetMin: document.getElementById("r_budgetMin").value.trim(),
     budgetMax: document.getElementById("r_budgetMax").value.trim(),
     paymentMethod: document.getElementById("r_paymentMethod").value,
-    bankName: document.getElementById("r_paymentMethod").value === "بنك" ? document.getElementById("r_bankName").value : "",
     notes: document.getElementById("r_notes").value.trim(),
     status: "جديد",
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -898,15 +812,16 @@ document.getElementById("requestForm").addEventListener("submit", async function
     const isMilitary = govType === "عسكري";
     const hasObligations = document.getElementById("f_hasObligations").value;
 
-    const obligations = [1,2,3].map(n => ({
-      description: document.getElementById(`f_obligation${n}Desc`).value.trim(),
-      monthlyInstallment: document.getElementById(`f_obligation${n}Installment`).value.trim(),
-      remainingMonths: document.getElementById(`f_obligation${n}Months`).value.trim()
-    })).filter(o => o.description || o.monthlyInstallment || o.remainingMonths);
+    const obligations = Array.from(document.querySelectorAll("#obligationsContainer .location-row"))
+      .map(row => ({
+        description: row.querySelector(".obligation-desc").value.trim(),
+        monthlyInstallment: row.querySelector(".obligation-installment").value.trim(),
+        remainingMonths: row.querySelector(".obligation-months").value.trim()
+      }))
+      .filter(o => o.description || o.monthlyInstallment || o.remainingMonths);
 
     data.financing = {
       idNumber: document.getElementById("f_idNumber").value.trim(),
-      dobCalendarType: document.getElementById("f_calendarType").value,
       dobGregorian: dobDate ? dobDate.toISOString().slice(0,10) : "",
       age: dobDate ? calculateAge(dobDate) : null,
       employerType: employerType,
@@ -920,7 +835,7 @@ document.getElementById("requestForm").addEventListener("submit", async function
       pensionSalary: employmentStatus === "متقاعد" ? document.getElementById("f_pensionSalary").value.trim() : "",
       netSalary: document.getElementById("f_netSalary").value.trim(),
       serviceYears: document.getElementById("f_serviceYears").value.trim(),
-      earlyRepayment: document.getElementById("f_earlyRepayment").value,
+      earlyRepayment: document.getElementById("f_earlyRepayment").value.trim(),
       hasObligations: hasObligations,
       obligations: hasObligations === "نعم" ? obligations : [],
       salaryBank: document.getElementById("f_salaryBank").value,
@@ -964,8 +879,6 @@ document.getElementById("requestForm").addEventListener("submit", async function
 
     document.getElementById("requestForm").reset();
     document.getElementById("financingQuestionnaire").style.display = "none";
-    document.getElementById("f_dobGregorianField").style.display = "flex";
-    document.getElementById("f_dobHijriField").style.display = "none";
     document.getElementById("f_ageDisplay").textContent = "";
     document.getElementById("f_govTypeField").style.display = "none";
     document.getElementById("f_rankField").style.display = "none";
@@ -975,6 +888,7 @@ document.getElementById("requestForm").addEventListener("submit", async function
     document.getElementById("f_salarySumDisplay").style.display = "none";
     document.getElementById("f_obligationsBlock").style.display = "none";
     resetLocationsContainer();
+    resetObligationsContainer();
     statusMsg.textContent = `✔ تم استلام طلبك بنجاح - رقم الطلب: #${requestNumber}. سنتواصل معك في أقرب وقت ممكن.`;
     statusMsg.className = "request-status-msg ok";
   }catch(e){

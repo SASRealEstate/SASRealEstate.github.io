@@ -2545,7 +2545,10 @@ function buildFinancingHTML(f){
   if (f.pensionSalary) rows.push(`راتب التقاعد: ${Number(f.pensionSalary).toLocaleString()} ريال`);
   if (f.netSalary) rows.push(`الراتب الصافي: ${Number(f.netSalary).toLocaleString()} ريال`);
   if (f.serviceYears) rows.push(`سنوات الخدمة: ${escapeHtml(f.serviceYears)}`);
-  if (f.earlyRepayment) rows.push(`السداد المبكر: ${escapeHtml(f.earlyRepayment)}`);
+  if (f.earlyRepayment) {
+    const erNum = Number(f.earlyRepayment);
+    rows.push(`قيمة السداد المبكر: ${isNaN(erNum) ? escapeHtml(f.earlyRepayment) : erNum.toLocaleString() + " ريال"}`);
+  }
   if (f.hasObligations) rows.push(`التزامات: ${escapeHtml(f.hasObligations)}`);
   if (Array.isArray(f.obligations)){
     f.obligations.forEach((o, idx) => {
@@ -2815,6 +2818,7 @@ async function sendRequestToBanks(docId, d){
   const emailData = {
     requestNumber: d.requestNumber || docId,
     propertyType: d.type || "",
+    locations: Array.isArray(d.locations) ? d.locations.join(" أو ") : "",
     budgetMin: d.budgetMin || "",
     budgetMax: d.budgetMax || "",
     idNumber: f.idNumber || "",
