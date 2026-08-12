@@ -357,7 +357,7 @@
         </div>
 
         <div class="request-field" id="f_defenseEzazField" style="display:none;">
-          <label for="f_defenseEzaz">لوزارة الدفاع - مستحق إعزاز؟</label>
+          <label for="f_defenseEzaz">لوزارة الدفاع - مستحق اعتزاز؟</label>
           <select id="f_defenseEzaz">
             <option value="">— اختر —</option>
             <option value="نعم">نعم</option>
@@ -410,18 +410,13 @@
         </div>
 
         <div class="request-field">
-          <label for="f_netSalary">الراتب الصافي</label>
+          <label for="f_netSalary">الراتب الذي ينزل في البنك</label>
           <input type="number" id="f_netSalary" min="0" placeholder="بالريال">
         </div>
 
         <div class="request-field">
           <label for="f_serviceYears">عدد سنوات الخدمة</label>
           <input type="number" id="f_serviceYears" min="0" placeholder="بالسنوات">
-        </div>
-
-        <div class="request-field">
-          <label for="f_earlyRepayment">قيمة السداد المبكر <span style="font-weight:400; color:var(--muted); font-size:.8rem;">(إن وجد)</span></label>
-          <input type="number" id="f_earlyRepayment" min="0" placeholder="بالريال">
         </div>
 
         <div class="request-field">
@@ -436,6 +431,11 @@
         <div id="f_obligationsBlock" style="display:none;">
           <div id="obligationsContainer"></div>
           <button type="button" id="addObligationBtn" class="btn-add-location"><i class="fa-solid fa-plus"></i> إضافة التزام جديد</button>
+
+          <div class="request-field" style="margin-top:10px;">
+            <label for="f_earlyRepayment">قيمة السداد المبكر <span style="font-weight:400; color:var(--muted); font-size:.8rem;">(إن وجد)</span></label>
+            <input type="number" id="f_earlyRepayment" min="0" placeholder="بالريال">
+          </div>
         </div>
 
         <div class="request-field">
@@ -690,7 +690,11 @@ function resetObligationsContainer(){
 document.getElementById("f_hasObligations").addEventListener("change", function(){
   const yes = this.value === "نعم";
   document.getElementById("f_obligationsBlock").style.display = yes ? "block" : "none";
-  if (yes) resetObligationsContainer();
+  if (yes){
+    resetObligationsContainer();
+  } else {
+    document.getElementById("f_earlyRepayment").value = "";
+  }
 });
 
 const REGIONS_CITIES = {
@@ -835,7 +839,7 @@ document.getElementById("requestForm").addEventListener("submit", async function
       pensionSalary: employmentStatus === "متقاعد" ? document.getElementById("f_pensionSalary").value.trim() : "",
       netSalary: document.getElementById("f_netSalary").value.trim(),
       serviceYears: document.getElementById("f_serviceYears").value.trim(),
-      earlyRepayment: document.getElementById("f_earlyRepayment").value.trim(),
+      earlyRepayment: hasObligations === "نعم" ? document.getElementById("f_earlyRepayment").value.trim() : "",
       hasObligations: hasObligations,
       obligations: hasObligations === "نعم" ? obligations : [],
       salaryBank: document.getElementById("f_salaryBank").value,

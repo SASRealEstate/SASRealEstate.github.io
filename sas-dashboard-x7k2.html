@@ -2537,13 +2537,13 @@ function buildFinancingHTML(f){
   if (f.dobGregorian) rows.push(`تاريخ الميلاد: ${escapeHtml(f.dobGregorian)}${f.age != null ? ` (العمر: ${escapeHtml(f.age)} سنة)` : ""}`);
   if (f.employerType) rows.push(`جهة العمل: ${escapeHtml(f.employerType)}${f.govType ? " - " + escapeHtml(f.govType) : ""}`);
   if (f.rank) rows.push(`الرتبة: ${escapeHtml(f.rank)}`);
-  if (f.defenseEzaz) rows.push(`مستحق إعزاز (وزارة الدفاع): ${escapeHtml(f.defenseEzaz)}`);
+  if (f.defenseEzaz) rows.push(`مستحق اعتزاز (وزارة الدفاع): ${escapeHtml(f.defenseEzaz)}`);
   if (f.appointmentDateHijri) rows.push(`تاريخ التعيين: ${escapeHtml(f.appointmentDateHijri)}`);
   if (f.employmentStatus) rows.push(`الحالة الوظيفية: ${escapeHtml(f.employmentStatus)}`);
   if (f.basicSalary) rows.push(`الراتب الأساسي (بدون بدلات): ${Number(f.basicSalary).toLocaleString()} ريال`);
   if (f.allowances) rows.push(`البدلات: ${Number(f.allowances).toLocaleString()} ريال`);
   if (f.pensionSalary) rows.push(`راتب التقاعد: ${Number(f.pensionSalary).toLocaleString()} ريال`);
-  if (f.netSalary) rows.push(`الراتب الصافي: ${Number(f.netSalary).toLocaleString()} ريال`);
+  if (f.netSalary) rows.push(`الراتب الذي ينزل في البنك: ${Number(f.netSalary).toLocaleString()} ريال`);
   if (f.serviceYears) rows.push(`سنوات الخدمة: ${escapeHtml(f.serviceYears)}`);
   if (f.earlyRepayment) {
     const erNum = Number(f.earlyRepayment);
