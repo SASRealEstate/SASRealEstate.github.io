@@ -534,6 +534,13 @@ function getComputedDob(){
   return null;
 }
 
+function getDobHijriString(){
+  const d = document.getElementById("f_dobHijriDay").value;
+  const m = document.getElementById("f_dobHijriMonth").value;
+  const y = document.getElementById("f_dobHijriYear").value;
+  return (d && m && y) ? `${d}-${m}-${y}هـ` : "";
+}
+
 function updateAgeDisplay(){
   const display = document.getElementById("f_ageDisplay");
   const dobDate = getComputedDob();
@@ -580,15 +587,11 @@ function populateHijriSelects(){
 }
 populateHijriSelects();
 
-function getComputedAppointmentDate(){
-  const d = parseInt(document.getElementById("f_appointmentHijriDay").value);
-  const m = parseInt(document.getElementById("f_appointmentHijriMonth").value);
-  const y = parseInt(document.getElementById("f_appointmentHijriYear").value);
-  if (d && m && y){
-    const date = hijriToGregorian(y, m, d);
-    return !isNaN(date.getTime()) ? date : null;
-  }
-  return null;
+function getAppointmentHijriString(){
+  const d = document.getElementById("f_appointmentHijriDay").value;
+  const m = document.getElementById("f_appointmentHijriMonth").value;
+  const y = document.getElementById("f_appointmentHijriYear").value;
+  return (d && m && y) ? `${d}-${m}-${y}هـ` : "";
 }
 
 document.getElementById("f_dobHijriDay").addEventListener("change", updateAgeDisplay);
@@ -811,7 +814,6 @@ document.getElementById("requestForm").addEventListener("submit", async function
 
   if (data.paymentMethod === "بنك"){
     const dobDate = getComputedDob();
-    const appointmentDate = getComputedAppointmentDate();
     const employmentStatus = document.getElementById("f_employmentStatus").value;
     const employerType = document.getElementById("f_employerType").value;
     const govType = employerType === "حكومي" ? document.getElementById("f_govType").value : "";
@@ -829,13 +831,14 @@ document.getElementById("requestForm").addEventListener("submit", async function
 
     data.financing = {
       idNumber: document.getElementById("f_idNumber").value.trim(),
+      dobHijri: getDobHijriString(),
       dobGregorian: dobDate ? dobDate.toISOString().slice(0,10) : "",
       age: dobDate ? calculateAge(dobDate) : null,
       employerType: employerType,
       govType: govType,
       rank: isMilitary ? document.getElementById("f_rank").value.trim() : "",
       defenseEzaz: isMilitary ? document.getElementById("f_defenseEzaz").value : "",
-      appointmentDateHijri: appointmentDate ? appointmentDate.toISOString().slice(0,10) : "",
+      appointmentDateHijri: getAppointmentHijriString(),
       employmentStatus: employmentStatus,
       basicSalary: employmentStatus === "على رأس العمل" ? document.getElementById("f_basicSalary").value.trim() : "",
       allowances: employmentStatus === "على رأس العمل" ? document.getElementById("f_allowances").value.trim() : "",

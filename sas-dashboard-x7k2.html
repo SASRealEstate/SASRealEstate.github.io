@@ -2534,7 +2534,7 @@ function buildFinancingHTML(f){
   if (!f) return "";
   const rows = [];
   if (f.idNumber) rows.push(`رقم الهوية: ${escapeHtml(f.idNumber)}`);
-  if (f.dobGregorian) rows.push(`تاريخ الميلاد: ${escapeHtml(f.dobGregorian)}${f.age != null ? ` (العمر: ${escapeHtml(f.age)} سنة)` : ""}`);
+  if (f.dobHijri) rows.push(`تاريخ الميلاد: ${escapeHtml(f.dobHijri)}${f.age != null ? ` (العمر: ${escapeHtml(f.age)} سنة)` : ""}`);
   if (f.employerType) rows.push(`جهة العمل: ${escapeHtml(f.employerType)}${f.govType ? " - " + escapeHtml(f.govType) : ""}`);
   if (f.rank) rows.push(`الرتبة: ${escapeHtml(f.rank)}`);
   if (f.defenseEzaz) rows.push(`مستحق اعتزاز (وزارة الدفاع): ${escapeHtml(f.defenseEzaz)}`);
@@ -2816,10 +2816,8 @@ async function sendRequestToBanks(docId, d){
     requestNumber: d.requestNumber || docId,
     propertyType: d.type || "",
     locations: Array.isArray(d.locations) ? d.locations.join(" أو ") : "",
-    budgetMin: d.budgetMin || "",
-    budgetMax: d.budgetMax || "",
     idNumber: f.idNumber || "",
-    dobGregorian: f.dobGregorian || "",
+    dobHijri: f.dobHijri || "",
     age: f.age != null ? f.age : "",
     employerType: f.employerType || "",
     govType: f.govType || "",
