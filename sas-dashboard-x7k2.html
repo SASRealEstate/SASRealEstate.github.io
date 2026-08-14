@@ -2621,8 +2621,10 @@ function renderRequestsList(docs){
     const safeArea = escapeHtml(d.area);
     const budgetMin = d.budgetMin ? Number(d.budgetMin) : null;
     const budgetMax = d.budgetMax ? Number(d.budgetMax) : null;
+    const budget = d.budget ? Number(d.budget) : null;
     let safeBudget = "";
-    if (budgetMin && budgetMax) safeBudget = `من ${budgetMin.toLocaleString()} إلى ${budgetMax.toLocaleString()} ريال`;
+    if (budget) safeBudget = `${budget.toLocaleString()} ريال`;
+    else if (budgetMin && budgetMax) safeBudget = `من ${budgetMin.toLocaleString()} إلى ${budgetMax.toLocaleString()} ريال`;
     else if (budgetMin) safeBudget = `من ${budgetMin.toLocaleString()} ريال`;
     else if (budgetMax) safeBudget = `حتى ${budgetMax.toLocaleString()} ريال`;
     else safeBudget = escapeHtml(d.budget);
@@ -2817,6 +2819,7 @@ async function sendRequestToBanks(docId, d){
     propertyType: d.type || "",
     locations: Array.isArray(d.locations) ? d.locations.join(" أو ") : "",
     area: d.area || "",
+    budget: d.budget || "",
     budgetMin: d.budgetMin || "",
     budgetMax: d.budgetMax || "",
     notes: d.notes || "",
