@@ -621,13 +621,15 @@ if (!window.db || !window.auth) {
 /* نفس رابط Apps Script يخدم الطلبين، يُميَّز الطلب بحقل action */
 
 const PHOTO_UPLOAD_URL = "https://script.google.com/macros/s/AKfycbzERmTzPjzIKAtMtLXy8G36IR1Bvrj5vItpq_TYjsaZ989py3wZoNhCq2bGtBuTCIT-/exec";
+/* يجب أن يطابق هذا القيمة المضافة في دالة doPost بملف Apps Script — راجع التعليمات المرفقة */
+const APPS_SCRIPT_SHARED_SECRET = "TTmjCFaEYWnypyX69EeEoFUksH4zu9rt";
 
 async function resolveLocationToLatLng(url){
   try{
     const res = await fetch(PHOTO_UPLOAD_URL, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ action: "resolveLocation", url })
+      body: JSON.stringify({ secret: APPS_SCRIPT_SHARED_SECRET, action: "resolveLocation", url })
     });
     const result = await res.json();
     if (result.success) return { lat: result.lat, lng: result.lng };
@@ -669,7 +671,7 @@ async function uploadPhotosForListing(listingNumber, fileList, statusEl, urlInpu
     const res = await fetch(PHOTO_UPLOAD_URL, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ listingNumber: String(listingNumber), files })
+      body: JSON.stringify({ secret: APPS_SCRIPT_SHARED_SECRET, listingNumber: String(listingNumber), files })
     });
     const result = await res.json();
 
@@ -2847,7 +2849,7 @@ async function sendRequestToBanks(docId, d){
     const res = await fetch(PHOTO_UPLOAD_URL, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ action: "sendToBanks", recipients, data: emailData })
+      body: JSON.stringify({ secret: APPS_SCRIPT_SHARED_SECRET, action: "sendToBanks", recipients, data: emailData })
     });
     const result = await res.json();
     if (result.success){
