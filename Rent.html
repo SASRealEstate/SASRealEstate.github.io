@@ -308,13 +308,13 @@ function getPrimaryPrice(prices){
 
 function renderCardHTML(item){
     const {id, type, location, floor, rooms, baths, hall, kitchen, store,
-           elevator, furnished, fittedKitchen, entrance, notes, photos, brokerPhone, availableFrom} = item;
+           elevator, furnished, fittedKitchen, entrance, notes, photos, brokerPhone, brokerContact, availableFrom} = item;
 
     const prices = getEffectivePrices(item);
     const paymentMethods = getEffectivePaymentMethods(item);
     const activeTypes = RENT_TYPES.filter(rt => prices[rt.key]);
     const primaryPrice = getPrimaryPrice(prices);
-    const contactPhoneDigits = (brokerPhone ? String(brokerPhone) : "534108666").replace(/[^\d]/g, "").replace(/^0/, "");
+    const contactPhoneDigits = (brokerPhone && brokerContact !== false ? String(brokerPhone) : "534108666").replace(/[^\d]/g, "").replace(/^0/, "");
     const contactPhone = "966" + contactPhoneDigits;
 
     const priceRowsHTML = activeTypes.map(rt => {

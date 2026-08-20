@@ -362,7 +362,7 @@ button{ cursor:pointer; border:none; }
     </div>
     <div class="actions">
       <a class="btn-header" id="viewPageLink" href="Rent.html" target="_blank"><i class="fa-solid fa-eye"></i> عرض الصفحة</a>
-      <a class="btn-header" href="RequestOffer.html" target="_blank"><i class="fa-solid fa-magnifying-glass-dollar"></i> نموذج طلب عقار/أرض</a>
+      <a class="btn-header" id="requestOfferLink" href="RequestOffer.html" target="_blank" style="display:none;"><i class="fa-solid fa-magnifying-glass-dollar"></i> نموذج طلب عقار/أرض</a>
       <a class="btn-header" id="floorplan3dLink" href="experimental/floorplan3d/editor/" target="_blank" style="display:none;"><i class="fa-solid fa-cube"></i> محرر الشقة ثلاثية الأبعاد</a>
       <button class="btn-header" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i> خروج</button>
     </div>
@@ -1115,6 +1115,10 @@ function applyRoleUI(){
   // Experimental feature, admins only — never shown to brokers.
   const floorplanLink = document.getElementById("floorplan3dLink");
   if (floorplanLink) floorplanLink.style.display = (userRole === "admin") ? "inline-flex" : "none";
+
+  // Customer request-form link, admins only — never shown to brokers.
+  const requestOfferLink = document.getElementById("requestOfferLink");
+  if (requestOfferLink) requestOfferLink.style.display = (userRole === "admin") ? "inline-flex" : "none";
 }
 
 /* ============ التبويبات ============ */
@@ -1610,6 +1614,13 @@ function editListing(docId, data){
   window.scrollTo({top:0, behavior:"smooth"});
 }
 
+function toggleBrokerContact(docId, currentlyOn){
+  db.collection(cat().collection).doc(docId).update({brokerContact: !currentlyOn}).catch(e => {
+    alert("حدث خطأ أثناء التبديل: " + e.message);
+    console.error(e);
+  });
+}
+
 function archiveListing(docId){
   if (!confirm("هل تريد أرشفة العرض رقم " + docId + "؟ سيختفي من الصفحة العامة ويمكنك استعادته لاحقًا من تبويب \"مؤرشف\".")) return;
   db.collection(cat().collection).doc(docId).update({status: "مؤرشف"}).catch(e => {
@@ -1752,7 +1763,12 @@ function renderListingsTable(docs){
       ? `<button class="btn-copy" data-action="copy" title="نسخ بيانات العرض"><i class="fa-solid fa-copy"></i></button>`
       : ``;
 
-    const actionsHTML = copyBtnHTML + (isArchived
+    const brokerContactOn = d.brokerContact !== false;
+    const brokerToggleBtnHTML = d.brokerPhone
+      ? `<button class="btn-edit" data-action="toggleBrokerContact" title="${brokerContactOn ? 'إلغاء تفعيل: التواصل حاليًا عبر الوسيط' : 'تفعيل: التواصل حاليًا عبر المكتب'}"><i class="fa-solid ${brokerContactOn ? 'fa-toggle-on' : 'fa-toggle-off'}"></i></button>`
+      : ``;
+
+    const actionsHTML = copyBtnHTML + brokerToggleBtnHTML + (isArchived
       ? `<button class="btn-edit" data-action="edit"><i class="fa-solid fa-pen"></i></button>
          <button class="btn-unarchive" data-action="unarchive"><i class="fa-solid fa-rotate-left"></i></button>
          <button class="btn-delete" data-action="delete"><i class="fa-solid fa-trash"></i></button>`
@@ -1765,6 +1781,7 @@ function renderListingsTable(docs){
     tr.querySelector('[data-action="unarchive"]')?.addEventListener("click", () => unarchiveListing(doc.id));
     tr.querySelector('[data-action="delete"]')?.addEventListener("click", () => permanentlyDeleteListing(doc.id));
     tr.querySelector('[data-action="copy"]')?.addEventListener("click", (e) => copyListingText(doc.id, d, e.currentTarget));
+    tr.querySelector('[data-action="toggleBrokerContact"]')?.addEventListener("click", () => toggleBrokerContact(doc.id, brokerContactOn));
     tbody.appendChild(tr);
   });
 }
