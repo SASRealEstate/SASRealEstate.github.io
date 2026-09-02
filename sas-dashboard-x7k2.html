@@ -884,7 +884,7 @@ ${availabilityLine}الموقع: ${d.location || ""}
       {key:"status", label:"الحالة", type:"select", options:["نشط","مؤرشف"]},
       {key:"ownerNumber", label:"المالك", type:"owner-select"},
       {key:"brokerNumber", label:"الوسيط", type:"broker-select"},
-      {key:"type", label:"نوع العقار", type:"text"},
+      {key:"type", label:"نوع العقار", type:"select", options:["شقة","استوديو","دور","ملحق","رووف","دوبلكس","تاون هاوس","توين فيلا","فيلا مستقلة","قصر","شاليه","منزل شعبي","عمارة سكنية","مجمع سكني","عمارة تجارية"]},
       {key:"floor", label:"الدور", type:"text"},
       {key:"landArea", label:"مساحة الأرض", type:"text"},
       {key:"buildArea", label:"مسطح البناء", type:"text"},
@@ -1366,6 +1366,19 @@ function renderFormFields(){
       clearBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
       clearBtn.addEventListener("click", () => { input.value = ""; input.focus(); });
       row.appendChild(clearBtn);
+
+      if (f.type === "owner-select"){
+        const addOwnerBtn = document.createElement("button");
+        addOwnerBtn.type = "button";
+        addOwnerBtn.className = "btn-clear-select";
+        addOwnerBtn.title = "إضافة مالك جديد";
+        addOwnerBtn.innerHTML = '<i class="fa-solid fa-user-plus"></i>';
+        addOwnerBtn.addEventListener("click", () => {
+          switchMode("owners");
+          setTimeout(() => document.getElementById("o_name")?.focus(), 0);
+        });
+        row.appendChild(addOwnerBtn);
+      }
 
       div.appendChild(row);
     } else if (f.key === "photos" && currentCategory === "rent"){
