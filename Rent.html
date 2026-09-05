@@ -4,6 +4,17 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <link rel="icon" href="Logo.png" type="image/png">
+<script>
+(function(){
+  try{
+    var theme = localStorage.getItem("siteTheme") || "light";
+    var lang = localStorage.getItem("siteLang") || "ar";
+    if (theme === "dark") document.documentElement.setAttribute("data-theme","dark");
+    document.documentElement.setAttribute("lang", lang);
+    document.documentElement.setAttribute("dir", lang === "en" ? "ltr" : "rtl");
+  }catch(e){}
+})();
+</script>
 <title>قائمة شقق الإيجار | تطوير ساس العقارية</title>
 <meta name="description" content="قائمة شقق للإيجار محدثة من مكتب تطوير ساس العقارية - سنوي، دراسي، صيفي">
 
@@ -35,41 +46,43 @@
     </a>
 
     <div class="header-buttons">
-      <a href="tel:0534108666"><i class="fa-solid fa-phone"></i> اتصل الآن</a>
-      <a href="https://wa.me/966534108666" class="cta-whatsapp"><i class="fa-brands fa-whatsapp"></i> واتساب</a>
-      <a href="https://maps.app.goo.gl/2NUqCqLExX86fFG87"><i class="fa-solid fa-location-dot"></i> موقع المكتب</a>
-      <a href="index.html"><i class="fa-solid fa-house"></i> الرئيسية</a>
+      <a href="tel:0534108666"><i class="fa-solid fa-phone"></i> <span data-i18n="callNow">اتصل الآن</span></a>
+      <a href="https://wa.me/966534108666" class="cta-whatsapp"><i class="fa-brands fa-whatsapp"></i> <span data-i18n="whatsapp">واتساب</span></a>
+      <a href="https://maps.app.goo.gl/2NUqCqLExX86fFG87"><i class="fa-solid fa-location-dot"></i> <span data-i18n="officeLocation">موقع المكتب</span></a>
+      <a href="index.html"><i class="fa-solid fa-house"></i> <span data-i18n="home">الرئيسية</span></a>
+      <button type="button" id="themeToggleBtn" title="Dark mode"><i class="fa-solid fa-moon"></i></button>
+      <button type="button" id="langToggleBtn" title="English"><i class="fa-solid fa-language"></i> <span id="langToggleLabel">EN</span></button>
     </div>
   </div>
 
   <div class="toolbar-row">
     <div class="top-container">
-      <button onclick="copyFilteredOffers()"><i class="fa-solid fa-filter"></i> نسخ العروض المطابقة للفلاتر</button>
-      <button onclick="copyByRentType('yearly')"><i class="fa-solid fa-copy"></i> نسخ كل سنة كاملة</button>
-      <button onclick="copyByRentType('schoolYear')"><i class="fa-solid fa-copy"></i> نسخ كل سنة دراسية</button>
-      <button onclick="copyByRentType('summer')"><i class="fa-solid fa-copy"></i> نسخ كل صيفية</button>
-      <button onclick="copyByRentType('monthly')"><i class="fa-solid fa-copy"></i> نسخ كل شهري</button>
-      <button onclick="copyByRentType('weekly')"><i class="fa-solid fa-copy"></i> نسخ كل اسبوعي</button>
-      <button onclick="copyByRentType('daily')"><i class="fa-solid fa-copy"></i> نسخ كل يومي</button>
+      <button onclick="copyFilteredOffers()"><i class="fa-solid fa-filter"></i> <span data-i18n="copyFiltered">نسخ العروض المطابقة للفلاتر</span></button>
+      <button onclick="copyByRentType('yearly')"><i class="fa-solid fa-copy"></i> <span data-i18n="copyYearly">نسخ كل سنة كاملة</span></button>
+      <button onclick="copyByRentType('schoolYear')"><i class="fa-solid fa-copy"></i> <span data-i18n="copySchoolYear">نسخ كل سنة دراسية</span></button>
+      <button onclick="copyByRentType('summer')"><i class="fa-solid fa-copy"></i> <span data-i18n="copySummer">نسخ كل صيفية</span></button>
+      <button onclick="copyByRentType('monthly')"><i class="fa-solid fa-copy"></i> <span data-i18n="copyMonthly">نسخ كل شهري</span></button>
+      <button onclick="copyByRentType('weekly')"><i class="fa-solid fa-copy"></i> <span data-i18n="copyWeekly">نسخ كل اسبوعي</span></button>
+      <button onclick="copyByRentType('daily')"><i class="fa-solid fa-copy"></i> <span data-i18n="copyDaily">نسخ كل يومي</span></button>
     </div>
   </div>
 </header>
 
-<h2 class="page-title">قائمة الشقق للإيجار</h2>
-<p class="page-subtitle">تصفح كل الشقق المتاحة للإيجار وفلترها حسب احتياجك</p>
+<h2 class="page-title" data-i18n="pageTitle">قائمة الشقق للإيجار</h2>
+<p class="page-subtitle" data-i18n="pageSubtitle">تصفح كل الشقق المتاحة للإيجار وفلترها حسب احتياجك</p>
 
 <div class="notices-wrap">
 
-<div class="notice">
+<div class="notice" data-i18n="notice1">
 📌 ملاحظة: الأسعار والمعلومات يتم تحديثها بشكل دوري - للتأكد من توفر العقار يرجى التواصل معنا على واتساب الرقم اعلى الصفحه.
 </div>
 
-<div class="notice">
+<div class="notice" data-i18n-html="notice2">
 رسوم المكتب 2.5% من إجمالي الإيجار السنوي<br>
 مثال: الإيجار 20 الف سنويا , رسوم المكتب: 20000/40 = 500 ريال
 </div>
 
-<div class="notice">
+<div class="notice" data-i18n-html="notice3">
 كتابه العقود<br>
 250 ريال للعقد السكني — 500 ريال للعقد التجاري
 </div>
@@ -80,62 +93,62 @@
   <div class="filters-wrapper">
 
     <div class="filter-field">
-      <label for="filterRentType">نوع الإيجار</label>
+      <label for="filterRentType" data-i18n="filterRentType">نوع الإيجار</label>
       <select id="filterRentType">
-        <option value="">الكل</option>
-        <option value="yearly">سنة كاملة</option>
-        <option value="schoolYear">سنة دراسية</option>
-        <option value="summer">صيفية</option>
-        <option value="monthly">شهري</option>
-        <option value="weekly">اسبوع</option>
-        <option value="daily">يومي</option>
+        <option value="" data-i18n="all">الكل</option>
+        <option value="yearly" data-i18n="rtYearly">سنة كاملة</option>
+        <option value="schoolYear" data-i18n="rtSchoolYear">سنة دراسية</option>
+        <option value="summer" data-i18n="rtSummer">صيفية</option>
+        <option value="monthly" data-i18n="rtMonthly">شهري</option>
+        <option value="weekly" data-i18n="rtWeekly">اسبوع</option>
+        <option value="daily" data-i18n="rtDaily">يومي</option>
       </select>
     </div>
 
     <div class="filter-field">
-      <label for="filterElevator">مصعد</label>
+      <label for="filterElevator" data-i18n="elevator">مصعد</label>
       <select id="filterElevator">
-        <option value="">الكل</option>
-        <option value="نعم">نعم</option>
-        <option value="لا">لا</option>
+        <option value="" data-i18n="all">الكل</option>
+        <option value="نعم" data-i18n="yes">نعم</option>
+        <option value="لا" data-i18n="no">لا</option>
       </select>
     </div>
 
     <div class="filter-field">
-      <label for="sortSelect">ترتيب حسب</label>
+      <label for="sortSelect" data-i18n="sortBy">ترتيب حسب</label>
       <select id="sortSelect">
-        <option value="">— اختر —</option>
-        <option value="floor-asc">الدور ↑</option>
-        <option value="floor-desc">الدور ↓</option>
-        <option value="price-asc">السعر ↑</option>
-        <option value="price-desc">السعر ↓</option>
-        <option value="rooms-asc">عدد الغرف ↑</option>
-        <option value="rooms-desc">عدد الغرف ↓</option>
+        <option value="" data-i18n="chooseDash">— اختر —</option>
+        <option value="floor-asc" data-i18n="floorAsc">الدور ↑</option>
+        <option value="floor-desc" data-i18n="floorDesc">الدور ↓</option>
+        <option value="price-asc" data-i18n="priceAsc">السعر ↑</option>
+        <option value="price-desc" data-i18n="priceDesc">السعر ↓</option>
+        <option value="rooms-asc" data-i18n="roomsAsc">عدد الغرف ↑</option>
+        <option value="rooms-desc" data-i18n="roomsDesc">عدد الغرف ↓</option>
       </select>
     </div>
 
     <div class="filter-field">
-      <label for="filterEntrance">المدخل</label>
+      <label for="filterEntrance" data-i18n="entrance">المدخل</label>
       <select id="filterEntrance">
-        <option value="">الكل</option>
-        <option value="مستقل">مستقل</option>
-        <option value="مشترك">مشترك</option>
+        <option value="" data-i18n="all">الكل</option>
+        <option value="مستقل" data-i18n="entrancePrivate">مستقل</option>
+        <option value="مشترك" data-i18n="entranceShared">مشترك</option>
       </select>
     </div>
 
     <div class="filter-field">
-      <label for="filterFurnished">مؤثثة</label>
+      <label for="filterFurnished" data-i18n="furnished">مؤثثة</label>
       <select id="filterFurnished">
-        <option value="">الكل</option>
-        <option value="نعم">نعم</option>
-        <option value="لا">لا</option>
+        <option value="" data-i18n="all">الكل</option>
+        <option value="نعم" data-i18n="yes">نعم</option>
+        <option value="لا" data-i18n="no">لا</option>
       </select>
     </div>
 
     <div class="filter-field">
-      <label for="filterRooms">عدد الغرف ≥</label>
+      <label for="filterRooms" data-i18n="roomsGte">عدد الغرف ≥</label>
       <select id="filterRooms">
-        <option value="">الكل</option>
+        <option value="" data-i18n="all">الكل</option>
         <option value="1">1+</option>
         <option value="2">2+</option>
         <option value="3">3+</option>
@@ -146,7 +159,7 @@
     </div>
 
     <div class="floor-field">
-      <span>الدور</span>
+      <span data-i18n="floor">الدور</span>
       <div class="floor-options">
         <label><input class="floorCheckbox" type="checkbox" value="1"/> 1</label>
         <label><input class="floorCheckbox" type="checkbox" value="2"/> 2</label>
@@ -157,20 +170,20 @@
   </div>
 
   <div class="price-range">
-    <label for="minPriceInput">من:</label>
-    <input id="minPriceInput" placeholder="الحد الأدنى (السنوي)" type="number"/>
-    <label for="maxPriceInput">إلى:</label>
-    <input id="maxPriceInput" placeholder="الحد الأعلى (السنوي)" type="number"/>
+    <label for="minPriceInput" data-i18n="from">من:</label>
+    <input id="minPriceInput" data-i18n-placeholder="minYearly" placeholder="الحد الأدنى (السنوي)" type="number"/>
+    <label for="maxPriceInput" data-i18n="to">إلى:</label>
+    <input id="maxPriceInput" data-i18n-placeholder="maxYearly" placeholder="الحد الأعلى (السنوي)" type="number"/>
   </div>
 
-  <button type="button" id="resetFiltersBtn" class="btn-reset-filters" onclick="resetFilters()">إعادة تعيين الفلاتر</button>
+  <button type="button" id="resetFiltersBtn" class="btn-reset-filters" onclick="resetFilters()" data-i18n="resetFilters">إعادة تعيين الفلاتر</button>
 </div>
 
 <div class="cards" id="cards"></div>
 
 
 
-<h2 style="text-align:center;">خريطة المواقع</h2>
+<h2 style="text-align:center;" data-i18n="mapHeading">خريطة المواقع</h2>
 <div id="RentMap" style="height: 500px; width: 100%; max-width: 1400px; margin: 0 auto; border-radius: 10px;"></div>
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
@@ -181,7 +194,7 @@
     maxZoom: 19
   }).addTo(RentMap);
 
-  L.marker([18.275406366370408, 42.59176906998552]).addTo(RentMap)
+  var officeMarker = L.marker([18.275406366370408, 42.59176906998552]).addTo(RentMap)
     .bindPopup('<a href="https://maps.app.goo.gl/2NUqCqLExX86fFG87" target="_blank">📍 موقع المكتب </a>');
 </script>
 
@@ -213,6 +226,193 @@ function safeUrl(url){
   return "#";
 }
 
+/* ============ Dark mode + Arabic/English ============ */
+
+const TRANSLATIONS = {
+  pageTitleTag:{ar:"قائمة شقق الإيجار | تطوير ساس العقارية", en:"Apartments for Rent | Sas Real Estate Development"},
+  callNow:{ar:"اتصل الآن", en:"Call Now"},
+  whatsapp:{ar:"واتساب", en:"WhatsApp"},
+  officeLocation:{ar:"موقع المكتب", en:"Office Location"},
+  home:{ar:"الرئيسية", en:"Home"},
+  copyFiltered:{ar:"نسخ العروض المطابقة للفلاتر", en:"Copy Filtered Offers"},
+  copyYearly:{ar:"نسخ كل سنة كاملة", en:"Copy All Full-Year"},
+  copySchoolYear:{ar:"نسخ كل سنة دراسية", en:"Copy All School-Year"},
+  copySummer:{ar:"نسخ كل صيفية", en:"Copy All Summer"},
+  copyMonthly:{ar:"نسخ كل شهري", en:"Copy All Monthly"},
+  copyWeekly:{ar:"نسخ كل اسبوعي", en:"Copy All Weekly"},
+  copyDaily:{ar:"نسخ كل يومي", en:"Copy All Daily"},
+  pageTitle:{ar:"قائمة الشقق للإيجار", en:"Apartments for Rent"},
+  pageSubtitle:{ar:"تصفح كل الشقق المتاحة للإيجار وفلترها حسب احتياجك", en:"Browse all available rental apartments and filter by your needs"},
+  notice1:{ar:"📌 ملاحظة: الأسعار والمعلومات يتم تحديثها بشكل دوري - للتأكد من توفر العقار يرجى التواصل معنا على واتساب الرقم اعلى الصفحه.", en:"📌 Note: Prices and details are updated periodically - to confirm availability please contact us via WhatsApp using the number at the top of the page."},
+  notice2:{ar:"رسوم المكتب 2.5% من إجمالي الإيجار السنوي<br>مثال: الإيجار 20 الف سنويا , رسوم المكتب: 20000/40 = 500 ريال", en:"Office fee: 2.5% of total annual rent<br>Example: Annual rent 20,000 → office fee: 20000/40 = 500 SAR"},
+  notice3:{ar:"كتابه العقود<br>250 ريال للعقد السكني — 500 ريال للعقد التجاري", en:"Contract drafting<br>250 SAR for a residential contract — 500 SAR for a commercial contract"},
+  filterRentType:{ar:"نوع الإيجار", en:"Rent Type"},
+  all:{ar:"الكل", en:"All"},
+  rtYearly:{ar:"سنة كاملة", en:"Full Year"},
+  rtSchoolYear:{ar:"سنة دراسية", en:"School Year"},
+  rtSummer:{ar:"صيفية", en:"Summer"},
+  rtMonthly:{ar:"شهري", en:"Monthly"},
+  rtWeekly:{ar:"اسبوع", en:"Weekly"},
+  rtDaily:{ar:"يومي", en:"Daily"},
+  elevator:{ar:"مصعد", en:"Elevator"},
+  yes:{ar:"نعم", en:"Yes"},
+  no:{ar:"لا", en:"No"},
+  sortBy:{ar:"ترتيب حسب", en:"Sort By"},
+  chooseDash:{ar:"— اختر —", en:"— Select —"},
+  floorAsc:{ar:"الدور ↑", en:"Floor ↑"},
+  floorDesc:{ar:"الدور ↓", en:"Floor ↓"},
+  priceAsc:{ar:"السعر ↑", en:"Price ↑"},
+  priceDesc:{ar:"السعر ↓", en:"Price ↓"},
+  roomsAsc:{ar:"عدد الغرف ↑", en:"Rooms ↑"},
+  roomsDesc:{ar:"عدد الغرف ↓", en:"Rooms ↓"},
+  entrance:{ar:"المدخل", en:"Entrance"},
+  entrancePrivate:{ar:"مستقل", en:"Private"},
+  entranceShared:{ar:"مشترك", en:"Shared"},
+  furnished:{ar:"مؤثثة", en:"Furnished"},
+  roomsGte:{ar:"عدد الغرف ≥", en:"Rooms ≥"},
+  floor:{ar:"الدور", en:"Floor"},
+  from:{ar:"من:", en:"From:"},
+  to:{ar:"إلى:", en:"To:"},
+  minYearly:{ar:"الحد الأدنى (السنوي)", en:"Min (yearly)"},
+  maxYearly:{ar:"الحد الأعلى (السنوي)", en:"Max (yearly)"},
+  resetFilters:{ar:"إعادة تعيين الفلاتر", en:"Reset Filters"},
+  mapHeading:{ar:"خريطة المواقع", en:"Locations Map"},
+  footerRights:{ar:"تطوير ساس العقارية - جميع الحقوق محفوظة", en:"Sas Real Estate Development - All rights reserved"},
+  officeMarkerPopup:{ar:"📍 موقع المكتب", en:"📍 Office Location"},
+
+  copied:{ar:"تم النسخ", en:"Copied"},
+  copyBtn:{ar:"نسخ", en:"Copy"},
+  copyManualFail:{ar:"تعذر النسخ التلقائي، يرجى النسخ يدويًا", en:"Automatic copy failed, please copy manually"},
+  copyError:{ar:"حدث خطأ أثناء النسخ", en:"An error occurred while copying"},
+  loadError:{ar:"⚠️ حدث خطأ أثناء تحميل العروض. يرجى إعادة تحميل الصفحة أو التواصل معنا مباشرة عبر واتساب.", en:"⚠️ An error occurred while loading offers. Please reload the page or contact us directly via WhatsApp."},
+  priceUndetermined:{ar:"السعر غير محدد", en:"Price not set"},
+  noPriceSet:{ar:"لا يوجد سعر محدد", en:"No price set"},
+  riyal:{ar:"ريال", en:"SAR"},
+  perMonth:{ar:"شهريًا", en:"/month"},
+  singlePayment:{ar:"دفعة واحدة", en:"single payment"},
+  waGreeting:{ar:"السلام عليكم , انا مهتم بالشقة رقم", en:"Hello, I'm interested in apartment number"},
+  noApartmentsOfType:{ar:"لا توجد شقق من نوع", en:"No apartments of type"},
+  copiedAllOfType:{ar:"تم نسخ جميع شقق", en:"Copied all apartments of type"},
+  noMatchingOffers:{ar:"لا توجد عروض مطابقة للفلاتر الحالية", en:"No offers match the current filters"},
+  copiedMatchingPrefix:{ar:"تم نسخ", en:"Copied"},
+  copiedMatchingSuffix:{ar:"عرضًا مطابقًا للفلاتر الحالية", en:"offer(s) matching the current filters"},
+
+  lblId:{ar:"رقم", en:"No."},
+  lblType:{ar:"نوع العقار", en:"Property Type"},
+  lblFloor:{ar:"الدور", en:"Floor"},
+  lblRooms:{ar:"الغرف", en:"Rooms"},
+  lblBaths:{ar:"دورات المياه", en:"Bathrooms"},
+  lblHall:{ar:"صالة", en:"Living Room"},
+  lblKitchen:{ar:"مطبخ", en:"Kitchen"},
+  lblStore:{ar:"مستودع", en:"Storage"},
+  lblElevator:{ar:"مصعد", en:"Elevator"},
+  lblFittedKitchen:{ar:"مطبخ راكب", en:"Fitted Kitchen"},
+  lblEntranceFlag:{ar:"مستقل", en:"Private Entrance"},
+  lblNotes:{ar:"ملاحظات", en:"Notes"},
+  lblAvailableFrom:{ar:"متاح من", en:"Available from"},
+  lblLocation:{ar:"الموقع", en:"Location"},
+  lblPhotos:{ar:"الصور", en:"Photos"},
+  lblPrice:{ar:"السعر", en:"Price"},
+  lblFeatures:{ar:"المميزات", en:"Features"},
+  lblType2:{ar:"النوع", en:"Type"}
+};
+
+const TYPE_LABELS_EN = {
+  "بدروم":"Basement",
+  "شقة":"Apartment",
+  "استوديو":"Studio",
+  "دور":"Floor Unit",
+  "ملحق":"Annex",
+  "رووف":"Roof",
+  "دوبلكس":"Duplex",
+  "تاون هاوس":"Townhouse",
+  "توين فيلا":"Twin Villa",
+  "فيلا مستقلة":"Standalone Villa",
+  "قصر":"Palace",
+  "شاليه":"Chalet",
+  "منزل شعبي":"Traditional House",
+  "عمارة سكنية":"Residential Building",
+  "مجمع سكني":"Residential Complex"
+};
+
+function getLang(){
+  try{ return localStorage.getItem("siteLang") || "ar"; }catch(e){ return "ar"; }
+}
+function setLang(lang){
+  try{ localStorage.setItem("siteLang", lang); }catch(e){}
+}
+function getTheme(){
+  try{ return localStorage.getItem("siteTheme") || "light"; }catch(e){ return "light"; }
+}
+function setTheme(theme){
+  try{ localStorage.setItem("siteTheme", theme); }catch(e){}
+}
+
+function t(key){
+  const entry = TRANSLATIONS[key];
+  if (!entry) return key;
+  return entry[getLang()] || entry.ar;
+}
+
+function translateType(type){
+  if (getLang() !== "en") return type || "";
+  return TYPE_LABELS_EN[type] || type || "";
+}
+
+function rtLabel(rt){
+  return t("rt" + rt.key.charAt(0).toUpperCase() + rt.key.slice(1));
+}
+
+function applyTheme(){
+  const theme = getTheme();
+  if (theme === "dark") document.documentElement.setAttribute("data-theme","dark");
+  else document.documentElement.removeAttribute("data-theme");
+  const btn = document.getElementById("themeToggleBtn");
+  if (btn) btn.innerHTML = theme === "dark" ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+}
+
+function applyLangStatic(){
+  const lang = getLang();
+  document.documentElement.setAttribute("lang", lang);
+  document.documentElement.setAttribute("dir", lang === "en" ? "ltr" : "rtl");
+  document.title = t("pageTitleTag");
+
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    el.textContent = t(el.getAttribute("data-i18n"));
+  });
+  document.querySelectorAll("[data-i18n-html]").forEach(el => {
+    el.innerHTML = t(el.getAttribute("data-i18n-html"));
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+    el.placeholder = t(el.getAttribute("data-i18n-placeholder"));
+  });
+  const loadErrorEl = document.querySelector(".load-error");
+  if (loadErrorEl) loadErrorEl.textContent = t("loadError");
+
+  const langLabel = document.getElementById("langToggleLabel");
+  if (langLabel) langLabel.textContent = lang === "en" ? "AR" : "EN";
+  const langBtn = document.getElementById("langToggleBtn");
+  if (langBtn) langBtn.title = lang === "en" ? "العربية" : "English";
+}
+
+document.getElementById("themeToggleBtn")?.addEventListener("click", () => {
+  setTheme(getTheme() === "dark" ? "light" : "dark");
+  applyTheme();
+});
+
+document.getElementById("langToggleBtn")?.addEventListener("click", () => {
+  setLang(getLang() === "en" ? "ar" : "en");
+  applyLangStatic();
+  if (typeof renderAllCards === "function") renderAllCards();
+  if (typeof refreshOfficeMarkerPopup === "function") refreshOfficeMarkerPopup();
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  applyTheme();
+  applyLangStatic();
+  refreshOfficeMarkerPopup();
+});
+
 function fallbackCopy(text, onSuccess){
   try{
     const ta = document.createElement('textarea');
@@ -226,7 +426,7 @@ function fallbackCopy(text, onSuccess){
     document.body.removeChild(ta);
     if(onSuccess) onSuccess();
   }catch(e){
-    alert('تعذر النسخ التلقائي، يرجى النسخ يدويًا');
+    alert(t('copyManualFail'));
   }
 }
 
@@ -234,7 +434,7 @@ function copyTextToClipboard(text, btnEl){
   const showSuccess = () => {
     if(!btnEl) return;
     const original = btnEl.innerHTML;
-    btnEl.innerHTML = '<i class="fa-solid fa-check"></i> تم النسخ';
+    btnEl.innerHTML = '<i class="fa-solid fa-check"></i> ' + t('copied');
     setTimeout(() => { btnEl.innerHTML = original; }, 1500);
   };
   if (navigator.clipboard && navigator.clipboard.writeText){
@@ -268,11 +468,11 @@ const RENT_TYPE_MONTHLY_DIVISOR = {yearly:12, schoolYear:10, summer:2};
 const LEGACY_RENT_TYPE_TO_KEY = {"سنة كاملة":"yearly", "سنة دراسية":"schoolYear", "صيفية":"summer"};
 
 const PAYMENT_METHODS = [
-  {key:"annual", label:"دفعة", divisor:1, periodLabel:"دفعة واحدة"},
-  {key:"semiAnnual", label:"2 دفعات", divisor:2, periodLabel:"كل 6 أشهر"},
-  {key:"thirdYearly", label:"3 دفعات", divisor:3, periodLabel:"كل 4 أشهر"},
-  {key:"quarterly", label:"4 دفعات", divisor:4, periodLabel:"كل 3 أشهر"},
-  {key:"monthly", label:"12 دفعة", periodLabel:"شهريًا"}
+  {key:"annual", label:"دفعة", divisor:1, periodLabel:"دفعة واحدة", periodLabelEn:"single payment"},
+  {key:"semiAnnual", label:"2 دفعات", divisor:2, periodLabel:"كل 6 أشهر", periodLabelEn:"every 6 months"},
+  {key:"thirdYearly", label:"3 دفعات", divisor:3, periodLabel:"كل 4 أشهر", periodLabelEn:"every 4 months"},
+  {key:"quarterly", label:"4 دفعات", divisor:4, periodLabel:"كل 3 أشهر", periodLabelEn:"every 3 months"},
+  {key:"monthly", label:"12 دفعة", periodLabel:"شهريًا", periodLabelEn:"/month"}
 ];
 
 function getEffectivePrices(item){
@@ -292,12 +492,15 @@ function formatPaymentAmount(price, methodKey, rentTypeKey){
   if (methodKey === "monthly" || !methodKey){
     const divisor = RENT_TYPE_MONTHLY_DIVISOR[rentTypeKey] || 12;
     const amount = Math.round((parseFloat(price) || 0) / divisor);
-    return `${amount.toLocaleString()} ريال شهريًا`;
+    return getLang() === "en"
+      ? `${amount.toLocaleString()} ${t('riyal')}${t('perMonth')}`
+      : `${amount.toLocaleString()} ${t('riyal')} ${t('perMonth')}`;
   }
   const method = PAYMENT_METHODS.find(m => m.key === methodKey) || PAYMENT_METHODS[0];
   const amount = Math.round((parseFloat(price) || 0) / method.divisor);
-  if (method.key === "annual") return `دفعة واحدة ${amount.toLocaleString()} ريال`;
-  return `${amount.toLocaleString()} ريال ${method.periodLabel}`;
+  const periodLabel = getLang() === "en" ? method.periodLabelEn : method.periodLabel;
+  if (method.key === "annual") return `${t('singlePayment')} ${amount.toLocaleString()} ${t('riyal')}`;
+  return `${amount.toLocaleString()} ${t('riyal')} ${periodLabel}`;
 }
 
 function getPrimaryPrice(prices){
@@ -321,32 +524,34 @@ function renderCardHTML(item){
       const paymentNote = rt.hasPaymentMethod
         ? `<span class="price-payment-note">(${escapeHtml(formatPaymentAmount(prices[rt.key], paymentMethods[rt.key] || "monthly", rt.key))})</span>`
         : "";
-      return `<div class="price-line"><span class="price-type">${escapeHtml(rt.label)}</span><span class="price-value">${Number(prices[rt.key]).toLocaleString()} ريال</span>${paymentNote}</div>`;
-    }).join("") || `<div class="price-line"><span class="price-value" style="color:var(--muted); font-size:.85rem;">السعر غير محدد</span></div>`;
+      return `<div class="price-line"><span class="price-type">${escapeHtml(rtLabel(rt))}</span><span class="price-value">${Number(prices[rt.key]).toLocaleString()} ${t('riyal')}</span>${paymentNote}</div>`;
+    }).join("") || `<div class="price-line"><span class="price-value" style="color:var(--muted); font-size:.85rem;">${t('priceUndetermined')}</span></div>`;
 
     const priceLinesText = activeTypes.map(rt => {
-      const base = `${rt.label}: ${prices[rt.key]} ريال`;
+      const base = `${rtLabel(rt)}: ${prices[rt.key]} ${t('riyal')}`;
       return rt.hasPaymentMethod ? `${base} (${formatPaymentAmount(prices[rt.key], paymentMethods[rt.key] || "monthly", rt.key)})` : base;
-    }).join("\n") || "لا يوجد سعر محدد";
+    }).join("\n") || t('noPriceSet');
 
-    const availabilityLine = availableFrom ? `متاح من: ${availableFrom}\n` : "";
+    const availabilityLine = availableFrom ? `${t('lblAvailableFrom')}: ${availableFrom}\n` : "";
 
-    const copyText = `رقم: ${id}
-نوع العقار: ${type}
-الدور: ${floor}
-الغرف: ${rooms}
-دورات المياه: ${baths}
-صالة: ${hall}
-مطبخ: ${kitchen}
-مستودع: ${store}
-مصعد: ${elevator}
-مؤثثة: ${furnished}
-مطبخ راكب: ${fittedKitchen}
-مستقل: ${entrance}
-ملاحظات: ${notes}
+    const displayType = translateType(type);
+
+    const copyText = `${t('lblId')}: ${id}
+${t('lblType')}: ${displayType}
+${t('lblFloor')}: ${floor}
+${t('lblRooms')}: ${rooms}
+${t('lblBaths')}: ${baths}
+${t('lblHall')}: ${hall}
+${t('lblKitchen')}: ${kitchen}
+${t('lblStore')}: ${store}
+${t('lblElevator')}: ${elevator}
+${t('furnished')}: ${furnished}
+${t('lblFittedKitchen')}: ${fittedKitchen}
+${t('lblEntranceFlag')}: ${entrance}
+${t('lblNotes')}: ${notes}
 ${priceLinesText}
-${availabilityLine}الموقع: ${location}
-الصور: ${photos}`;
+${availabilityLine}${t('lblLocation')}: ${location}
+${t('lblPhotos')}: ${photos}`;
 
     return `
 <div class="card"
@@ -364,7 +569,7 @@ ${availabilityLine}الموقع: ${location}
   data-available-from="${escapeHtml(availableFrom || '')}">
 
 
-  <div class="card-header">${escapeHtml(type)} – رقم ${escapeHtml(id)}</div>
+  <div class="card-header">${escapeHtml(displayType)} – ${t('lblId')} ${escapeHtml(id)}</div>
 
   <div class="card-body">
 
@@ -372,18 +577,18 @@ ${availabilityLine}الموقع: ${location}
   ${priceRowsHTML}
 </div>
 
-${availableFrom ? `<div class="availability-badge"><i class="fa-solid fa-calendar-check"></i> متاح من: ${escapeHtml(availableFrom)}</div>` : ``}
+${availableFrom ? `<div class="availability-badge"><i class="fa-solid fa-calendar-check"></i> ${t('lblAvailableFrom')}: ${escapeHtml(availableFrom)}</div>` : ``}
 
     <div class="features">
-      <div><i class="fa-solid fa-stairs"></i> الدور: ${escapeHtml(floor)}</div>
-      <div><i class="fa-solid fa-bed"></i> غرف: ${escapeHtml(rooms)}</div>
-      <div><i class="fa-solid fa-shower"></i> حمامات: ${escapeHtml(baths)}</div>
-      <div><i class="fa-solid fa-couch"></i> صالة: ${escapeHtml(hall)}</div>
-      <div><i class="fa-solid fa-utensils"></i> مطبخ: ${escapeHtml(kitchen)}</div>
-      <div><i class="fa-solid fa-box-archive"></i>مستودع: ${escapeHtml(store)}</div>
+      <div><i class="fa-solid fa-stairs"></i> ${t('lblFloor')}: ${escapeHtml(floor)}</div>
+      <div><i class="fa-solid fa-bed"></i> ${t('lblRooms')}: ${escapeHtml(rooms)}</div>
+      <div><i class="fa-solid fa-shower"></i> ${t('lblBaths')}: ${escapeHtml(baths)}</div>
+      <div><i class="fa-solid fa-couch"></i> ${t('lblHall')}: ${escapeHtml(hall)}</div>
+      <div><i class="fa-solid fa-utensils"></i> ${t('lblKitchen')}: ${escapeHtml(kitchen)}</div>
+      <div><i class="fa-solid fa-box-archive"></i>${t('lblStore')}: ${escapeHtml(store)}</div>
 <div>
   <i class="fa-solid fa-arrows-up-down"></i>
-  مصعد:
+  ${t('lblElevator')}:
   ${elevator === 'نعم'
     ? '<span class="icon-yes">✔</span>'
     : '<span class="icon-no">✖</span>'}
@@ -391,7 +596,7 @@ ${availableFrom ? `<div class="availability-badge"><i class="fa-solid fa-calenda
 
 <div>
   <i class="fa-solid fa-door-open"></i>
-  مستقل:
+  ${t('lblEntranceFlag')}:
   ${entrance === 'مستقل'
     ? '<span class="icon-yes">✔</span>'
     : '<span class="icon-no">✖</span>'}
@@ -399,28 +604,27 @@ ${availableFrom ? `<div class="availability-badge"><i class="fa-solid fa-calenda
 
 <div>
   <i class="fa-solid fa-chair"></i>
-  مؤثثة:
+  ${t('furnished')}:
   ${furnished === 'نعم'
     ? '<span class="icon-yes">✔</span>'
     : '<span class="icon-no">✖</span>'}
 </div>
       <div>
-    مطبخ راكب:
+    ${t('lblFittedKitchen')}:
     ${fittedKitchen === 'نعم'
     ? '<span class="icon-yes">✔</span>'
     : '<span class="icon-no">✖</span>'}
 
         </div>
     </div>
-    <!-- ⬆️ انتهى اللصق هنا ⬆️ -->
 
     ${notes ? `<div class="notes">📝 ${escapeHtml(notes)}</div>` : ``}
   </div>
 <div class="card-actions">
-  <a class="btn-location" href="${safeUrl(location)}" target="_blank"><i class="fa-solid fa-location-dot"></i> الموقع</a>
-  <a class="btn-photos" href="${safeUrl(photos)}" target="_blank"><i class="fa-solid fa-images"></i> الصور</a>
-  <a class="btn-whatsapp" href="https://wa.me/${contactPhone}?text=السلام عليكم , انا مهتم%20بالشقة%20رقم%20${encodeURIComponent(id)}" target="_blank"><i class="fa-brands fa-whatsapp"></i> واتساب</a>
-<button type="button" class="btn-copy" data-copy-text="${escapeHtml(copyText)}"><i class="fa-solid fa-copy"></i> نسخ</button>
+  <a class="btn-location" href="${safeUrl(location)}" target="_blank"><i class="fa-solid fa-location-dot"></i> ${t('lblLocation')}</a>
+  <a class="btn-photos" href="${safeUrl(photos)}" target="_blank"><i class="fa-solid fa-images"></i> ${t('lblPhotos')}</a>
+  <a class="btn-whatsapp" href="https://wa.me/${contactPhone}?text=${encodeURIComponent(t('waGreeting') + ' ' + id)}" target="_blank"><i class="fa-brands fa-whatsapp"></i> ${t('whatsapp')}</a>
+<button type="button" class="btn-copy" data-copy-text="${escapeHtml(copyText)}"><i class="fa-solid fa-copy"></i> ${t('copyBtn')}</button>
 </div>
 
 </div>
@@ -433,17 +637,34 @@ document.addEventListener("click", function(e){
   copyTextToClipboard(btn.dataset.copyText, btn);
 });
 
+let lastListings = null;
+
 async function buildCards(){
   const cards=document.getElementById("cards");
   cards.innerHTML="";
   const listings = await getListings();
   if (listings === null){
-    cards.innerHTML = `<div class="load-error">⚠️ حدث خطأ أثناء تحميل العروض. يرجى إعادة تحميل الصفحة أو التواصل معنا مباشرة عبر واتساب.</div>`;
+    cards.innerHTML = `<div class="load-error">${t('loadError')}</div>`;
     return;
   }
   listings.sort((a,b) => (parseInt(a.id)||0) - (parseInt(b.id)||0));
+  lastListings = listings;
   cards.innerHTML = listings.map(renderCardHTML).join("");
   addAutoMapMarkers(listings);
+}
+
+function renderAllCards(){
+  if (!lastListings) return;
+  const cards = document.getElementById("cards");
+  cards.innerHTML = lastListings.map(renderCardHTML).join("");
+  addAutoMapMarkers(lastListings);
+  applyCardFilters();
+}
+
+function refreshOfficeMarkerPopup(){
+  if (typeof officeMarker !== "undefined" && officeMarker){
+    officeMarker.setPopupContent(`<a href="https://maps.app.goo.gl/2NUqCqLExX86fFG87" target="_blank">${t('officeMarkerPopup')}</a>`);
+  }
 }
 
 const mapMarkersById = {};
@@ -478,13 +699,14 @@ function syncMapMarkersWithFilters(){
 
 
 function copyByRentType(targetType) {
-  const targetLabel = (RENT_TYPES.find(rt => rt.key === targetType) || {}).label || targetType;
+  const targetRt = RENT_TYPES.find(rt => rt.key === targetType);
+  const targetLabel = targetRt ? rtLabel(targetRt) : targetType;
 
   const cards = Array.from(document.querySelectorAll('.card'))
     .filter(card => (card.dataset.rentType || "").split(" ").includes(targetType));
 
   if (!cards.length) {
-    alert(`لا توجد شقق من نوع ${targetLabel}`);
+    alert(`${t('noApartmentsOfType')} ${targetLabel}`);
     return;
   }
 
@@ -516,20 +738,20 @@ function copyByRentType(targetType) {
     const notes = notesEl ? notesEl.textContent.trim() : '';
     const availableFrom = card.dataset.availableFrom || '';
 
-    return `رقم: ${id}
-النوع: ${targetLabel}
-السعر: ${price} ريال${paymentNote}
-الدور: ${floor}
-الغرف: ${rooms}
-المميزات: ${features}\n
-${notes ? `ملاحظات: ${notes}\n` : ''}${availableFrom ? `متاح من: ${availableFrom}\n` : ''}الموقع: ${locationLink}
-الصور: ${photoLink}`;
+    return `${t('lblId')}: ${id}
+${t('lblType2')}: ${targetLabel}
+${t('lblPrice')}: ${price} ${t('riyal')}${paymentNote}
+${t('lblFloor')}: ${floor}
+${t('lblRooms')}: ${rooms}
+${t('lblFeatures')}: ${features}\n
+${notes ? `${t('lblNotes')}: ${notes}\n` : ''}${availableFrom ? `${t('lblAvailableFrom')}: ${availableFrom}\n` : ''}${t('lblLocation')}: ${locationLink}
+${t('lblPhotos')}: ${photoLink}`;
   }).join('\n\n----------------------\n\n');
 
   navigator.clipboard.writeText(allText).then(() => {
-    alert(`تم نسخ جميع شقق ${targetLabel}`);
+    alert(`${t('copiedAllOfType')} ${targetLabel}`);
   }).catch(() => {
-    alert('حدث خطأ أثناء النسخ');
+    alert(t('copyError'));
   });
 }
 
@@ -538,7 +760,7 @@ function copyFilteredOffers() {
     .filter(card => card.style.display !== 'none');
 
   if (!cards.length) {
-    alert('لا توجد عروض مطابقة للفلاتر الحالية');
+    alert(t('noMatchingOffers'));
     return;
   }
 
@@ -549,10 +771,10 @@ function copyFilteredOffers() {
     const priceLines = RENT_TYPES
       .filter(rt => prices[rt.key])
       .map(rt => {
-        const base = `${rt.label}: ${prices[rt.key]} ريال`;
+        const base = `${rtLabel(rt)}: ${prices[rt.key]} ${t('riyal')}`;
         return rt.hasPaymentMethod ? `${base} (${formatPaymentAmount(prices[rt.key], paymentMethods[rt.key] || "monthly", rt.key)})` : base;
       })
-      .join('\n') || 'لا يوجد سعر محدد';
+      .join('\n') || t('noPriceSet');
     const floor = card.dataset.floor || '';
     const rooms = card.dataset.rooms || '';
 
@@ -570,19 +792,19 @@ function copyFilteredOffers() {
     const notes = notesEl ? notesEl.textContent.trim() : '';
     const availableFrom = card.dataset.availableFrom || '';
 
-    return `رقم: ${id}
+    return `${t('lblId')}: ${id}
 ${priceLines}
-الدور: ${floor}
-الغرف: ${rooms}
-المميزات: ${features}\n
-${notes ? `ملاحظات: ${notes}\n` : ''}${availableFrom ? `متاح من: ${availableFrom}\n` : ''}الموقع: ${locationLink}
-الصور: ${photoLink}`;
+${t('lblFloor')}: ${floor}
+${t('lblRooms')}: ${rooms}
+${t('lblFeatures')}: ${features}\n
+${notes ? `${t('lblNotes')}: ${notes}\n` : ''}${availableFrom ? `${t('lblAvailableFrom')}: ${availableFrom}\n` : ''}${t('lblLocation')}: ${locationLink}
+${t('lblPhotos')}: ${photoLink}`;
   }).join('\n\n----------------------\n\n');
 
   navigator.clipboard.writeText(allText).then(() => {
-    alert(`تم نسخ ${cards.length} عرضًا مطابقًا للفلاتر الحالية`);
+    alert(`${t('copiedMatchingPrefix')} ${cards.length} ${t('copiedMatchingSuffix')}`);
   }).catch(() => {
-    alert('حدث خطأ أثناء النسخ');
+    alert(t('copyError'));
   });
 }
 
@@ -699,10 +921,10 @@ document.getElementById("sortSelect").addEventListener("change", function () {
   <a href="index.html"><img src="Logo.png" alt="شعار المكتب" class="footer-logo"></a>
   <div class="footer-links">
     <a href="tel:0534108666"><i class="fa-solid fa-phone"></i> 0534108666</a>
-    <a href="https://wa.me/966534108666"><i class="fa-brands fa-whatsapp"></i> واتساب</a>
-    <a href="https://maps.app.goo.gl/2NUqCqLExX86fFG87"><i class="fa-solid fa-location-dot"></i> موقع المكتب</a>
+    <a href="https://wa.me/966534108666"><i class="fa-brands fa-whatsapp"></i> <span data-i18n="whatsapp">واتساب</span></a>
+    <a href="https://maps.app.goo.gl/2NUqCqLExX86fFG87"><i class="fa-solid fa-location-dot"></i> <span data-i18n="officeLocation">موقع المكتب</span></a>
   </div>
-  <small>© <span id="footerYear"></span> تطوير ساس العقارية - جميع الحقوق محفوظة</small>
+  <small>© <span id="footerYear"></span> <span data-i18n="footerRights">تطوير ساس العقارية - جميع الحقوق محفوظة</span></small>
 </footer>
 
 <script>document.getElementById("footerYear").textContent = new Date().getFullYear();</script>

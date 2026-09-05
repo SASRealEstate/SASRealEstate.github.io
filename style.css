@@ -16,6 +16,32 @@
   --radius:14px;
   --shadow:0 8px 24px rgba(38,41,15,.10);
   --shadow-hover:0 14px 32px rgba(38,41,15,.16);
+  --card-bg:#ffffff;
+  --input-bg:#ffffff;
+  --notice-bg:var(--gold-light);
+  --notice-border:#e6d18f;
+  --notice-text:#5a4713;
+  --error-bg:#fdecea;
+  --error-border:#f5c2c0;
+  --error-text:#7a2e2b;
+}
+
+:root[data-theme="dark"]{
+  --cream:#1b1d12;
+  --ink:#eceada;
+  --muted:#a3a68c;
+  --line:#3a3d28;
+  --gold-light:#2a2814;
+  --card-bg:#232519;
+  --input-bg:#232519;
+  --notice-bg:#2a2814;
+  --notice-border:#4a4423;
+  --notice-text:#e8d9a3;
+  --error-bg:#3a1f1c;
+  --error-border:#5c2d28;
+  --error-text:#f0aca4;
+  --shadow:0 8px 24px rgba(0,0,0,.35);
+  --shadow-hover:0 14px 32px rgba(0,0,0,.45);
 }
 
 *{ box-sizing:border-box; }
@@ -41,7 +67,7 @@ select, input{
   padding:8px 12px;
   border:1px solid var(--line);
   border-radius:9px;
-  background:#fff;
+  background:var(--input-bg);
   color:var(--ink);
 }
 
@@ -198,7 +224,7 @@ select:focus, input:focus{
 .filters-panel{
   max-width:1400px;
   margin:0 auto 24px;
-  background:#fff;
+  background:var(--card-bg);
   border:1px solid var(--line);
   border-radius:var(--radius);
   box-shadow:var(--shadow);
@@ -295,9 +321,9 @@ select:focus, input:focus{
 /* ===== Notices ===== */
 
 .notice{
-  background:var(--gold-light);
+  background:var(--notice-bg);
   padding:14px 20px;
-  border:1px solid #e6d18f;
+  border:1px solid var(--notice-border);
   border-right:5px solid var(--gold);
   border-radius:10px;
   margin:14px auto;
@@ -306,14 +332,14 @@ select:focus, input:focus{
   font-weight:700;
   text-align:center;
   line-height:1.8;
-  color:#5a4713;
+  color:var(--notice-text);
 }
 
 .notices-wrap{ padding:0 20px; }
 
 .load-error{
-  background:#fdecea;
-  border:1px solid #f5c2c0;
+  background:var(--error-bg);
+  border:1px solid var(--error-border);
   border-right:5px solid #d9534f;
   border-radius:10px;
   padding:26px 20px;
@@ -323,8 +349,11 @@ select:focus, input:focus{
   font-size:1rem;
   font-weight:700;
   line-height:1.8;
-  color:#7a2e2b;
+  color:var(--error-text);
 }
+
+[dir="ltr"] .notice{ border-right:none; border-left:5px solid var(--gold); }
+[dir="ltr"] .load-error{ border-right:none; border-left:5px solid #d9534f; }
 
 /* ===== Cards ===== */
 
@@ -345,7 +374,7 @@ select:focus, input:focus{
 @media (max-width:340px){ .cards{ grid-template-columns:repeat(1,1fr); } }
 
 .card{
-  background:#fff;
+  background:var(--card-bg);
   border-radius:var(--radius);
   border:1px solid var(--line);
   box-shadow:var(--shadow);
