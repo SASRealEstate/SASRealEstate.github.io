@@ -24,6 +24,7 @@
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="firebase-config.js"></script>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
@@ -55,7 +56,7 @@
     </div>
   </div>
 
-  <div class="toolbar-row">
+  <div class="toolbar-row" id="staffToolbar" style="display:none;">
     <div class="top-container">
       <button onclick="copyFilteredOffers()"><i class="fa-solid fa-filter"></i> <span data-i18n="copyFiltered">نسخ العروض المطابقة للفلاتر</span></button>
       <button onclick="copyByRentType('yearly')"><i class="fa-solid fa-copy"></i> <span data-i18n="copyYearly">نسخ كل سنة كاملة</span></button>
@@ -412,6 +413,20 @@ document.addEventListener("DOMContentLoaded", () => {
   applyLangStatic();
   refreshOfficeMarkerPopup();
 });
+
+if (window.auth){
+  auth.onAuthStateChanged(async user => {
+    const toolbar = document.getElementById("staffToolbar");
+    if (!toolbar) return;
+    if (!user){ toolbar.style.display = "none"; return; }
+    try{
+      const adminDoc = await db.collection("admins").doc(user.uid).get();
+      toolbar.style.display = adminDoc.exists ? "" : "none";
+    }catch(e){
+      toolbar.style.display = "none";
+    }
+  });
+}
 
 function fallbackCopy(text, onSuccess){
   try{
