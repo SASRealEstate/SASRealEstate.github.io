@@ -389,6 +389,16 @@ select:focus, input:focus{
   box-shadow:var(--shadow-hover);
 }
 
+.card.card-highlight{
+  animation:cardHighlightPulse 1.5s ease-in-out 2;
+  border-color:var(--gold);
+}
+
+@keyframes cardHighlightPulse{
+  0%, 100%{ box-shadow:var(--shadow); }
+  50%{ box-shadow:0 0 0 4px var(--gold), var(--shadow-hover); }
+}
+
 .card-header{
   background:linear-gradient(135deg, var(--olive-dark), var(--olive));
   color:#fff;
