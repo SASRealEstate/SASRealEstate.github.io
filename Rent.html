@@ -652,6 +652,12 @@ document.addEventListener("click", function(e){
   copyTextToClipboard(btn.dataset.copyText, btn);
 });
 
+document.addEventListener("click", function(e){
+  const label = e.target.closest(".map-pin-label[data-goto-id]");
+  if (!label) return;
+  goToCard(label.dataset.gotoId);
+});
+
 let lastListings = null;
 
 async function buildCards(){
@@ -693,11 +699,8 @@ function addAutoMapMarkers(listings){
     const lat = parseFloat(item.lat);
     const lng = parseFloat(item.lng);
     if (!isFinite(lat) || !isFinite(lng)) return;
-    const popup = item.location
-      ? `<a href="${safeUrl(item.location)}" target="_blank">${escapeHtml(item.id)}</a>`
-      : `${escapeHtml(item.id)}`;
+    const popup = `<span class="map-pin-label" data-goto-id="${escapeHtml(item.id)}">${escapeHtml(item.id)}</span>`;
     const marker = L.marker([lat, lng]).addTo(RentMap).bindPopup(popup);
-    marker.on("click", () => goToCard(item.id));
     mapMarkersById[String(item.id)] = marker;
   });
 }

@@ -389,6 +389,13 @@ select:focus, input:focus{
   box-shadow:var(--shadow-hover);
 }
 
+.map-pin-label{
+  cursor:pointer;
+  font-weight:700;
+  color:var(--olive-dark);
+}
+.map-pin-label:hover{ text-decoration:underline; }
+
 .card.card-highlight{
   animation:cardHighlightPulse 1.5s ease-in-out 2;
   border-color:var(--gold);
