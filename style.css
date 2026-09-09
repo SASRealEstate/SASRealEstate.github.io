@@ -221,6 +221,8 @@ select:focus, input:focus{
 
 /* ===== Filters panel ===== */
 
+.filters-toggle-btn{ display:none; }
+
 .filters-panel{
   max-width:1400px;
   margin:0 auto 24px;
@@ -663,7 +665,26 @@ select:focus, input:focus{
   .notices-wrap{ padding:0 14px; }
   .notice{ margin:12px 0; font-size:.85rem; padding:12px 14px; }
 
-  .filters-panel{ margin:0 14px 20px; padding:16px; }
+  .filters-toggle-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    width:calc(100% - 28px);
+    margin:0 14px 12px;
+    padding:12px 16px;
+    background:var(--card-bg);
+    border:1px solid var(--line);
+    border-radius:10px;
+    color:var(--olive-dark);
+    font-family:inherit;
+    font-weight:700;
+    font-size:.88rem;
+    cursor:pointer;
+  }
+
+  .filters-panel{ margin:0 14px 20px; padding:16px; display:none; }
+  .filters-panel.filters-open{ display:block; }
 
   .filters-wrapper{
     flex-direction:column;

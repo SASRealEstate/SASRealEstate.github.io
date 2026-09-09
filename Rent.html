@@ -78,19 +78,13 @@
 📌 ملاحظة: الأسعار والمعلومات يتم تحديثها بشكل دوري - للتأكد من توفر العقار يرجى التواصل معنا على واتساب الرقم اعلى الصفحه.
 </div>
 
-<div class="notice" data-i18n-html="notice2">
-رسوم المكتب 2.5% من إجمالي الإيجار السنوي<br>
-مثال: الإيجار 20 الف سنويا , رسوم المكتب: 20000/40 = 500 ريال
 </div>
 
-<div class="notice" data-i18n-html="notice3">
-كتابه العقود<br>
-250 ريال للعقد السكني — 500 ريال للعقد التجاري
-</div>
+<button type="button" id="filtersToggleBtn" class="filters-toggle-btn">
+  <i class="fa-solid fa-filter"></i> <span data-i18n="filtersToggle">فلاتر</span> <i class="fa-solid fa-chevron-down" id="filtersToggleChevron"></i>
+</button>
 
-</div>
-
-<div class="filters-panel">
+<div class="filters-panel" id="filtersPanel">
   <div class="filters-wrapper">
 
     <div class="filter-field">
@@ -245,8 +239,6 @@ const TRANSLATIONS = {
   pageTitle:{ar:"قائمة الشقق للإيجار", en:"Apartments for Rent"},
   pageSubtitle:{ar:"تصفح كل الشقق المتاحة للإيجار وفلترها حسب احتياجك", en:"Browse all available rental apartments and filter by your needs"},
   notice1:{ar:"📌 ملاحظة: الأسعار والمعلومات يتم تحديثها بشكل دوري - للتأكد من توفر العقار يرجى التواصل معنا على واتساب الرقم اعلى الصفحه.", en:"📌 Note: Prices and details are updated periodically - to confirm availability please contact us via WhatsApp using the number at the top of the page."},
-  notice2:{ar:"رسوم المكتب 2.5% من إجمالي الإيجار السنوي<br>مثال: الإيجار 20 الف سنويا , رسوم المكتب: 20000/40 = 500 ريال", en:"Office fee: 2.5% of total annual rent<br>Example: Annual rent 20,000 → office fee: 20000/40 = 500 SAR"},
-  notice3:{ar:"كتابه العقود<br>250 ريال للعقد السكني — 500 ريال للعقد التجاري", en:"Contract drafting<br>250 SAR for a residential contract — 500 SAR for a commercial contract"},
   filterRentType:{ar:"نوع الإيجار", en:"Rent Type"},
   all:{ar:"الكل", en:"All"},
   rtYearly:{ar:"سنة كاملة", en:"Full Year"},
@@ -277,6 +269,7 @@ const TRANSLATIONS = {
   minYearly:{ar:"الحد الأدنى (السنوي)", en:"Min (yearly)"},
   maxYearly:{ar:"الحد الأعلى (السنوي)", en:"Max (yearly)"},
   resetFilters:{ar:"إعادة تعيين الفلاتر", en:"Reset Filters"},
+  filtersToggle:{ar:"فلاتر", en:"Filters"},
   mapHeading:{ar:"خريطة المواقع", en:"Locations Map"},
   footerRights:{ar:"تطوير ساس العقارية - جميع الحقوق محفوظة", en:"Sas Real Estate Development - All rights reserved"},
   officeMarkerPopup:{ar:"📍 موقع المكتب", en:"📍 Office Location"},
@@ -656,6 +649,13 @@ document.addEventListener("click", function(e){
   const label = e.target.closest(".map-pin-label[data-goto-id]");
   if (!label) return;
   goToCard(label.dataset.gotoId);
+});
+
+document.getElementById("filtersToggleBtn")?.addEventListener("click", () => {
+  const panel = document.getElementById("filtersPanel");
+  const chevron = document.getElementById("filtersToggleChevron");
+  const open = panel.classList.toggle("filters-open");
+  if (chevron) chevron.className = open ? "fa-solid fa-chevron-up" : "fa-solid fa-chevron-down";
 });
 
 let lastListings = null;
