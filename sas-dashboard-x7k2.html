@@ -2603,6 +2603,75 @@ function buildFinancingHTML(f){
   `;
 }
 
+function buildRequestCopyText(docId, d){
+  const requestNumber = d.requestNumber || docId;
+  const locations = Array.isArray(d.locations) ? d.locations : (d.location ? [d.location] : []);
+  const budgetMin = d.budgetMin ? Number(d.budgetMin) : null;
+  const budgetMax = d.budgetMax ? Number(d.budgetMax) : null;
+  const budget = d.budget ? Number(d.budget) : null;
+  let budgetText = "";
+  if (budget) budgetText = `${budget.toLocaleString()} ريال`;
+  else if (budgetMin && budgetMax) budgetText = `من ${budgetMin.toLocaleString()} إلى ${budgetMax.toLocaleString()} ريال`;
+  else if (budgetMin) budgetText = `من ${budgetMin.toLocaleString()} ريال`;
+  else if (budgetMax) budgetText = `حتى ${budgetMax.toLocaleString()} ريال`;
+
+  let text = `طلب عقار جديد من مكتب تطوير ساس العقارية\n\n`;
+  text += `=== معلومات العقار المطلوب ===\n`;
+  if (d.type) text += `نوع العقار: ${d.type}\n`;
+  if (locations.length) text += `موقع العقار: ${locations.join(" أو ")}\n`;
+  if (d.area) text += `المساحة: ${d.area} م²\n`;
+  if (budgetText) text += `الميزانية التقريبية: ${budgetText}\n`;
+  if (d.notes) text += `ملاحظات إضافية: ${d.notes}\n`;
+
+  const f = d.financing;
+  if (f){
+    text += `\n=== بيانات التمويل ===\n`;
+    if (f.idNumber) text += `رقم الهوية: ${f.idNumber}\n`;
+    if (f.dobHijri) text += `تاريخ الميلاد: ${f.dobHijri}${f.age != null && f.age !== "" ? ` (العمر: ${f.age} سنة)` : ""}\n`;
+    if (f.employerType) text += `جهة العمل: ${f.employerType}${f.govType ? " - " + f.govType : ""}\n`;
+    if (f.rank) text += `الرتبة: ${f.rank}\n`;
+    if (f.defenseEzaz) text += `مستحق اعتزاز (وزارة الدفاع): ${f.defenseEzaz}\n`;
+    if (f.appointmentDateHijri) text += `تاريخ التعيين: ${f.appointmentDateHijri}\n`;
+    if (f.employmentStatus) text += `الحالة الوظيفية: ${f.employmentStatus}\n`;
+    if (f.basicSalary) text += `الراتب الأساسي (بدون بدلات): ${Number(f.basicSalary).toLocaleString()} ريال\n`;
+    if (f.allowances) text += `البدلات: ${Number(f.allowances).toLocaleString()} ريال\n`;
+    if (f.pensionSalary) text += `راتب التقاعد: ${Number(f.pensionSalary).toLocaleString()} ريال\n`;
+    if (f.netSalary) text += `الراتب الذي ينزل في البنك: ${Number(f.netSalary).toLocaleString()} ريال\n`;
+    if (f.serviceYears) text += `سنوات الخدمة: ${f.serviceYears}\n`;
+    if (f.hasObligations) text += `التزامات: ${f.hasObligations}\n`;
+    if (Array.isArray(f.obligations)){
+      f.obligations.forEach((o, idx) => {
+        const parts = [];
+        if (o.description) parts.push(o.description);
+        if (o.monthlyInstallment) parts.push(`قسط شهري: ${Number(o.monthlyInstallment).toLocaleString()} ريال`);
+        if (o.remainingMonths) parts.push(`المدة المتبقية: ${o.remainingMonths} شهر`);
+        if (o.earlyRepayment) parts.push(`قيمة السداد المبكر: ${Number(o.earlyRepayment).toLocaleString()} ريال`);
+        if (parts.length) text += `  - الالتزام ${idx + 1}: ${parts.join(" - ")}\n`;
+      });
+    }
+    if (f.salaryBank) text += `بنك الراتب: ${f.salaryBank}\n`;
+    if (f.housingSupport) text += `مستحق للدعم السكني: ${f.housingSupport}\n`;
+  }
+
+  text += `\n---\nرقم الطلب الداخلي: ${requestNumber}`;
+  return text;
+}
+
+function copyRequestText(docId, d, btnEl){
+  const text = buildRequestCopyText(docId, d);
+  const showSuccess = () => {
+    if (!btnEl) return;
+    const original = btnEl.innerHTML;
+    btnEl.innerHTML = '<i class="fa-solid fa-check"></i>';
+    setTimeout(() => { btnEl.innerHTML = original; }, 1200);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(showSuccess).catch(() => fallbackCopy(text, showSuccess));
+  } else {
+    fallbackCopy(text, showSuccess);
+  }
+}
+
 function renderRequestsList(docs){
   renderRequestTypeFilter(docs);
 
@@ -2687,6 +2756,7 @@ function renderRequestsList(docs){
         </div>
       </div>
       <div class="row-actions">
+        <button class="btn-copy" data-action="copy" title="نسخ لإرسال عبر واتساب"><i class="fa-solid fa-copy"></i></button>
         ${d.financing ? `<button class="btn-edit" data-action="sendBanks" title="إرسال إلى البنوك"><i class="fa-solid fa-paper-plane"></i></button>` : ``}
         <button class="btn-delete" data-action="delete"><i class="fa-solid fa-trash"></i></button>
       </div>
@@ -2694,6 +2764,7 @@ function renderRequestsList(docs){
     card.querySelector('.request-status-select').addEventListener("change", (e) => markRequestStatus(doc.id, e.target.value));
     card.querySelector('[data-action="delete"]').addEventListener("click", () => deleteRequest(doc.id));
     card.querySelector('[data-action="sendBanks"]')?.addEventListener("click", () => sendRequestToBanks(doc.id, d));
+    card.querySelector('[data-action="copy"]').addEventListener("click", (e) => copyRequestText(doc.id, d, e.currentTarget));
     listWrap.appendChild(card);
   });
 }
@@ -2808,41 +2879,57 @@ function renderBankRepsList(docs){
   }
   emptyState.style.display = "none";
 
-  const sorted = [...docs].sort((a,b) => (a.data().bankName || "").localeCompare(b.data().bankName || "", "ar"));
+  const sorted = [...docs].sort((a,b) => {
+    const aArchived = !!a.data().archived, bArchived = !!b.data().archived;
+    if (aArchived !== bArchived) return aArchived ? 1 : -1;
+    return (a.data().bankName || "").localeCompare(b.data().bankName || "", "ar");
+  });
 
   sorted.forEach(doc => {
     const d = doc.data();
+    const isArchived = !!d.archived;
     const card = document.createElement("div");
     card.className = "owner-card";
+    if (isArchived) card.style.opacity = ".6";
     const repPhoneDigits = (d.repPhone || "").replace(/[^\d]/g, "").replace(/^0/, "");
 
     card.innerHTML = `
       <div class="owner-info">
-        <h3>${escapeHtml(d.bankName)}</h3>
+        <h3>${escapeHtml(d.bankName)}${isArchived ? ` <span class="badge-archived">مؤرشف - لا يستقبل رسائل</span>` : ``}</h3>
         ${d.repName ? `<div class="owner-broker-line"><i class="fa-solid fa-user"></i> ${escapeHtml(d.repName)}</div>` : ``}
         <div class="owner-broker-line"><i class="fa-solid fa-envelope"></i> ${escapeHtml(d.repEmail)}</div>
         ${d.repPhone ? `<div class="owner-phone"><a href="https://wa.me/966${repPhoneDigits}" target="_blank"><i class="fa-brands fa-whatsapp"></i> ${escapeHtml(d.repPhone)}</a></div>` : ``}
       </div>
       <div class="row-actions">
         <button class="btn-edit" data-action="edit"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn-edit" data-action="toggleArchive" title="${isArchived ? 'إلغاء الأرشفة' : 'أرشفة - إيقاف استقبال الرسائل'}"><i class="fa-solid ${isArchived ? 'fa-box-open' : 'fa-box-archive'}"></i></button>
         <button class="btn-delete" data-action="delete"><i class="fa-solid fa-trash"></i></button>
       </div>
     `;
     card.querySelector('[data-action="edit"]').addEventListener("click", () => editBankRep(doc.id, d));
+    card.querySelector('[data-action="toggleArchive"]').addEventListener("click", () => toggleBankRepArchive(doc.id, isArchived));
     card.querySelector('[data-action="delete"]').addEventListener("click", () => deleteBankRep(doc.id));
     listWrap.appendChild(card);
+  });
+}
+
+function toggleBankRepArchive(docId, currentlyArchived){
+  db.collection("bankReps").doc(docId).update({archived: !currentlyArchived}).catch(e => {
+    alert("حدث خطأ أثناء التحديث: " + e.message);
+    console.error(e);
   });
 }
 
 /* ============ إرسال طلبات التمويل إلى البنوك ============ */
 
 async function sendRequestToBanks(docId, d){
-  if (!allBankReps.length){
-    alert("لا يوجد ممثلو بنوك مضافون بعد. أضفهم من تبويب \"ممثلو البنوك\" أولًا.");
+  const activeBankReps = allBankReps.filter(r => !r.archived);
+  if (!activeBankReps.length){
+    alert("لا يوجد ممثلو بنوك مفعّلون بعد. أضفهم أو ألغِ أرشفتهم من تبويب \"ممثلو البنوك\" أولًا.");
     return;
   }
 
-  const recipients = allBankReps.map(r => r.repEmail).filter(Boolean);
+  const recipients = activeBankReps.map(r => r.repEmail).filter(Boolean);
   if (!confirm(`سيتم إرسال جميع بيانات هذا الطلب (بدون الاسم ورقم الجوال والصفة) إلى ${recipients.length} بنك. متابعة؟`)) return;
 
   const f = d.financing || {};
