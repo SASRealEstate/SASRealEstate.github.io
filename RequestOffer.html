@@ -482,9 +482,25 @@
 <script>document.getElementById("footerYear").textContent = new Date().getFullYear();</script>
 
 <script>
+const FINANCING_BASE_REQUIRED_IDS = [
+  "f_idNumber", "f_dobHijriDay", "f_dobHijriMonth", "f_dobHijriYear",
+  "f_employerType", "f_appointmentHijriDay", "f_appointmentHijriMonth", "f_appointmentHijriYear",
+  "f_employmentStatus", "f_netSalary", "f_serviceYears", "f_hasObligations",
+  "f_salaryBank", "f_housingSupport"
+];
+
 document.getElementById("r_paymentMethod").addEventListener("change", function(){
   const isBank = this.value === "بنك";
   document.getElementById("financingQuestionnaire").style.display = isBank ? "block" : "none";
+  FINANCING_BASE_REQUIRED_IDS.forEach(id => {
+    document.getElementById(id).required = isBank;
+  });
+  if (!isBank){
+    ["f_govType", "f_rank", "f_defenseEzaz", "f_basicSalary", "f_allowances", "f_pensionSalary"].forEach(id => {
+      document.getElementById(id).required = false;
+    });
+    document.getElementById("obligationsContainer").innerHTML = "";
+  }
 });
 
 /* ============ استبيان التمويل - هجري/ميلادي ============ */
@@ -592,6 +608,7 @@ document.getElementById("f_dobHijriYear").addEventListener("change", updateAgeDi
 document.getElementById("f_employerType").addEventListener("change", function(){
   const isGov = this.value === "حكومي";
   document.getElementById("f_govTypeField").style.display = isGov ? "flex" : "none";
+  document.getElementById("f_govType").required = isGov;
   if (!isGov){
     document.getElementById("f_govType").value = "";
     document.getElementById("f_govType").dispatchEvent(new Event("change"));
@@ -602,6 +619,8 @@ document.getElementById("f_govType").addEventListener("change", function(){
   const isMilitary = this.value === "عسكري";
   document.getElementById("f_rankField").style.display = isMilitary ? "flex" : "none";
   document.getElementById("f_defenseEzazField").style.display = isMilitary ? "flex" : "none";
+  document.getElementById("f_rank").required = isMilitary;
+  document.getElementById("f_defenseEzaz").required = isMilitary;
   if (!isMilitary){
     document.getElementById("f_rank").value = "";
     document.getElementById("f_defenseEzaz").value = "";
@@ -613,6 +632,9 @@ document.getElementById("f_employmentStatus").addEventListener("change", functio
   const isRetired = this.value === "متقاعد";
   document.getElementById("f_activeSalaryFields").style.display = isActive ? "grid" : "none";
   document.getElementById("f_pensionSalaryField").style.display = isRetired ? "flex" : "none";
+  document.getElementById("f_basicSalary").required = isActive;
+  document.getElementById("f_allowances").required = isActive;
+  document.getElementById("f_pensionSalary").required = isRetired;
   if (!isActive){ document.getElementById("f_basicSalary").value = ""; document.getElementById("f_allowances").value = ""; }
   if (!isRetired) document.getElementById("f_pensionSalary").value = "";
   updateSalarySum();
@@ -642,24 +664,28 @@ function createObligationRow(){
   descInput.type = "text";
   descInput.className = "obligation-desc";
   descInput.placeholder = "نوع الالتزام (مثال: قرض شخصي)";
+  descInput.required = true;
 
   const installmentInput = document.createElement("input");
   installmentInput.type = "number";
   installmentInput.min = "0";
   installmentInput.className = "obligation-installment";
   installmentInput.placeholder = "القسط الشهري (ريال)";
+  installmentInput.required = true;
 
   const monthsInput = document.createElement("input");
   monthsInput.type = "number";
   monthsInput.min = "0";
   monthsInput.className = "obligation-months";
   monthsInput.placeholder = "المدة المتبقية (أشهر)";
+  monthsInput.required = true;
 
   const earlyRepaymentInput = document.createElement("input");
   earlyRepaymentInput.type = "number";
   earlyRepaymentInput.min = "0";
   earlyRepaymentInput.className = "obligation-earlyRepayment";
   earlyRepaymentInput.placeholder = "قيمة السداد المبكر (ريال)";
+  earlyRepaymentInput.required = true;
 
   const removeBtn = document.createElement("button");
   removeBtn.type = "button";
@@ -691,6 +717,7 @@ document.getElementById("f_hasObligations").addEventListener("change", function(
   const yes = this.value === "نعم";
   document.getElementById("f_obligationsBlock").style.display = yes ? "block" : "none";
   if (yes) resetObligationsContainer();
+  else document.getElementById("obligationsContainer").innerHTML = "";
 });
 
 const REGIONS_CITIES = {
@@ -886,6 +913,12 @@ document.getElementById("requestForm").addEventListener("submit", async function
     document.getElementById("f_pensionSalaryField").style.display = "none";
     document.getElementById("f_salarySumDisplay").style.display = "none";
     document.getElementById("f_obligationsBlock").style.display = "none";
+    document.getElementById("f_govType").required = false;
+    document.getElementById("f_rank").required = false;
+    document.getElementById("f_defenseEzaz").required = false;
+    document.getElementById("f_basicSalary").required = false;
+    document.getElementById("f_allowances").required = false;
+    document.getElementById("f_pensionSalary").required = false;
     resetLocationsContainer();
     resetObligationsContainer();
     statusMsg.textContent = `✔ تم استلام طلبك بنجاح - رقم الطلب: #${requestNumber}. سنتواصل معك في أقرب وقت ممكن.`;
