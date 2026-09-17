@@ -174,7 +174,7 @@ async function getListings(){
 }
 
 function renderCardHTML(item){
-  const {id, plateNumber, type, offerType, location, planNumber, planName, parcelNumber,
+  const {id, type, offerType, location, planNumber, planName, parcelNumber,
          length, width, area, specs, facades, asking, price, pricePerMeter, photos, notes} = item;
 
   const askingNum = parseFloat(asking);
@@ -182,7 +182,6 @@ function renderCardHTML(item){
   const askingPerMeter = (askingNum > 0 && areaNum > 0) ? Math.round(askingNum / areaNum) : null;
 
   const copyText = `رقم: ${id}
-رقم اللوحة: ${plateNumber}
 نوع العقار: ${type}
 نوع العرض: ${offerType}
 رقم القطعة: ${parcelNumber}
@@ -226,7 +225,6 @@ function renderCardHTML(item){
       <div><i class="fa-solid fa-hashtag"></i> رقم القطعة: ${escapeHtml(parcelNumber) || "-"}</div>
       <div><i class="fa-solid fa-hashtag"></i> رقم المخطط: ${escapeHtml(planNumber) || "-"}</div>
       <div><i class="fa-solid fa-map"></i> المخطط: ${escapeHtml(planName) || "-"}</div>
-      <div><i class="fa-solid fa-hashtag"></i> رقم اللوحة: ${escapeHtml(plateNumber) || "-"}</div>
     </div>
 
     ${specs ? `<div class="notes">📝 ${escapeHtml(specs)}</div>` : ``}

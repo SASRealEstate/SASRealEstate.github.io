@@ -396,6 +396,12 @@ button{ cursor:pointer; border:none; }
       <div class="panel">
         <h2><i class="fa-solid fa-list"></i> العروض الحالية (<span id="listingsCount">0</span>)</h2>
 
+        <input type="text" id="listingsSearchInput" placeholder="ابحث برقم العرض، النوع، الموقع، أو الملاحظات" style="margin-bottom:12px;">
+
+        <div class="status-filter" id="listingsTypeFilterWrap" style="margin-bottom:10px;">
+          <select id="listingsTypeFilter"><option value="all">كل الأنواع</option></select>
+        </div>
+
         <div class="status-filter" id="statusFilter"></div>
 
         <div style="overflow-x:auto;">
@@ -815,6 +821,7 @@ const CATEGORIES = {
       {key:"status", label:"الحالة", type:"select", options:["نشط","مؤرشف"]},
       {key:"ownerNumber", label:"المالك", type:"owner-select", brokerHidden:true},
       {key:"brokerNumber", label:"الوسيط", type:"broker-select", brokerHidden:true},
+      {key:"plateNumber", label:"رقم اللوحة", type:"text"},
       {key:"type", label:"نوع العقار", type:"select", value:"شقة", options:["بدروم","شقة","استوديو","دور","ملحق","رووف","دوبلكس","تاون هاوس","توين فيلا","فيلا مستقلة","قصر","شاليه","منزل شعبي","عمارة سكنية","مجمع سكني"]},
       {key:"prices", label:"الأسعار (أدخل السعر لكل نوع تريد عرضه فقط)", type:"multi-price", wide:true},
       {key:"floor", label:"الدور", type:"text"},
@@ -835,6 +842,7 @@ const CATEGORIES = {
     listColumns: [
       {key:"id", label:"رقم"},
       {key:"status", label:"الحالة", statusBadge:true},
+      {key:"plateNumber", label:"رقم اللوحة"},
       {key:"type", label:"النوع"},
       {key:"prices", label:"الأسعار", pricesDisplay:true},
       {key:"floor", label:"الدور"},
@@ -857,6 +865,7 @@ const CATEGORIES = {
         .join("\n") || "لا توجد أسعار محددة";
       const availabilityLine = d.availableFrom ? `تاريخ التوفر: ${d.availableFrom}\n` : "";
       return `رقم: ${id}
+رقم اللوحة: ${d.plateNumber || ""}
 نوع العقار: ${d.type || ""}
 الدور: ${d.floor || ""}
 الغرف: ${d.rooms || ""}
@@ -884,6 +893,7 @@ ${availabilityLine}الموقع: ${d.location || ""}
       {key:"status", label:"الحالة", type:"select", options:["نشط","مؤرشف"]},
       {key:"ownerNumber", label:"المالك", type:"owner-select"},
       {key:"brokerNumber", label:"الوسيط", type:"broker-select"},
+      {key:"plateNumber", label:"رقم اللوحة", type:"text"},
       {key:"type", label:"نوع العقار", type:"select", options:["شقة","استوديو","دور","ملحق","رووف","دوبلكس","تاون هاوس","توين فيلا","فيلا مستقلة","قصر","شاليه","منزل شعبي","عمارة سكنية","مجمع سكني","عمارة تجارية"]},
       {key:"floor", label:"الدور", type:"text"},
       {key:"landArea", label:"مساحة الأرض", type:"text"},
@@ -898,6 +908,7 @@ ${availabilityLine}الموقع: ${d.location || ""}
     listColumns: [
       {key:"id", label:"رقم"},
       {key:"status", label:"الحالة", statusBadge:true},
+      {key:"plateNumber", label:"رقم اللوحة"},
       {key:"type", label:"النوع"},
       {key:"price", label:"السعر", suffix:" ريال"},
       {key:"landArea", label:"مساحة الأرض"},
@@ -906,6 +917,7 @@ ${availabilityLine}الموقع: ${d.location || ""}
       {key:"brokerNumber", label:"الوسيط", brokerLookup:true}
     ],
     copyText: (id, d) => `رقم: ${id}
+رقم اللوحة: ${d.plateNumber || ""}
 نوع العقار: ${d.type || ""}
 الدور: ${d.floor || ""}
 مساحة الأرض: ${d.landArea || ""}
@@ -948,6 +960,7 @@ ${availabilityLine}الموقع: ${d.location || ""}
     listColumns: [
       {key:"id", label:"رقم"},
       {key:"status", label:"الحالة", statusBadge:true},
+      {key:"plateNumber", label:"رقم اللوحة"},
       {key:"type", label:"النوع"},
       {key:"price", label:"السعر", suffix:" ريال"},
       {key:"area", label:"المساحة"},
@@ -982,6 +995,8 @@ let unsubscribeListener = null;
 let idBaselines = {};
 let lastAutoId = null;
 let currentStatusFilter = "all";
+let listingsSearchQuery = "";
+let listingsTypeFilter = "all";
 let lastDocs = [];
 let currentMode = "listings";
 let userRole = null; // "admin" | "broker"
@@ -1191,6 +1206,10 @@ async function switchCategory(key){
   if (userRole === "broker") key = "rent";
   currentCategory = key;
   currentStatusFilter = "all";
+  listingsSearchQuery = "";
+  listingsTypeFilter = "all";
+  const searchInput = document.getElementById("listingsSearchInput");
+  if (searchInput) searchInput.value = "";
   renderTabs();
   document.getElementById("viewPageLink").href = cat().sourcePage;
   if (userRole === "admin"){
@@ -1224,6 +1243,33 @@ function renderStatusFilter(){
     wrap.appendChild(btn);
   });
 }
+
+function renderListingsTypeFilter(docs){
+  const select = document.getElementById("listingsTypeFilter");
+  if (!select) return;
+  const types = Array.from(new Set(docs.map(doc => doc.data().type).filter(Boolean))).sort((a,b) => a.localeCompare(b, "ar"));
+  const previousValue = listingsTypeFilter;
+
+  select.innerHTML = `<option value="all">كل الأنواع</option>` +
+    types.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
+
+  if (types.includes(previousValue) || previousValue === "all"){
+    select.value = previousValue;
+  } else {
+    listingsTypeFilter = "all";
+    select.value = "all";
+  }
+}
+
+document.getElementById("listingsSearchInput")?.addEventListener("input", function(){
+  listingsSearchQuery = this.value;
+  renderListingsTable(lastDocs);
+});
+
+document.getElementById("listingsTypeFilter")?.addEventListener("change", function(){
+  listingsTypeFilter = this.value;
+  renderListingsTable(lastDocs);
+});
 
 /* ============ اقتراح رقم العرض التالي تلقائيًا ============ */
 
@@ -1716,23 +1762,45 @@ function copyListingText(docId, d, btnEl){
   }
 }
 
+function listingMatchesSearch(doc, query){
+  if (!query) return true;
+  const d = doc.data();
+  const parts = [doc.id, d.status]
+    .concat(cat().fields.map(f => d[f.key]))
+    .concat([getOwnerLabelByNumber(d.ownerNumber), getBrokerLabelByNumber(d.brokerNumber)]);
+  return parts
+    .filter(v => v !== undefined && v !== null)
+    .join(" ")
+    .toLowerCase()
+    .includes(query);
+}
+
 function renderListingsTable(docs){
   const tbody = document.getElementById("listingsTableBody");
   const emptyState = document.getElementById("emptyState");
   tbody.innerHTML = "";
 
+  renderListingsTypeFilter(docs);
+
+  const searchQuery = listingsSearchQuery.trim().toLowerCase();
+
   const filtered = docs.filter(doc => {
-    if (currentStatusFilter === "all") return true;
-    const status = doc.data().status || "نشط";
-    return status === currentStatusFilter;
+    const d = doc.data();
+    const status = d.status || "نشط";
+    if (currentStatusFilter !== "all" && status !== currentStatusFilter) return false;
+    if (listingsTypeFilter !== "all" && d.type !== listingsTypeFilter) return false;
+    if (!listingMatchesSearch(doc, searchQuery)) return false;
+    return true;
   });
 
   document.getElementById("listingsCount").textContent = filtered.length;
 
   if (filtered.length === 0){
-    emptyState.textContent = currentStatusFilter === "all"
-      ? "لا توجد عروض بعد. أضف عرضًا جديدًا أو استورد العروض الحالية."
-      : (currentStatusFilter === "مؤرشف" ? "لا توجد عروض مؤرشفة." : "لا توجد عروض نشطة.");
+    emptyState.textContent = (searchQuery || listingsTypeFilter !== "all")
+      ? "لا توجد عروض مطابقة للبحث/الفلاتر."
+      : (currentStatusFilter === "all"
+        ? "لا توجد عروض بعد. أضف عرضًا جديدًا أو استورد العروض الحالية."
+        : (currentStatusFilter === "مؤرشف" ? "لا توجد عروض مؤرشفة." : "لا توجد عروض نشطة."));
     emptyState.style.display = "block";
     return;
   }
