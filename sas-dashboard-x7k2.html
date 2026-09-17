@@ -400,6 +400,7 @@ button{ cursor:pointer; border:none; }
 
         <div class="status-filter" id="listingsTypeFilterWrap" style="margin-bottom:10px;">
           <select id="listingsTypeFilter"><option value="all">كل الأنواع</option></select>
+          <select id="listingsSortSelect"><option value="">بدون ترتيب</option></select>
         </div>
 
         <div class="status-filter" id="statusFilter"></div>
@@ -997,6 +998,7 @@ let lastAutoId = null;
 let currentStatusFilter = "all";
 let listingsSearchQuery = "";
 let listingsTypeFilter = "all";
+let listingsSortBy = "";
 let lastDocs = [];
 let currentMode = "listings";
 let userRole = null; // "admin" | "broker"
@@ -1208,6 +1210,7 @@ async function switchCategory(key){
   currentStatusFilter = "all";
   listingsSearchQuery = "";
   listingsTypeFilter = "all";
+  listingsSortBy = "";
   const searchInput = document.getElementById("listingsSearchInput");
   if (searchInput) searchInput.value = "";
   renderTabs();
@@ -1218,6 +1221,7 @@ async function switchCategory(key){
   renderFormFields();
   renderTableHead();
   renderStatusFilter();
+  renderListingsSortOptions();
   resetForm();
   listenToListings();
 }
@@ -1268,6 +1272,54 @@ document.getElementById("listingsSearchInput")?.addEventListener("input", functi
 
 document.getElementById("listingsTypeFilter")?.addEventListener("change", function(){
   listingsTypeFilter = this.value;
+  renderListingsTable(lastDocs);
+});
+
+const LISTINGS_SORT_OPTIONS = [
+  {key:"id", label:"الرقم"},
+  {key:"type", label:"نوع العقار"},
+  {key:"owner", label:"المالك"},
+  {key:"broker", label:"الوسيط"},
+  {key:"rooms", label:"عدد الغرف", rentOnly:true},
+  {key:"rentType", label:"نوع الإيجار", rentOnly:true}
+];
+
+function renderListingsSortOptions(){
+  const select = document.getElementById("listingsSortSelect");
+  if (!select) return;
+  const options = LISTINGS_SORT_OPTIONS.filter(o => !o.rentOnly || currentCategory === "rent");
+  select.innerHTML = `<option value="">بدون ترتيب</option>` +
+    options.map(o => `<option value="${o.key}">${escapeHtml(o.label)}</option>`).join("");
+  select.value = options.some(o => o.key === listingsSortBy) ? listingsSortBy : "";
+  listingsSortBy = select.value;
+}
+
+function listingSortValue(d, sortBy){
+  if (sortBy === "id") return parseInt(d.id, 10) || 0;
+  if (sortBy === "type") return d.type || "";
+  if (sortBy === "owner") return getOwnerLabelByNumber(d.ownerNumber) || "￿";
+  if (sortBy === "broker") return getBrokerLabelByNumber(d.brokerNumber) || "￿";
+  if (sortBy === "rooms") return parseInt(d.rooms, 10) || 0;
+  if (sortBy === "rentType"){
+    const prices = effectivePrices(d);
+    const idx = RENT_TYPES.findIndex(rt => prices[rt.key]);
+    return idx === -1 ? RENT_TYPES.length : idx;
+  }
+  return 0;
+}
+
+function sortListings(docs, sortBy){
+  if (!sortBy) return docs;
+  const numeric = sortBy === "id" || sortBy === "rooms" || sortBy === "rentType";
+  return [...docs].sort((a, b) => {
+    const va = listingSortValue(a.data(), sortBy);
+    const vb = listingSortValue(b.data(), sortBy);
+    return numeric ? (va - vb) : String(va).localeCompare(String(vb), "ar");
+  });
+}
+
+document.getElementById("listingsSortSelect")?.addEventListener("change", function(){
+  listingsSortBy = this.value;
   renderListingsTable(lastDocs);
 });
 
@@ -1784,14 +1836,14 @@ function renderListingsTable(docs){
 
   const searchQuery = listingsSearchQuery.trim().toLowerCase();
 
-  const filtered = docs.filter(doc => {
+  const filtered = sortListings(docs.filter(doc => {
     const d = doc.data();
     const status = d.status || "نشط";
     if (currentStatusFilter !== "all" && status !== currentStatusFilter) return false;
     if (listingsTypeFilter !== "all" && d.type !== listingsTypeFilter) return false;
     if (!listingMatchesSearch(doc, searchQuery)) return false;
     return true;
-  });
+  }), listingsSortBy);
 
   document.getElementById("listingsCount").textContent = filtered.length;
 
