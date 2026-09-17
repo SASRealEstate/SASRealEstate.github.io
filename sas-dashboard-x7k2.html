@@ -396,7 +396,17 @@ button{ cursor:pointer; border:none; }
       <div class="panel">
         <h2><i class="fa-solid fa-list"></i> العروض الحالية (<span id="listingsCount">0</span>)</h2>
 
-        <input type="text" id="listingsSearchInput" placeholder="ابحث برقم العرض، النوع، الموقع، أو الملاحظات" style="margin-bottom:12px;">
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+          <select id="listingsSearchMode" style="min-width:170px;">
+            <option value="">بدون بحث</option>
+            <option value="id">رقم الإعلان</option>
+            <option value="ownerName">اسم المالك</option>
+            <option value="ownerPhone">رقم جوال المالك</option>
+            <option value="brokerName">اسم الوسيط</option>
+            <option value="brokerPhone">رقم جوال الوسيط</option>
+          </select>
+          <input type="text" id="listingsSearchInput" style="flex:1; min-width:200px;" disabled placeholder="اختر طريقة البحث أولًا">
+        </div>
 
         <div class="status-filter" id="listingsTypeFilterWrap" style="margin-bottom:10px;">
           <select id="listingsTypeFilter"><option value="all">كل الأنواع</option></select>
@@ -760,7 +770,7 @@ const RENT_TYPES = [
   {key:"daily", label:"يومي"}
 ];
 
-const RENT_TYPE_MONTHLY_DIVISOR = {yearly:12, schoolYear:10, summer:2};
+const RENT_TYPE_MONTHLY_DIVISOR = {yearly:10, schoolYear:10, summer:2};
 
 const LEGACY_RENT_TYPE_TO_KEY = {"سنة كاملة":"yearly", "سنة دراسية":"schoolYear", "صيفية":"summer"};
 
@@ -997,6 +1007,7 @@ let idBaselines = {};
 let lastAutoId = null;
 let currentStatusFilter = "all";
 let listingsSearchQuery = "";
+let listingsSearchMode = "";
 let listingsTypeFilter = "all";
 let listingsSortBy = "";
 let lastDocs = [];
@@ -1209,10 +1220,13 @@ async function switchCategory(key){
   currentCategory = key;
   currentStatusFilter = "all";
   listingsSearchQuery = "";
+  listingsSearchMode = "";
   listingsTypeFilter = "all";
   listingsSortBy = "";
   const searchInput = document.getElementById("listingsSearchInput");
-  if (searchInput) searchInput.value = "";
+  if (searchInput){ searchInput.value = ""; searchInput.disabled = true; searchInput.placeholder = LISTINGS_SEARCH_MODE_PLACEHOLDERS[""]; }
+  const searchMode = document.getElementById("listingsSearchMode");
+  if (searchMode) searchMode.value = "";
   renderTabs();
   document.getElementById("viewPageLink").href = cat().sourcePage;
   if (userRole === "admin"){
@@ -1264,6 +1278,26 @@ function renderListingsTypeFilter(docs){
     select.value = "all";
   }
 }
+
+const LISTINGS_SEARCH_MODE_PLACEHOLDERS = {
+  "": "اختر طريقة البحث أولًا",
+  id: "اكتب رقم الإعلان",
+  ownerName: "اكتب اسم المالك",
+  ownerPhone: "اكتب رقم جوال المالك",
+  brokerName: "اكتب اسم الوسيط",
+  brokerPhone: "اكتب رقم جوال الوسيط"
+};
+
+document.getElementById("listingsSearchMode")?.addEventListener("change", function(){
+  listingsSearchMode = this.value;
+  listingsSearchQuery = "";
+  const input = document.getElementById("listingsSearchInput");
+  input.value = "";
+  input.disabled = !listingsSearchMode;
+  input.placeholder = LISTINGS_SEARCH_MODE_PLACEHOLDERS[listingsSearchMode] || "";
+  if (!input.disabled) input.focus();
+  renderListingsTable(lastDocs);
+});
 
 document.getElementById("listingsSearchInput")?.addEventListener("input", function(){
   listingsSearchQuery = this.value;
@@ -1815,16 +1849,18 @@ function copyListingText(docId, d, btnEl){
 }
 
 function listingMatchesSearch(doc, query){
-  if (!query) return true;
+  if (!listingsSearchMode || !query) return true;
   const d = doc.data();
-  const parts = [doc.id, d.status]
-    .concat(cat().fields.map(f => d[f.key]))
-    .concat([getOwnerLabelByNumber(d.ownerNumber), getBrokerLabelByNumber(d.brokerNumber)]);
-  return parts
-    .filter(v => v !== undefined && v !== null)
-    .join(" ")
-    .toLowerCase()
-    .includes(query);
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  const digits = q.replace(/\D/g, "");
+
+  if (listingsSearchMode === "id") return String(doc.id).toLowerCase().includes(q);
+  if (listingsSearchMode === "ownerName") return getOwnerLabelByNumber(d.ownerNumber).toLowerCase().includes(q);
+  if (listingsSearchMode === "brokerName") return getBrokerLabelByNumber(d.brokerNumber).toLowerCase().includes(q);
+  if (listingsSearchMode === "ownerPhone") return digits ? getOwnerPhoneByNumber(d.ownerNumber).replace(/\D/g, "").includes(digits) : false;
+  if (listingsSearchMode === "brokerPhone") return digits ? getBrokerPhoneByNumber(d.brokerNumber).replace(/\D/g, "").includes(digits) : false;
+  return true;
 }
 
 function renderListingsTable(docs){
@@ -1980,6 +2016,12 @@ function getOwnerLabelByNumber(number){
   return o ? ownerLabel(o) : `#${number}`;
 }
 
+function getOwnerPhoneByNumber(number){
+  if (!number) return "";
+  const o = allOwners.find(o => String(o.number) === String(number));
+  return o ? (o.phone || "") : "";
+}
+
 /* ---- كاش الوسطاء (للربط من نموذج العروض) ---- */
 
 async function loadAllBrokers(){
@@ -2009,6 +2051,12 @@ function getBrokerLabelByNumber(number){
   if (!number) return "-";
   const b = allBrokers.find(b => String(b.number) === String(number));
   return b ? brokerLabel(b) : `#${number}`;
+}
+
+function getBrokerPhoneByNumber(number){
+  if (!number) return "";
+  const b = allBrokers.find(b => String(b.number) === String(number));
+  return b ? (b.phone || "") : "";
 }
 
 /* ---- فهرس العقارات لكل مالك (يُحسب من العروض مباشرة) ---- */
