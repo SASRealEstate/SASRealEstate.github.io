@@ -688,7 +688,7 @@ async function uploadPhotosForListing(listingNumber, fileList, statusEl, urlInpu
     const res = await fetch(PHOTO_UPLOAD_URL, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ secret: APPS_SCRIPT_SHARED_SECRET, listingNumber: String(listingNumber), files })
+      body: JSON.stringify({ secret: APPS_SCRIPT_SHARED_SECRET, category: currentCategory, listingNumber: String(listingNumber), files })
     });
     const result = await res.json();
 
@@ -1513,7 +1513,7 @@ function renderFormFields(){
       }
 
       div.appendChild(row);
-    } else if (f.key === "photos" && currentCategory === "rent"){
+    } else if (f.key === "photos"){
       const row = document.createElement("div");
       row.className = "clearable-input-row";
       input.style.flex = "1";
