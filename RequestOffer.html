@@ -96,8 +96,12 @@
 
 @media (max-width:600px){
   .location-row{ grid-template-columns:1fr; }
+  .btn-remove-location{ padding:10px 14px; }
 }
 
+.location-row{ align-items:end; }
+.row-cell{ display:flex; flex-direction:column; gap:6px; }
+.row-cell label{ font-weight:700; font-size:.85rem; color:var(--olive-dark); }
 .location-row select,
 .location-row input{ width:100%; }
 
@@ -656,6 +660,16 @@ function updateSalarySum(){
 document.getElementById("f_basicSalary").addEventListener("input", updateSalarySum);
 document.getElementById("f_allowances").addEventListener("input", updateSalarySum);
 
+function labeledCell(text, el){
+  const cell = document.createElement("div");
+  cell.className = "row-cell";
+  const label = document.createElement("label");
+  label.textContent = text;
+  cell.appendChild(label);
+  cell.appendChild(el);
+  return cell;
+}
+
 function createObligationRow(){
   const row = document.createElement("div");
   row.className = "location-row obligation-row";
@@ -663,28 +677,28 @@ function createObligationRow(){
   const descInput = document.createElement("input");
   descInput.type = "text";
   descInput.className = "obligation-desc";
-  descInput.placeholder = "نوع الالتزام (مثال: قرض شخصي)";
+  descInput.placeholder = "مثال: قرض شخصي";
   descInput.required = true;
 
   const installmentInput = document.createElement("input");
   installmentInput.type = "number";
   installmentInput.min = "0";
   installmentInput.className = "obligation-installment";
-  installmentInput.placeholder = "القسط الشهري (ريال)";
+  installmentInput.placeholder = "بالريال";
   installmentInput.required = true;
 
   const monthsInput = document.createElement("input");
   monthsInput.type = "number";
   monthsInput.min = "0";
   monthsInput.className = "obligation-months";
-  monthsInput.placeholder = "المدة المتبقية (أشهر)";
+  monthsInput.placeholder = "بالأشهر";
   monthsInput.required = true;
 
   const earlyRepaymentInput = document.createElement("input");
   earlyRepaymentInput.type = "number";
   earlyRepaymentInput.min = "0";
   earlyRepaymentInput.className = "obligation-earlyRepayment";
-  earlyRepaymentInput.placeholder = "قيمة السداد المبكر (ريال)";
+  earlyRepaymentInput.placeholder = "بالريال";
   earlyRepaymentInput.required = true;
 
   const removeBtn = document.createElement("button");
@@ -693,10 +707,10 @@ function createObligationRow(){
   removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
   removeBtn.addEventListener("click", () => row.remove());
 
-  row.appendChild(descInput);
-  row.appendChild(installmentInput);
-  row.appendChild(monthsInput);
-  row.appendChild(earlyRepaymentInput);
+  row.appendChild(labeledCell("نوع الالتزام", descInput));
+  row.appendChild(labeledCell("القسط الشهري", installmentInput));
+  row.appendChild(labeledCell("المدة المتبقية", monthsInput));
+  row.appendChild(labeledCell("قيمة السداد المبكر", earlyRepaymentInput));
   row.appendChild(removeBtn);
   return row;
 }
@@ -752,7 +766,7 @@ function createLocationRow(){
   const neighborhoodInput = document.createElement("input");
   neighborhoodInput.type = "text";
   neighborhoodInput.className = "location-neighborhood";
-  neighborhoodInput.placeholder = "الحي (اختياري)";
+  neighborhoodInput.placeholder = "اختياري";
 
   regionSelect.addEventListener("change", function(){
     const cities = REGIONS_CITIES[this.value] || [];
@@ -766,9 +780,9 @@ function createLocationRow(){
   removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
   removeBtn.addEventListener("click", () => row.remove());
 
-  row.appendChild(regionSelect);
-  row.appendChild(citySelect);
-  row.appendChild(neighborhoodInput);
+  row.appendChild(labeledCell("المنطقة", regionSelect));
+  row.appendChild(labeledCell("المدينة", citySelect));
+  row.appendChild(labeledCell("الحي", neighborhoodInput));
   row.appendChild(removeBtn);
   return row;
 }
