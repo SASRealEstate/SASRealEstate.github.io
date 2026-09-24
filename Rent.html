@@ -353,6 +353,12 @@ function translateType(type){
   return TYPE_LABELS_EN[type] || type || "";
 }
 
+function translateEntrance(v){
+  if (v === "مستقل") return t("entrancePrivate");
+  if (v === "مشترك") return t("entranceShared");
+  return v || "";
+}
+
 function rtLabel(rt){
   return t("rt" + rt.key.charAt(0).toUpperCase() + rt.key.slice(1));
 }
@@ -555,7 +561,7 @@ ${t('lblStore')}: ${store}
 ${t('lblElevator')}: ${elevator}
 ${t('furnished')}: ${furnished}
 ${t('lblFittedKitchen')}: ${fittedKitchen}
-${t('lblEntranceFlag')}: ${entrance}
+${t('entrance')}: ${translateEntrance(entrance)}
 ${t('lblNotes')}: ${notes}
 ${priceLinesText}
 ${availabilityLine}${t('lblLocation')}: ${location}
@@ -602,7 +608,7 @@ ${availableFrom ? `<div class="availability-badge"><i class="fa-solid fa-calenda
     : '<span class="icon-no">✖</span>'}
 </div>
 
-<div>
+<div data-feature="entrance">
   <i class="fa-solid fa-door-open"></i>
   ${t('lblEntranceFlag')}:
   ${entrance === 'مستقل'
@@ -757,7 +763,9 @@ function copyByRentType(targetType) {
     const photoLink = card.querySelector('.card-actions a[href*="drive.google.com"], .card-actions a[href*="photos"]')?.href || '';
 
     const featureItems = Array.from(card.querySelectorAll('.features div'))
-      .map(el => el.textContent.replace(/\s+/g, ' ').trim());
+      .map(el => el.dataset.feature === 'entrance'
+        ? `${t('entrance')}: ${translateEntrance(card.dataset.entrance)}`
+        : el.textContent.replace(/\s+/g, ' ').trim());
 
     const firstLine = featureItems.slice(0, 6).join(' | ');   // إلى مستودع
     const secondLine = featureItems.slice(6).join(' | ');     // من مصعد وما بعده
@@ -812,7 +820,9 @@ function copyFilteredOffers() {
     const photoLink = card.querySelector('.card-actions a[href*="drive.google.com"], .card-actions a[href*="photos"]')?.href || '';
 
     const featureItems = Array.from(card.querySelectorAll('.features div'))
-      .map(el => el.textContent.replace(/\s+/g, ' ').trim());
+      .map(el => el.dataset.feature === 'entrance'
+        ? `${t('entrance')}: ${translateEntrance(card.dataset.entrance)}`
+        : el.textContent.replace(/\s+/g, ' ').trim());
 
     const firstLine = featureItems.slice(0, 6).join(' | ');
     const secondLine = featureItems.slice(6).join(' | ');

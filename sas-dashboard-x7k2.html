@@ -689,7 +689,24 @@ async function uploadPhotosForListing(listingNumber, fileList, statusEl, urlInpu
   }
   if (!fileList || !fileList.length) return;
 
-  statusEl.textContent = "جارٍ رفع " + fileList.length + " صورة...";
+  const MB = 1024 * 1024;
+  let totalSize = 0;
+  for (const f of Array.from(fileList)){
+    const isVideo = f.type.startsWith("video/");
+    if (f.size > (isVideo ? 35 : 8) * MB){
+      statusEl.textContent = "الملف كبير جدًا: " + f.name + " (الحد " + (isVideo ? "35 ميجا للفيديو" : "8 ميجا للصورة") + ")";
+      statusEl.className = "status-msg err";
+      return;
+    }
+    totalSize += f.size;
+  }
+  if (totalSize > 35 * MB){
+    statusEl.textContent = "الحجم الكلي كبير (الحد 35 ميجا في المرة الواحدة)، ارفع الملفات على دفعات.";
+    statusEl.className = "status-msg err";
+    return;
+  }
+
+  statusEl.textContent = "جارٍ رفع " + fileList.length + " ملف...";
   statusEl.className = "status-msg";
 
   try{
@@ -708,7 +725,7 @@ async function uploadPhotosForListing(listingNumber, fileList, statusEl, urlInpu
 
     if (result.success){
       urlInputEl.value = result.folderUrl;
-      statusEl.textContent = "تم رفع الصور بنجاح ✔";
+      statusEl.textContent = "تم الرفع بنجاح ✔";
       statusEl.className = "status-msg ok";
     } else {
       statusEl.textContent = "خطأ: " + (result.error || "غير معروف");
@@ -728,10 +745,11 @@ function showPhotoPreview(fileList, previewWrap, statusEl, urlInputEl, fileInput
   statusEl.className = "status-msg";
 
   files.forEach(f => {
-    const img = document.createElement("img");
-    img.src = URL.createObjectURL(f);
-    img.className = "photo-preview-thumb";
-    previewWrap.appendChild(img);
+    const el = document.createElement(f.type.startsWith("video/") ? "video" : "img");
+    el.src = URL.createObjectURL(f);
+    if (el.tagName === "VIDEO"){ el.muted = true; el.preload = "metadata"; }
+    el.className = "photo-preview-thumb";
+    previewWrap.appendChild(el);
   });
 
   const actions = document.createElement("div");
@@ -740,7 +758,7 @@ function showPhotoPreview(fileList, previewWrap, statusEl, urlInputEl, fileInput
   const confirmBtn = document.createElement("button");
   confirmBtn.type = "button";
   confirmBtn.className = "btn-save";
-  confirmBtn.textContent = "تأكيد رفع " + files.length + " صورة";
+  confirmBtn.textContent = "تأكيد رفع " + files.length + " ملف";
   confirmBtn.addEventListener("click", () => {
     const listingNumber = document.getElementById("f_id").value.trim();
     previewWrap.innerHTML = "";
@@ -901,7 +919,7 @@ const CATEGORIES = {
 مصعد: ${d.elevator || ""}
 مؤثثة: ${d.furnished || ""}
 مطبخ راكب: ${d.fittedKitchen || ""}
-مستقل: ${d.entrance || ""}
+المدخل: ${d.entrance || ""}
 ملاحظات: ${d.notes || ""}
 ${pricesText}
 ${availabilityLine}الموقع: ${d.location || ""}
@@ -1544,7 +1562,7 @@ function renderFormFields(){
       const fileInput = document.createElement("input");
       fileInput.type = "file";
       fileInput.multiple = true;
-      fileInput.accept = "image/jpeg,image/png,image/webp";
+      fileInput.accept = "image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm";
       fileInput.style.display = "none";
       fileInput.id = "photoFileInput";
 
