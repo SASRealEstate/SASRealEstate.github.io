@@ -751,3 +751,33 @@ select:focus, input:focus{
   .card-actions a,
   .card-actions button{ font-size:.78rem; padding:10px 6px; min-height:40px; }
 }
+
+/* ===== Embedded single-card preview (used by the admin dashboard's preview button) ===== */
+
+html.embed-preview,
+.embed-preview body{
+  background:#fff;
+  margin:0;
+}
+
+.embed-preview .site-header,
+.embed-preview .toolbar-row,
+.embed-preview .notices-wrap,
+.embed-preview .filters-panel,
+.embed-preview .filters-toggle-btn,
+.embed-preview .page-title,
+.embed-preview .page-subtitle,
+.embed-preview .site-footer,
+.embed-preview #RentMap,
+.embed-preview #BuildingsMap,
+.embed-preview #LandsMap,
+.embed-preview h2{
+  display:none !important;
+}
+
+.embed-preview .cards{
+  display:block;
+  max-width:420px;
+  margin:0 auto;
+  padding:16px;
+}

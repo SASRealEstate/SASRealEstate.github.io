@@ -5,6 +5,13 @@
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="Logo.png" type="image/png">
+<script>
+try{
+  if (new URLSearchParams(location.search).get("embed") === "1"){
+    document.documentElement.classList.add("embed-preview");
+  }
+}catch(e){}
+</script>
 <title>قائمة الأراضي للبيع | تطوير ساس العقارية</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -273,8 +280,16 @@ function goToCard(id){
 }
 
 function applyPreviewParam(){
-  const id = new URLSearchParams(location.search).get("preview");
-  if (id) goToCard(id);
+  const params = new URLSearchParams(location.search);
+  const id = params.get("preview");
+  if (!id) return;
+  if (params.get("embed") === "1"){
+    document.querySelectorAll(".card").forEach(c => {
+      if (c.dataset.id !== String(id)) c.remove();
+    });
+  } else {
+    goToCard(id);
+  }
 }
 
 const mapMarkersById = {};

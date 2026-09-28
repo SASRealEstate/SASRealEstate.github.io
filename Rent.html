@@ -12,6 +12,9 @@
     if (theme === "dark") document.documentElement.setAttribute("data-theme","dark");
     document.documentElement.setAttribute("lang", lang);
     document.documentElement.setAttribute("dir", lang === "en" ? "ltr" : "rtl");
+    if (new URLSearchParams(location.search).get("embed") === "1"){
+      document.documentElement.classList.add("embed-preview");
+    }
   }catch(e){}
 })();
 </script>
@@ -301,7 +304,9 @@ const TRANSLATIONS = {
   lblStore:{ar:"مستودع", en:"Storage"},
   lblElevator:{ar:"مصعد", en:"Elevator"},
   lblFittedKitchen:{ar:"مطبخ راكب", en:"Fitted Kitchen"},
-  lblEntranceFlag:{ar:"مستقل", en:"Private Entrance"},
+  lblAge:{ar:"عمر العقار", en:"Property Age"},
+  ageNew:{ar:"جديد", en:"New"},
+  ageYearsSuffix:{ar:"سنة", en:"years"},
   lblNotes:{ar:"ملاحظات", en:"Notes"},
   lblAvailableFrom:{ar:"متاح من", en:"Available from"},
   lblLocation:{ar:"الموقع", en:"Location"},
@@ -351,6 +356,17 @@ function t(key){
 function translateType(type){
   if (getLang() !== "en") return type || "";
   return TYPE_LABELS_EN[type] || type || "";
+}
+
+function translateAge(ageType, ageYears){
+  if (ageType === "جديد") return t("ageNew");
+  if (ageType === "سنوات" && hasFeatureValue(ageYears)) return `${ageYears} ${t("ageYearsSuffix")}`;
+  return "";
+}
+
+function hasFeatureValue(v){
+  const s = (v || "").toString().trim();
+  return !!s && s !== "-";
 }
 
 function translateEntrance(v){
@@ -525,7 +541,9 @@ function getPrimaryPrice(prices){
 
 function renderCardHTML(item){
     const {id, type, location, floor, rooms, baths, hall, kitchen, store,
-           elevator, furnished, fittedKitchen, entrance, notes, photos, brokerPhone, brokerContact, availableFrom} = item;
+           elevator, furnished, fittedKitchen, entrance, notes, photos, brokerPhone, brokerContact, availableFrom,
+           ageType, ageYears} = item;
+    const ageText = translateAge(ageType, ageYears);
 
     const prices = getEffectivePrices(item);
     const paymentMethods = getEffectivePaymentMethods(item);
@@ -550,22 +568,26 @@ function renderCardHTML(item){
 
     const displayType = translateType(type);
 
-    const copyText = `${t('lblId')}: ${id}
-${t('lblType')}: ${displayType}
-${t('lblFloor')}: ${floor}
-${t('lblRooms')}: ${rooms}
-${t('lblBaths')}: ${baths}
-${t('lblHall')}: ${hall}
-${t('lblKitchen')}: ${kitchen}
-${t('lblStore')}: ${store}
-${t('lblElevator')}: ${elevator}
-${t('furnished')}: ${furnished}
-${t('lblFittedKitchen')}: ${fittedKitchen}
-${t('entrance')}: ${translateEntrance(entrance)}
-${t('lblNotes')}: ${notes}
-${priceLinesText}
-${availabilityLine}${t('lblLocation')}: ${location}
-${t('lblPhotos')}: ${photos}`;
+    const copyText = [
+      `${t('lblId')}: ${id}`,
+      `${t('lblType')}: ${displayType}`,
+      hasFeatureValue(floor) && `${t('lblFloor')}: ${floor}`,
+      hasFeatureValue(rooms) && `${t('lblRooms')}: ${rooms}`,
+      hasFeatureValue(baths) && `${t('lblBaths')}: ${baths}`,
+      hasFeatureValue(hall) && `${t('lblHall')}: ${hall}`,
+      hasFeatureValue(kitchen) && `${t('lblKitchen')}: ${kitchen}`,
+      hasFeatureValue(store) && `${t('lblStore')}: ${store}`,
+      ageText && `${t('lblAge')}: ${ageText}`,
+      `${t('lblElevator')}: ${elevator}`,
+      `${t('furnished')}: ${furnished}`,
+      `${t('lblFittedKitchen')}: ${fittedKitchen}`,
+      hasFeatureValue(entrance) && `${t('entrance')}: ${translateEntrance(entrance)}`,
+      hasFeatureValue(notes) && `${t('lblNotes')}: ${notes}`,
+      priceLinesText,
+      availabilityLine ? availabilityLine.trim() : "",
+      hasFeatureValue(location) && `${t('lblLocation')}: ${location}`,
+      hasFeatureValue(photos) && `${t('lblPhotos')}: ${photos}`
+    ].filter(Boolean).join("\n");
 
     return `
 <div class="card"
@@ -594,12 +616,13 @@ ${t('lblPhotos')}: ${photos}`;
 ${availableFrom ? `<div class="availability-badge"><i class="fa-solid fa-calendar-check"></i> ${t('lblAvailableFrom')}: ${escapeHtml(availableFrom)}</div>` : ``}
 
     <div class="features">
-      <div><i class="fa-solid fa-stairs"></i> ${t('lblFloor')}: ${escapeHtml(floor)}</div>
-      <div><i class="fa-solid fa-bed"></i> ${t('lblRooms')}: ${escapeHtml(rooms)}</div>
-      <div><i class="fa-solid fa-shower"></i> ${t('lblBaths')}: ${escapeHtml(baths)}</div>
-      <div><i class="fa-solid fa-couch"></i> ${t('lblHall')}: ${escapeHtml(hall)}</div>
-      <div><i class="fa-solid fa-utensils"></i> ${t('lblKitchen')}: ${escapeHtml(kitchen)}</div>
-      <div><i class="fa-solid fa-box-archive"></i>${t('lblStore')}: ${escapeHtml(store)}</div>
+      ${hasFeatureValue(floor) ? `<div><i class="fa-solid fa-stairs"></i> ${t('lblFloor')}: ${escapeHtml(floor)}</div>` : ``}
+      ${hasFeatureValue(rooms) ? `<div><i class="fa-solid fa-bed"></i> ${t('lblRooms')}: ${escapeHtml(rooms)}</div>` : ``}
+      ${hasFeatureValue(baths) ? `<div><i class="fa-solid fa-shower"></i> ${t('lblBaths')}: ${escapeHtml(baths)}</div>` : ``}
+      ${hasFeatureValue(hall) ? `<div><i class="fa-solid fa-couch"></i> ${t('lblHall')}: ${escapeHtml(hall)}</div>` : ``}
+      ${hasFeatureValue(kitchen) ? `<div><i class="fa-solid fa-utensils"></i> ${t('lblKitchen')}: ${escapeHtml(kitchen)}</div>` : ``}
+      ${hasFeatureValue(store) ? `<div><i class="fa-solid fa-box-archive"></i>${t('lblStore')}: ${escapeHtml(store)}</div>` : ``}
+      ${ageText ? `<div><i class="fa-solid fa-hourglass-half"></i> ${t('lblAge')}: ${escapeHtml(ageText)}</div>` : ``}
 <div>
   <i class="fa-solid fa-arrows-up-down"></i>
   ${t('lblElevator')}:
@@ -608,13 +631,7 @@ ${availableFrom ? `<div class="availability-badge"><i class="fa-solid fa-calenda
     : '<span class="icon-no">✖</span>'}
 </div>
 
-<div data-feature="entrance">
-  <i class="fa-solid fa-door-open"></i>
-  ${t('lblEntranceFlag')}:
-  ${entrance === 'مستقل'
-    ? '<span class="icon-yes">✔</span>'
-    : '<span class="icon-no">✖</span>'}
-</div>
+${hasFeatureValue(entrance) ? `<div data-feature="entrance"><i class="fa-solid fa-door-open"></i> ${t('entrance')}: ${translateEntrance(entrance)}</div>` : ``}
 
 <div>
   <i class="fa-solid fa-chair"></i>
@@ -682,8 +699,16 @@ async function buildCards(){
 }
 
 function applyPreviewParam(){
-  const id = new URLSearchParams(location.search).get("preview");
-  if (id) goToCard(id);
+  const params = new URLSearchParams(location.search);
+  const id = params.get("preview");
+  if (!id) return;
+  if (params.get("embed") === "1"){
+    document.querySelectorAll(".card").forEach(c => {
+      if (c.dataset.id !== String(id)) c.remove();
+    });
+  } else {
+    goToCard(id);
+  }
 }
 
 function renderAllCards(){
