@@ -262,6 +262,22 @@ async function buildCards(){
   cards.innerHTML = listings.map(renderCardHTML).join("");
   addAutoMapMarkers(listings);
   applyFilters();
+  applyPreviewParam();
+}
+
+function goToCard(id){
+  const card = document.querySelector(`.card[data-id="${CSS.escape(String(id))}"]`);
+  if (!card) return;
+  document.querySelectorAll(".card.card-highlight").forEach(c => c.classList.remove("card-highlight"));
+  card.scrollIntoView({behavior:"smooth", block:"center"});
+  void card.offsetWidth;
+  card.classList.add("card-highlight");
+  setTimeout(() => card.classList.remove("card-highlight"), 3000);
+}
+
+function applyPreviewParam(){
+  const id = new URLSearchParams(location.search).get("preview");
+  if (id) goToCard(id);
 }
 
 const mapMarkersById = {};

@@ -906,24 +906,26 @@ const CATEGORIES = {
           return `${base} (${formatPaymentAmount(prices[rt.key], method, rt.key)})`;
         })
         .join("\n") || "لا توجد أسعار محددة";
-      const availabilityLine = d.availableFrom ? `تاريخ التوفر: ${d.availableFrom}\n` : "";
-      return `رقم: ${id}
-رقم اللوحة: ${d.plateNumber || ""}
-نوع العقار: ${d.type || ""}
-الدور: ${d.floor || ""}
-الغرف: ${d.rooms || ""}
-دورات المياه: ${d.baths || ""}
-صالة: ${d.hall || ""}
-مطبخ: ${d.kitchen || ""}
-مستودع: ${d.store || ""}
-مصعد: ${d.elevator || ""}
-مؤثثة: ${d.furnished || ""}
-مطبخ راكب: ${d.fittedKitchen || ""}
-المدخل: ${d.entrance || ""}
-ملاحظات: ${d.notes || ""}
-${pricesText}
-${availabilityLine}الموقع: ${d.location || ""}
-الصور: ${d.photos || ""}`;
+      return [
+        `رقم: ${id}`,
+        d.plateNumber && `رقم اللوحة: ${d.plateNumber}`,
+        d.type && `نوع العقار: ${d.type}`,
+        d.floor && `الدور: ${d.floor}`,
+        d.rooms && `الغرف: ${d.rooms}`,
+        d.baths && `دورات المياه: ${d.baths}`,
+        d.hall && `صالة: ${d.hall}`,
+        d.kitchen && `مطبخ: ${d.kitchen}`,
+        d.store && `مستودع: ${d.store}`,
+        d.elevator && `مصعد: ${d.elevator}`,
+        d.furnished && `مؤثثة: ${d.furnished}`,
+        d.fittedKitchen && `مطبخ راكب: ${d.fittedKitchen}`,
+        d.entrance && `المدخل: ${d.entrance}`,
+        d.notes && `ملاحظات: ${d.notes}`,
+        pricesText,
+        d.availableFrom && `تاريخ التوفر: ${d.availableFrom}`,
+        d.location && `الموقع: ${d.location}`,
+        d.photos && `الصور: ${d.photos}`
+      ].filter(Boolean).join("\n");
     }
   },
   buildings: {
@@ -959,18 +961,20 @@ ${availabilityLine}الموقع: ${d.location || ""}
       {key:"ownerNumber", label:"المالك", ownerLookup:true},
       {key:"brokerNumber", label:"الوسيط", brokerLookup:true}
     ],
-    copyText: (id, d) => `رقم: ${id}
-رقم اللوحة: ${d.plateNumber || ""}
-نوع العقار: ${d.type || ""}
-الدور: ${d.floor || ""}
-مساحة الأرض: ${d.landArea || ""}
-مسطح البناء: ${d.buildArea || ""}
-الواجهات: ${d.facades || ""}
-السوم: ${d.asking || ""}
-السعر: ${d.price || ""} ريال
-ملاحظات: ${d.notes || ""}
-الموقع: ${d.location || ""}
-الصور: ${d.photos || ""}`
+    copyText: (id, d) => [
+      `رقم: ${id}`,
+      d.plateNumber && `رقم اللوحة: ${d.plateNumber}`,
+      d.type && `نوع العقار: ${d.type}`,
+      d.floor && `الدور: ${d.floor}`,
+      d.landArea && `مساحة الأرض: ${d.landArea}`,
+      d.buildArea && `مسطح البناء: ${d.buildArea}`,
+      d.facades && `الواجهات: ${d.facades}`,
+      d.asking && `السوم: ${d.asking}`,
+      d.price && `السعر: ${d.price} ريال`,
+      d.notes && `ملاحظات: ${d.notes}`,
+      d.location && `الموقع: ${d.location}`,
+      d.photos && `الصور: ${d.photos}`
+    ].filter(Boolean).join("\n")
   },
   lands: {
     label: "أراضي للبيع",
@@ -1010,24 +1014,26 @@ ${availabilityLine}الموقع: ${d.location || ""}
       {key:"ownerNumber", label:"المالك", ownerLookup:true},
       {key:"brokerNumber", label:"الوسيط", brokerLookup:true}
     ],
-    copyText: (id, d) => `رقم: ${id}
-رقم اللوحة: ${d.plateNumber || ""}
-نوع العقار: ${d.type || ""}
-نوع العرض: ${d.offerType || ""}
-رقم القطعة: ${d.parcelNumber || ""}
-رقم المخطط: ${d.planNumber || ""}
-اسم المخطط: ${d.planName || ""}
-طول: ${d.length || ""}
-عرض: ${d.width || ""}
-المساحة: ${d.area || ""}
-مواصفات العقار: ${d.specs || ""}
-الواجهات: ${d.facades || ""}
-السوم: ${d.asking || ""}
-السعر: ${d.price || ""} ريال
-سعر المتر: ${d.pricePerMeter || ""}
-الملاحظات: ${d.notes || ""}
-الموقع: ${d.location || ""}
-الصور: ${d.photos || ""}`
+    copyText: (id, d) => [
+      `رقم: ${id}`,
+      d.plateNumber && `رقم اللوحة: ${d.plateNumber}`,
+      d.type && `نوع العقار: ${d.type}`,
+      d.offerType && `نوع العرض: ${d.offerType}`,
+      d.parcelNumber && `رقم القطعة: ${d.parcelNumber}`,
+      d.planNumber && `رقم المخطط: ${d.planNumber}`,
+      d.planName && `اسم المخطط: ${d.planName}`,
+      d.length && `طول: ${d.length}`,
+      d.width && `عرض: ${d.width}`,
+      d.area && `المساحة: ${d.area}`,
+      d.specs && `مواصفات العقار: ${d.specs}`,
+      d.facades && `الواجهات: ${d.facades}`,
+      d.asking && `السوم: ${d.asking}`,
+      d.price && `السعر: ${d.price} ريال`,
+      d.pricePerMeter && `سعر المتر: ${d.pricePerMeter}`,
+      d.notes && `الملاحظات: ${d.notes}`,
+      d.location && `الموقع: ${d.location}`,
+      d.photos && `الصور: ${d.photos}`
+    ].filter(Boolean).join("\n")
   }
 };
 
@@ -1544,6 +1550,19 @@ function renderFormFields(){
         row.appendChild(addOwnerBtn);
       }
 
+      if (f.type === "broker-select"){
+        const addBrokerBtn = document.createElement("button");
+        addBrokerBtn.type = "button";
+        addBrokerBtn.className = "btn-clear-select";
+        addBrokerBtn.title = "إضافة وسيط جديد";
+        addBrokerBtn.innerHTML = '<i class="fa-solid fa-user-plus"></i>';
+        addBrokerBtn.addEventListener("click", () => {
+          switchMode("brokers");
+          setTimeout(() => document.getElementById("b_name")?.focus(), 0);
+        });
+        row.appendChild(addBrokerBtn);
+      }
+
       div.appendChild(row);
     } else if (f.key === "photos"){
       const row = document.createElement("div");
@@ -1964,12 +1983,16 @@ function renderListingsTable(docs){
       ? `<button class="btn-copy" data-action="copy" title="نسخ بيانات العرض"><i class="fa-solid fa-copy"></i></button>`
       : ``;
 
+    const previewBtnHTML = userRole === "admin"
+      ? `<button class="btn-edit" data-action="preview" title="معاينة: كيف يظهر العرض للزبائن"><i class="fa-solid fa-eye"></i></button>`
+      : ``;
+
     const brokerContactOn = d.brokerContact !== false;
     const brokerToggleBtnHTML = d.brokerPhone
       ? `<button class="btn-edit" data-action="toggleBrokerContact" title="${brokerContactOn ? 'إلغاء تفعيل: التواصل حاليًا عبر الوسيط' : 'تفعيل: التواصل حاليًا عبر المكتب'}"><i class="fa-solid ${brokerContactOn ? 'fa-toggle-on' : 'fa-toggle-off'}"></i></button>`
       : ``;
 
-    const actionsHTML = copyBtnHTML + brokerToggleBtnHTML + (isArchived
+    const actionsHTML = previewBtnHTML + copyBtnHTML + brokerToggleBtnHTML + (isArchived
       ? `<button class="btn-edit" data-action="edit"><i class="fa-solid fa-pen"></i></button>
          <button class="btn-unarchive" data-action="unarchive"><i class="fa-solid fa-rotate-left"></i></button>
          <button class="btn-delete" data-action="delete"><i class="fa-solid fa-trash"></i></button>`
@@ -1983,6 +2006,9 @@ function renderListingsTable(docs){
     tr.querySelector('[data-action="delete"]')?.addEventListener("click", () => permanentlyDeleteListing(doc.id));
     tr.querySelector('[data-action="copy"]')?.addEventListener("click", (e) => copyListingText(doc.id, d, e.currentTarget));
     tr.querySelector('[data-action="toggleBrokerContact"]')?.addEventListener("click", () => toggleBrokerContact(doc.id, brokerContactOn));
+    tr.querySelector('[data-action="preview"]')?.addEventListener("click", () => {
+      window.open(cat().sourcePage + "?preview=" + encodeURIComponent(doc.id), "_blank");
+    });
     tbody.appendChild(tr);
   });
 }

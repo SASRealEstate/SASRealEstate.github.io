@@ -678,6 +678,12 @@ async function buildCards(){
   lastListings = listings;
   cards.innerHTML = listings.map(renderCardHTML).join("");
   addAutoMapMarkers(listings);
+  applyPreviewParam();
+}
+
+function applyPreviewParam(){
+  const id = new URLSearchParams(location.search).get("preview");
+  if (id) goToCard(id);
 }
 
 function renderAllCards(){
