@@ -1440,6 +1440,7 @@ function renderFormFields(){
 
     const div = document.createElement("div");
     div.className = "field" + (f.wide ? " wide" : "");
+    div.id = "field_" + f.key;
 
     const label = document.createElement("label");
     label.setAttribute("for", "f_" + f.key);
@@ -1658,7 +1659,23 @@ function renderFormFields(){
     wrap.appendChild(div);
   });
 
+  wireElevatorVisibility();
   wireComputedFields();
+}
+
+function wireElevatorVisibility(){
+  const floorEl = document.getElementById("f_floor");
+  const elevatorWrap = document.getElementById("field_elevator");
+  const elevatorEl = document.getElementById("f_elevator");
+  if (!floorEl || !elevatorWrap || !elevatorEl) return;
+
+  const sync = () => {
+    const isGroundFloor = floorEl.value.trim() === "1";
+    elevatorWrap.style.display = isGroundFloor ? "none" : "";
+    if (isGroundFloor) elevatorEl.value = "لا";
+  };
+  floorEl.addEventListener("input", sync);
+  sync();
 }
 
 function recalcPricePerMeter(){
@@ -1900,6 +1917,7 @@ function editListing(docId, data){
     ageYearsEl.value = data.ageYears || "";
     ageYearsEl.style.display = data.ageType === "سنوات" ? "" : "none";
   }
+  wireElevatorVisibility();
   document.getElementById("f_id").disabled = true;
   const copyCountField = document.getElementById("copyCountField");
   if (copyCountField) copyCountField.style.display = "none";
