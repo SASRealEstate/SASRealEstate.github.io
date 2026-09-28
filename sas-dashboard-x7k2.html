@@ -405,6 +405,11 @@ button{ cursor:pointer; border:none; }
           <datalist id="ownerOptionsList"></datalist>
           <datalist id="brokerOptionsList"></datalist>
 
+          <div class="field" id="copyCountField" style="margin-top:10px;">
+            <label for="f_copyCount">عدد النسخ <span style="font-weight:400; color:var(--muted); font-size:.85rem;">(اختياري - لإضافة عدة عروض متطابقة بأرقام متتالية دفعة واحدة)</span></label>
+            <input type="number" id="f_copyCount" min="1" placeholder="1">
+          </div>
+
           <div class="form-actions">
             <button type="submit" class="btn-save"><i class="fa-solid fa-floppy-disk"></i> <span id="saveBtnText">حفظ العرض</span></button>
             <button type="button" class="btn-cancel" id="cancelEditBtn" style="display:none;" onclick="resetForm()">إلغاء التعديل</button>
@@ -1702,6 +1707,10 @@ function resetForm(){
   document.getElementById("formStatus").textContent = "";
   const ageYearsEl = document.getElementById("f_ageYears");
   if (ageYearsEl) ageYearsEl.style.display = "none";
+  const copyCountField = document.getElementById("copyCountField");
+  if (copyCountField) copyCountField.style.display = userRole === "broker" ? "none" : "";
+  const copyCountEl = document.getElementById("f_copyCount");
+  if (copyCountEl) copyCountEl.value = "";
   updatePhotoUploadAvailability();
 }
 
@@ -1721,6 +1730,14 @@ async function getNextListingId(){
   });
 }
 
+function offsetLatLng(lat, lng, index, total){
+  const radiusMeters = 6; // متر تقريبًا، فقط عشان الدبابيس تنفصل عن بعض على الخريطة بدون ما تبعد عن الموقع الحقيقي
+  const angle = (2 * Math.PI * index) / total;
+  const dLat = (radiusMeters * Math.cos(angle)) / 111320;
+  const dLng = (radiusMeters * Math.sin(angle)) / (111320 * Math.cos(lat * Math.PI / 180));
+  return { lat: lat + dLat, lng: lng + dLng };
+}
+
 async function saveListing(event){
   event.preventDefault();
   const statusEl = document.getElementById("formStatus");
@@ -1728,10 +1745,15 @@ async function saveListing(event){
   statusEl.textContent = "";
 
   let id = editingDocId;
+  const isNew = !id;
+  const copyCountEl = document.getElementById("f_copyCount");
+  const copyCount = (isNew && userRole !== "broker" && copyCountEl)
+    ? Math.max(1, parseInt(copyCountEl.value, 10) || 1)
+    : 1;
 
   try{
-    if (!id){
-      // creating a new listing
+    if (isNew){
+      // creating a new listing (أو عدة نسخ متتالية)
       if (userRole === "broker"){
         id = await getNextListingId();
       } else {
@@ -1741,9 +1763,19 @@ async function saveListing(event){
           statusEl.className = "status-msg err";
           return false;
         }
-        const existing = await db.collection(cat().collection).doc(String(id)).get();
-        if (existing.exists){
-          statusEl.textContent = "رقم العرض " + id + " مستخدم بالفعل، اختر رقمًا آخر";
+        const baseId = parseInt(id, 10);
+        if (copyCount > 1 && isNaN(baseId)){
+          statusEl.textContent = "رقم العرض يجب أن يكون رقمًا صحيحًا لاستخدام عدد النسخ";
+          statusEl.className = "status-msg err";
+          return false;
+        }
+        const idsToCheck = copyCount > 1
+          ? Array.from({length: copyCount}, (_, i) => String(baseId + i))
+          : [String(id)];
+        const existingChecks = await Promise.all(idsToCheck.map(x => db.collection(cat().collection).doc(x).get()));
+        const taken = idsToCheck.filter((_, i) => existingChecks[i].exists);
+        if (taken.length){
+          statusEl.textContent = "الأرقام التالية مستخدمة بالفعل: " + taken.join("، ") + " - اختر رقمًا آخر أو عدد نسخ أقل";
           statusEl.className = "status-msg err";
           return false;
         }
@@ -1778,7 +1810,6 @@ async function saveListing(event){
     });
     const ageYearsEl = document.getElementById("f_ageYears");
     if (ageYearsEl) data.ageYears = data.ageType === "سنوات" ? ageYearsEl.value.trim() : "";
-    data.id = String(id);
 
     if (userRole === "broker"){
       data.brokerNumber = myBrokerNumber;
@@ -1799,13 +1830,34 @@ async function saveListing(event){
 
     const writeOptions = { merge: true };
 
-    await db.collection(cat().collection).doc(String(id)).set(data, writeOptions);
+    if (isNew && copyCount > 1){
+      const baseId = parseInt(id, 10);
+      const batch = db.batch();
+      for (let i = 0; i < copyCount; i++){
+        const copyId = String(baseId + i);
+        const copyData = { ...data, id: copyId };
+        if (i > 0 && typeof data.lat === "number" && typeof data.lng === "number"){
+          const offset = offsetLatLng(data.lat, data.lng, i, copyCount);
+          copyData.lat = offset.lat;
+          copyData.lng = offset.lng;
+        }
+        batch.set(db.collection(cat().collection).doc(copyId), copyData, writeOptions);
+      }
+      await batch.commit();
 
-    statusEl.textContent = "تم الحفظ بنجاح ✔ - رقم العرض: " + id;
-    statusEl.className = "status-msg ok";
+      statusEl.textContent = `تم إضافة ${copyCount} عروض بنجاح ✔ - من رقم ${baseId} إلى ${baseId + copyCount - 1}`;
+      statusEl.className = "status-msg ok";
+      resetForm();
+    } else {
+      data.id = String(id);
+      await db.collection(cat().collection).doc(String(id)).set(data, writeOptions);
 
-    const savedSnap = await db.collection(cat().collection).doc(String(id)).get();
-    editListing(String(id), savedSnap.data());
+      statusEl.textContent = "تم الحفظ بنجاح ✔ - رقم العرض: " + id;
+      statusEl.className = "status-msg ok";
+
+      const savedSnap = await db.collection(cat().collection).doc(String(id)).get();
+      editListing(String(id), savedSnap.data());
+    }
   }catch(e){
     statusEl.textContent = "حدث خطأ أثناء الحفظ: " + e.message;
     statusEl.className = "status-msg err";
@@ -1849,6 +1901,8 @@ function editListing(docId, data){
     ageYearsEl.style.display = data.ageType === "سنوات" ? "" : "none";
   }
   document.getElementById("f_id").disabled = true;
+  const copyCountField = document.getElementById("copyCountField");
+  if (copyCountField) copyCountField.style.display = "none";
   recalcPricePerMeter();
   document.getElementById("formTitle").textContent = "تعديل عرض رقم " + docId;
   document.getElementById("saveBtnText").textContent = "حفظ التعديلات";
