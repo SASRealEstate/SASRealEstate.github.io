@@ -1474,7 +1474,8 @@ function renderFormFields(){
           allowedMethods.forEach(pm => {
             const opt = document.createElement("option");
             opt.value = pm.key;
-            opt.textContent = "طريقة الدفع: " + pm.label;
+            const label = pm.key === "monthly" ? `${RENT_TYPE_MONTHLY_DIVISOR[rt.key] || 12} دفعة` : pm.label;
+            opt.textContent = "طريقة الدفع: " + label;
             if (pm.key === "monthly") opt.selected = true;
             methodSelect.appendChild(opt);
           });
