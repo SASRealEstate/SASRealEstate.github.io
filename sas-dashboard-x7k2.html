@@ -1476,7 +1476,7 @@ function renderFormFields(){
             opt.value = pm.key;
             const label = pm.key === "monthly" ? `${RENT_TYPE_MONTHLY_DIVISOR[rt.key] || 12} دفعة` : pm.label;
             opt.textContent = "طريقة الدفع: " + label;
-            if (pm.key === "monthly") opt.selected = true;
+            if (pm.key === "monthly"){ opt.defaultSelected = true; opt.selected = true; }
             methodSelect.appendChild(opt);
           });
 
@@ -1508,6 +1508,7 @@ function renderFormFields(){
       f.options.forEach(opt => {
         const o = document.createElement("option");
         o.value = opt; o.textContent = opt;
+        if (f.value && opt === f.value) o.defaultSelected = true;
         input.appendChild(o);
       });
     } else if (f.type === "owner-select"){
@@ -1533,7 +1534,7 @@ function renderFormFields(){
     }
     input.id = "f_" + f.key;
     if (f.required) input.required = true;
-    if (f.value) input.value = f.value;
+    if (f.value){ input.value = f.value; input.defaultValue = f.value; }
     if (f.computed){
       input.readOnly = true;
       input.style.background = "var(--cream)";

@@ -135,6 +135,14 @@
     </div>
 
     <div class="filter-field">
+      <label for="filterAge" data-i18n="lblAge">عمر العقار</label>
+      <select id="filterAge">
+        <option value="" data-i18n="all">الكل</option>
+        <option value="جديد" data-i18n="ageNew">جديد</option>
+      </select>
+    </div>
+
+    <div class="filter-field">
       <label for="filterFurnished" data-i18n="furnished">مؤثثة</label>
       <select id="filterFurnished">
         <option value="" data-i18n="all">الكل</option>
@@ -598,6 +606,7 @@ function renderCardHTML(item){
   data-furnished="${escapeHtml(furnished)}"
   data-elevator="${escapeHtml(elevator)}"
   data-entrance="${escapeHtml(entrance)}"
+  data-age-type="${escapeHtml(ageType || '')}"
   data-price="${escapeHtml(primaryPrice)}"
   data-rent-type="${escapeHtml(activeTypes.map(rt => rt.key).join(' '))}"
   data-prices='${escapeHtml(JSON.stringify(prices))}'
@@ -885,6 +894,7 @@ function applyCardFilters(){
   const furnished = document.getElementById("filterFurnished")?.value || "";
   const elevator  = document.getElementById("filterElevator")?.value || "";
   const entrance  = document.getElementById("filterEntrance")?.value || "";
+  const age       = document.getElementById("filterAge")?.value || "";
   const rentType  = document.getElementById("filterRentType")?.value || "";
   const minRooms  = parseInt(document.getElementById("filterRooms")?.value || 0);
   
@@ -907,7 +917,9 @@ function applyCardFilters(){
     const cardRentTypes = (card.dataset.rentType || "").split(" ").filter(Boolean);
 
     if(furnished && cardFurnished !== furnished) show = false;
-    if(elevator && cardElevator !== elevator) show = false;
+    const isGroundFloor = (cardFloor || "").trim() === "1";
+    if(elevator && !isGroundFloor && cardElevator !== elevator) show = false;
+    if(age && card.dataset.ageType !== age) show = false;
     if(entrance && cardEntrance !== entrance) show = false;
     if(rentType && !cardRentTypes.includes(rentType)) show = false;
 
@@ -922,7 +934,7 @@ function applyCardFilters(){
 }
 
 function resetFilters(){
-  ["filterFurnished","filterElevator","filterEntrance","filterRentType","filterRooms"].forEach(id=>{
+  ["filterFurnished","filterElevator","filterEntrance","filterAge","filterRentType","filterRooms"].forEach(id=>{
     const el = document.getElementById(id);
     if (el) el.value = "";
   });
@@ -939,6 +951,7 @@ function resetFilters(){
   "filterFurnished",
   "filterElevator",
   "filterEntrance",
+  "filterAge",
   "filterRooms",
   "filterRentType",
   "minPriceInput",
