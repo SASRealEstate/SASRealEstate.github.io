@@ -843,6 +843,15 @@ function legacyPricesFromListing(d){
   return key ? { [key]: d.price } : {};
 }
 
+function extraRentPriceLines(d){
+  if (!Array.isArray(d.extraRentPayments)) return [];
+  return d.extraRentPayments.flatMap(option => {
+    const rt = RENT_TYPES.find(type => type.hasPaymentMethod && type.key === option?.rentType);
+    if (!rt || !(Number(option.price) > 0)) return [];
+    return [`${rt.label}: ${Number(option.price).toLocaleString()} ريال (${formatPaymentAmount(option.price, option.method, rt.key)})`];
+  });
+}
+
 function effectivePrices(d){
   return (d.prices && Object.keys(d.prices).length) ? d.prices : legacyPricesFromListing(d);
 }
@@ -918,6 +927,7 @@ const CATEGORIES = {
           const method = paymentMethods[rt.key] || "monthly";
           return `${base} (${formatPaymentAmount(prices[rt.key], method, rt.key)})`;
         })
+        .concat(extraRentPriceLines(d))
         .join("\n") || "لا توجد أسعار محددة";
       return [
         `رقم: ${id}`,
@@ -1493,6 +1503,13 @@ function renderFormFields(){
 
           row.appendChild(methodSelect);
           row.appendChild(computedDisplay);
+          const extras = document.createElement("div");
+          extras.id = "f_extraPayments_" + rt.key;
+          const add = document.createElement("button");
+          add.type = "button";
+          add.textContent = "+ طريقة دفع";
+          add.addEventListener("click", () => addRentPaymentRow(rt.key).focus());
+          row.append(extras, add);
         }
 
         grid.appendChild(row);
@@ -1705,10 +1722,43 @@ function wireComputedFields(){
   }
 }
 
+function addRentPaymentRow(rentType, option = {}){
+  const row = document.createElement("div");
+  row.className = "extra-rent-payment";
+  row.style.cssText = "display:grid; gap:4px; margin:8px 0;";
+  const price = document.createElement("input");
+  price.type = "number";
+  price.min = "1";
+  price.required = true;
+  price.placeholder = "السعر الإجمالي بالريال";
+  price.setAttribute("aria-label", price.placeholder);
+  price.value = option.price || "";
+  const method = document.getElementById("f_paymentMethod_" + rentType).cloneNode(true);
+  method.removeAttribute("id");
+  method.setAttribute("aria-label", "طريقة الدفع");
+  method.value = option.method || "monthly";
+  if (!method.value) method.value = "monthly";
+  const preview = document.createElement("small");
+  const refresh = () => {
+    preview.textContent = price.value ? formatPaymentAmount(price.value, method.value, rentType) : "";
+  };
+  price.addEventListener("input", refresh);
+  method.addEventListener("change", refresh);
+  const remove = document.createElement("button");
+  remove.type = "button";
+  remove.textContent = "حذف طريقة الدفع";
+  remove.addEventListener("click", () => row.remove());
+  row.append(price, method, preview, remove);
+  document.getElementById("f_extraPayments_" + rentType).appendChild(row);
+  refresh();
+  return price;
+}
+
 function resetForm(){
   editingDocId = null;
   editingOriginalLocation = "";
   document.getElementById("listingForm").reset();
+  document.querySelectorAll("#listingForm .extra-rent-payment").forEach(row => row.remove());
   document.getElementById("formTitle").textContent = "إضافة عرض جديد";
   document.getElementById("saveBtnText").textContent = "حفظ العرض";
   document.getElementById("cancelEditBtn").style.display = "none";
@@ -1806,16 +1856,22 @@ async function saveListing(event){
       if (f.type === "multi-price"){
         const prices = {};
         const paymentMethods = {};
+        const extraRentPayments = [];
         RENT_TYPES.forEach(rt => {
           const el = document.getElementById("f_prices_" + rt.key);
           if (el && el.value.trim() !== "") prices[rt.key] = el.value.trim();
           if (rt.hasPaymentMethod){
             const pmEl = document.getElementById("f_paymentMethod_" + rt.key);
             if (pmEl) paymentMethods[rt.key] = pmEl.value;
+            document.getElementById("f_extraPayments_" + rt.key).querySelectorAll(".extra-rent-payment").forEach(row => {
+              extraRentPayments.push({ rentType: rt.key, price: row.querySelector("input").value, method: row.querySelector("select").value });
+            });
           }
         });
         data[f.key] = prices;
         data.paymentMethods = paymentMethods;
+        data.extraRentPayments = extraRentPayments;
+        if (isNew) data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
         return;
       }
       const el = document.getElementById("f_" + f.key);
@@ -1903,6 +1959,10 @@ function editListing(docId, data){
           if (pmEl) pmEl.value = method;
           const computedEl = document.getElementById("f_paymentComputed_" + rt.key);
           if (computedEl) computedEl.textContent = prices[rt.key] ? formatPaymentAmount(prices[rt.key], method, rt.key) : "";
+          document.getElementById("f_extraPayments_" + rt.key).replaceChildren();
+          if (Array.isArray(data.extraRentPayments)){
+            data.extraRentPayments.filter(option => option?.rentType === rt.key).forEach(option => addRentPaymentRow(rt.key, option));
+          }
         }
       });
       return;
@@ -2082,6 +2142,7 @@ function renderListingsTable(docs){
           const method = paymentMethods[rt.key] || "monthly";
           return `${base} <span style="color:var(--muted); font-size:.78em;">(${formatPaymentAmount(prices[rt.key], method, rt.key)})</span>`;
         });
+        parts.push(...extraRentPriceLines(d).map(escapeHtml));
         content = parts.length ? parts.join("<br>") : `<span style="color:var(--muted);">-</span>`;
       } else {
         const val = escapeHtml(d[col.key]);

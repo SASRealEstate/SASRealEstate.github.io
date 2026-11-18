@@ -91,6 +91,14 @@
   <div class="filters-wrapper">
 
     <div class="filter-field">
+      <label for="filterRecent" data-i18n="filterRecent">تاريخ إضافة العرض</label>
+      <select id="filterRecent">
+        <option value="" data-i18n="all">الكل</option>
+        <option value="recent" data-i18n="recentOnly">الجديد فقط (آخر 7 أيام)</option>
+      </select>
+    </div>
+
+    <div class="filter-field">
       <label for="filterRentType" data-i18n="filterRentType">نوع الإيجار</label>
       <select id="filterRentType">
         <option value="" data-i18n="all">الكل</option>
@@ -250,6 +258,8 @@ const TRANSLATIONS = {
   pageTitle:{ar:"قائمة الشقق للإيجار", en:"Apartments for Rent"},
   pageSubtitle:{ar:"تصفح كل الشقق المتاحة للإيجار وفلترها حسب احتياجك", en:"Browse all available rental apartments and filter by your needs"},
   notice1:{ar:"📌 ملاحظة: الأسعار والمعلومات يتم تحديثها بشكل دوري - للتأكد من توفر العقار يرجى التواصل معنا على واتساب الرقم اعلى الصفحه.", en:"📌 Note: Prices and details are updated periodically - to confirm availability please contact us via WhatsApp using the number at the top of the page."},
+  filterRecent:{ar:"تاريخ إضافة العرض", en:"Date Listed"},
+  recentOnly:{ar:"الجديد فقط (آخر 7 أيام)", en:"New only (last 7 days)"},
   filterRentType:{ar:"نوع الإيجار", en:"Rent Type"},
   all:{ar:"الكل", en:"All"},
   rtYearly:{ar:"سنة كاملة", en:"Full Year"},
@@ -547,6 +557,12 @@ function getPrimaryPrice(prices){
   return vals.length ? Math.min(...vals) : 0;
 }
 
+function rentOptionText({ rentType, price, method }){
+  const rt = RENT_TYPES.find(type => type.key === rentType);
+  const base = `${rtLabel(rt)}: ${Number(price).toLocaleString()} ${t('riyal')}`;
+  return rt.hasPaymentMethod ? `${base} (${formatPaymentAmount(price, method, rentType)})` : base;
+}
+
 function renderCardHTML(item){
     const {id, type, location, floor, rooms, baths, hall, kitchen, store,
            elevator, furnished, fittedKitchen, entrance, notes, photos, brokerPhone, brokerContact, availableFrom,
@@ -555,22 +571,27 @@ function renderCardHTML(item){
 
     const prices = getEffectivePrices(item);
     const paymentMethods = getEffectivePaymentMethods(item);
-    const activeTypes = RENT_TYPES.filter(rt => prices[rt.key]);
-    const primaryPrice = getPrimaryPrice(prices);
+    const extras = Array.isArray(item.extraRentPayments) ? item.extraRentPayments.filter(option =>
+      RENT_TYPES.some(rt => rt.hasPaymentMethod && rt.key === option?.rentType) && Number(option.price) > 0
+    ) : [];
+    const activeTypes = RENT_TYPES.filter(rt => prices[rt.key] || extras.some(option => option.rentType === rt.key));
+    const priceOptions = activeTypes.flatMap(rt => {
+      const base = prices[rt.key] ? [{ rentType: rt.key, price: prices[rt.key], method: paymentMethods[rt.key] || "monthly" }] : [];
+      return base.concat(extras.filter(option => option.rentType === rt.key));
+    });
+    const primaryPrice = getPrimaryPrice(prices) || (extras.length ? Math.min(...extras.map(option => Number(option.price))) : 0);
     const contactPhoneDigits = (brokerPhone && brokerContact !== false ? String(brokerPhone) : "534108666").replace(/[^\d]/g, "").replace(/^0/, "");
     const contactPhone = "966" + contactPhoneDigits;
 
-    const priceRowsHTML = activeTypes.map(rt => {
+    const priceRowsHTML = priceOptions.map(({ rentType, price, method }) => {
+      const rt = RENT_TYPES.find(type => type.key === rentType);
       const paymentNote = rt.hasPaymentMethod
-        ? `<span class="price-payment-note">(${escapeHtml(formatPaymentAmount(prices[rt.key], paymentMethods[rt.key] || "monthly", rt.key))})</span>`
+        ? `<span class="price-payment-note">(${escapeHtml(formatPaymentAmount(price, method, rentType))})</span>`
         : "";
-      return `<div class="price-line"><span class="price-type">${escapeHtml(rtLabel(rt))}</span><span class="price-value">${Number(prices[rt.key]).toLocaleString()} ${t('riyal')}</span>${paymentNote}</div>`;
+      return `<div class="price-line"><span class="price-type">${escapeHtml(rtLabel(rt))}</span><span class="price-value">${Number(price).toLocaleString()} ${t('riyal')}</span>${paymentNote}</div>`;
     }).join("") || `<div class="price-line"><span class="price-value" style="color:var(--muted); font-size:.85rem;">${t('priceUndetermined')}</span></div>`;
 
-    const priceLinesText = activeTypes.map(rt => {
-      const base = `${rtLabel(rt)}: ${prices[rt.key]} ${t('riyal')}`;
-      return rt.hasPaymentMethod ? `${base} (${formatPaymentAmount(prices[rt.key], paymentMethods[rt.key] || "monthly", rt.key)})` : base;
-    }).join("\n") || t('noPriceSet');
+    const priceLinesText = priceOptions.map(rentOptionText).join("\n") || t('noPriceSet');
 
     const availabilityLine = availableFrom ? `${t('lblAvailableFrom')}: ${availableFrom}\n` : "";
 
@@ -608,9 +629,9 @@ function renderCardHTML(item){
   data-entrance="${escapeHtml(entrance)}"
   data-age-type="${escapeHtml(ageType || '')}"
   data-price="${escapeHtml(primaryPrice)}"
+  data-created-at="${escapeHtml(typeof item.createdAt?.toMillis === 'function' ? item.createdAt.toMillis() : 0)}"
   data-rent-type="${escapeHtml(activeTypes.map(rt => rt.key).join(' '))}"
-  data-prices='${escapeHtml(JSON.stringify(prices))}'
-  data-payment-methods='${escapeHtml(JSON.stringify(paymentMethods))}'
+  data-rent-options='${escapeHtml(JSON.stringify(priceOptions))}'
   data-available-from="${escapeHtml(availableFrom || '')}">
 
 
@@ -786,16 +807,10 @@ function copyByRentType(targetType) {
     return;
   }
 
-  const targetHasPaymentMethod = !!(RENT_TYPES.find(rt => rt.key === targetType) || {}).hasPaymentMethod;
-
   const allText = cards.map(card => {
     const id = card.querySelector('.card-header')?.textContent?.trim() || '';
-    const prices = JSON.parse(card.dataset.prices || '{}');
-    const paymentMethods = JSON.parse(card.dataset.paymentMethods || '{}');
-    const price = prices[targetType] || '';
-    const paymentNote = (targetHasPaymentMethod && price)
-      ? ` (${formatPaymentAmount(price, paymentMethods[targetType] || "monthly", targetType)})`
-      : '';
+    const priceLines = JSON.parse(card.dataset.rentOptions)
+      .filter(option => option.rentType === targetType).map(rentOptionText).join('\n');
     const floor = card.dataset.floor || '';
     const rooms = card.dataset.rooms || '';
 
@@ -818,7 +833,7 @@ function copyByRentType(targetType) {
 
     return `${t('lblId')}: ${id}
 ${t('lblType2')}: ${targetLabel}
-${t('lblPrice')}: ${price} ${t('riyal')}${paymentNote}
+${priceLines}
 ${t('lblFloor')}: ${floor}
 ${t('lblRooms')}: ${rooms}
 ${t('lblFeatures')}: ${features}\n
@@ -844,15 +859,7 @@ function copyFilteredOffers() {
 
   const allText = cards.map(card => {
     const id = card.querySelector('.card-header')?.textContent?.trim() || '';
-    const prices = JSON.parse(card.dataset.prices || '{}');
-    const paymentMethods = JSON.parse(card.dataset.paymentMethods || '{}');
-    const priceLines = RENT_TYPES
-      .filter(rt => prices[rt.key])
-      .map(rt => {
-        const base = `${rtLabel(rt)}: ${prices[rt.key]} ${t('riyal')}`;
-        return rt.hasPaymentMethod ? `${base} (${formatPaymentAmount(prices[rt.key], paymentMethods[rt.key] || "monthly", rt.key)})` : base;
-      })
-      .join('\n') || t('noPriceSet');
+    const priceLines = JSON.parse(card.dataset.rentOptions).map(rentOptionText).join('\n') || t('noPriceSet');
     const floor = card.dataset.floor || '';
     const rooms = card.dataset.rooms || '';
 
@@ -895,6 +902,8 @@ function applyCardFilters(){
   const elevator  = document.getElementById("filterElevator")?.value || "";
   const entrance  = document.getElementById("filterEntrance")?.value || "";
   const age       = document.getElementById("filterAge")?.value || "";
+  const recentOnly = document.getElementById("filterRecent").value === "recent";
+  const recentCutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
   const rentType  = document.getElementById("filterRentType")?.value || "";
   const minRooms  = parseInt(document.getElementById("filterRooms")?.value || 0);
   
@@ -913,19 +922,22 @@ function applyCardFilters(){
     const cardEntrance  = card.dataset.entrance;
     const cardFloor     = card.dataset.floor;
     const cardRooms     = parseInt(card.dataset.rooms || 0);
-    const cardPrice     = parseInt(card.dataset.price || 0);
     const cardRentTypes = (card.dataset.rentType || "").split(" ").filter(Boolean);
 
     if(furnished && cardFurnished !== furnished) show = false;
     const isGroundFloor = (cardFloor || "").trim() === "1";
     if(elevator && !isGroundFloor && cardElevator !== elevator) show = false;
+    if(recentOnly && Number(card.dataset.createdAt) < recentCutoff) show = false;
     if(age && card.dataset.ageType !== age) show = false;
     if(entrance && cardEntrance !== entrance) show = false;
     if(rentType && !cardRentTypes.includes(rentType)) show = false;
 
     if(minRooms && cardRooms < minRooms) show = false;
     if(selectedFloors.length && !selectedFloors.includes(cardFloor)) show = false;
-    if(cardPrice > 0 && (cardPrice < minPrice || cardPrice > maxPrice)) show = false;
+    const priceOptions = JSON.parse(card.dataset.rentOptions);
+    const relevantPrices = rentType ? priceOptions.filter(option => option.rentType === rentType) : priceOptions;
+    if ((minPrice || maxPrice !== 9999999) && relevantPrices.length &&
+        !relevantPrices.some(option => Number(option.price) >= minPrice && Number(option.price) <= maxPrice)) show = false;
 
     card.style.display = show ? "" : "none";
   });
@@ -934,7 +946,7 @@ function applyCardFilters(){
 }
 
 function resetFilters(){
-  ["filterFurnished","filterElevator","filterEntrance","filterAge","filterRentType","filterRooms"].forEach(id=>{
+  ["filterFurnished","filterElevator","filterEntrance","filterAge","filterRecent","filterRentType","filterRooms"].forEach(id=>{
     const el = document.getElementById(id);
     if (el) el.value = "";
   });
@@ -952,6 +964,7 @@ function resetFilters(){
   "filterElevator",
   "filterEntrance",
   "filterAge",
+  "filterRecent",
   "filterRooms",
   "filterRentType",
   "minPriceInput",
