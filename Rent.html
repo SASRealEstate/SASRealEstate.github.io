@@ -91,14 +91,6 @@
   <div class="filters-wrapper">
 
     <div class="filter-field">
-      <label for="filterRecent" data-i18n="filterRecent">تاريخ إضافة العرض</label>
-      <select id="filterRecent">
-        <option value="" data-i18n="all">الكل</option>
-        <option value="recent" data-i18n="recentOnly">الجديد فقط (آخر 7 أيام)</option>
-      </select>
-    </div>
-
-    <div class="filter-field">
       <label for="filterRentType" data-i18n="filterRentType">نوع الإيجار</label>
       <select id="filterRentType">
         <option value="" data-i18n="all">الكل</option>
@@ -258,8 +250,6 @@ const TRANSLATIONS = {
   pageTitle:{ar:"قائمة الشقق للإيجار", en:"Apartments for Rent"},
   pageSubtitle:{ar:"تصفح كل الشقق المتاحة للإيجار وفلترها حسب احتياجك", en:"Browse all available rental apartments and filter by your needs"},
   notice1:{ar:"📌 ملاحظة: الأسعار والمعلومات يتم تحديثها بشكل دوري - للتأكد من توفر العقار يرجى التواصل معنا على واتساب الرقم اعلى الصفحه.", en:"📌 Note: Prices and details are updated periodically - to confirm availability please contact us via WhatsApp using the number at the top of the page."},
-  filterRecent:{ar:"تاريخ إضافة العرض", en:"Date Listed"},
-  recentOnly:{ar:"الجديد فقط (آخر 7 أيام)", en:"New only (last 7 days)"},
   filterRentType:{ar:"نوع الإيجار", en:"Rent Type"},
   all:{ar:"الكل", en:"All"},
   rtYearly:{ar:"سنة كاملة", en:"Full Year"},
@@ -629,7 +619,6 @@ function renderCardHTML(item){
   data-entrance="${escapeHtml(entrance)}"
   data-age-type="${escapeHtml(ageType || '')}"
   data-price="${escapeHtml(primaryPrice)}"
-  data-created-at="${escapeHtml(typeof item.createdAt?.toMillis === 'function' ? item.createdAt.toMillis() : 0)}"
   data-rent-type="${escapeHtml(activeTypes.map(rt => rt.key).join(' '))}"
   data-rent-options='${escapeHtml(JSON.stringify(priceOptions))}'
   data-available-from="${escapeHtml(availableFrom || '')}">
@@ -902,8 +891,6 @@ function applyCardFilters(){
   const elevator  = document.getElementById("filterElevator")?.value || "";
   const entrance  = document.getElementById("filterEntrance")?.value || "";
   const age       = document.getElementById("filterAge")?.value || "";
-  const recentOnly = document.getElementById("filterRecent").value === "recent";
-  const recentCutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
   const rentType  = document.getElementById("filterRentType")?.value || "";
   const minRooms  = parseInt(document.getElementById("filterRooms")?.value || 0);
   
@@ -927,7 +914,6 @@ function applyCardFilters(){
     if(furnished && cardFurnished !== furnished) show = false;
     const isGroundFloor = (cardFloor || "").trim() === "1";
     if(elevator && !isGroundFloor && cardElevator !== elevator) show = false;
-    if(recentOnly && Number(card.dataset.createdAt) < recentCutoff) show = false;
     if(age && card.dataset.ageType !== age) show = false;
     if(entrance && cardEntrance !== entrance) show = false;
     if(rentType && !cardRentTypes.includes(rentType)) show = false;
@@ -946,7 +932,7 @@ function applyCardFilters(){
 }
 
 function resetFilters(){
-  ["filterFurnished","filterElevator","filterEntrance","filterAge","filterRecent","filterRentType","filterRooms"].forEach(id=>{
+  ["filterFurnished","filterElevator","filterEntrance","filterAge","filterRentType","filterRooms"].forEach(id=>{
     const el = document.getElementById(id);
     if (el) el.value = "";
   });
@@ -964,7 +950,6 @@ function resetFilters(){
   "filterElevator",
   "filterEntrance",
   "filterAge",
-  "filterRecent",
   "filterRooms",
   "filterRentType",
   "minPriceInput",
